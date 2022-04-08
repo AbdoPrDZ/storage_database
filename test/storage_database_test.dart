@@ -3,6 +3,14 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:storage_database/storage_database.dart';
 
 void main() {
+  test("test storage database", () async {
+    final StorageDatabase storageDatabase = await StorageDatabase.getInstance();
+    storageDatabase.collection("test").set("data");
+    storageDatabase.collection("test").stream().listen((event) {
+      print(event);
+    });
+  });
+  return;
   test(
     'test storage database',
     () async {

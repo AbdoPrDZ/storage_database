@@ -16,44 +16,42 @@ class StorageCollection {
     storageListeners = StorageListeners(storageDatabase);
   }
 
-  Map checkType(Type dataType) {
+  dynamic checkType(Type dataType) {
     if (!storageDatabase.checkCollectionIdExists(collectionId)) {
       storageDatabase.source.setData(
         collectionId,
         dataType.toString().contains("Map")
-            ? '{"data": {}}'
-            : dataType.toString().contains("List")
-                ? '{"data": []}'
-                : '{"data": null}',
-      );
-      return {
-        "data": dataType.toString().contains("Map")
             ? {}
             : dataType.toString().contains("List")
                 ? []
-                : null
-      };
+                : null,
+      );
+      return dataType.toString().contains("Map")
+          ? {}
+          : dataType.toString().contains("List")
+              ? []
+              : null;
     } else {
-      Map collectionData = jsonDecode(
+      dynamic collectionData = jsonDecode(
         storageDatabase.source.getData(collectionId)!,
       );
       bool currectType = false;
       try {
         if (dataType.toString().contains("Map")) {
-          Map.from(collectionData["data"]);
+          Map.from(collectionData);
           currectType = true;
         } else if (dataType.toString().contains("List")) {
-          List.from(collectionData["data"]);
+          List.from(collectionData);
           currectType = true;
         } else {
-          currectType = collectionData["data"].runtimeType == dataType;
+          currectType = collectionData.runtimeType == dataType;
         }
       } catch (e) {
         print("collection check type: $e");
       }
       if (!currectType) {
         throw StorageDatabaseException(
-          "The data type must be ${collectionData['data'].runtimeType}, but current type is ($dataType)",
+          "The data type must be ${collectionData.runtimeType}, but current type is ($dataType)",
         );
       }
       return collectionData;
@@ -61,13 +59,13 @@ class StorageCollection {
   }
 
   set(var data, {bool log = true, bool keepData = true}) {
-    Map collectionData = checkType(data.runtimeType);
+    dynamic collectionData = checkType(data.runtimeType);
     if (keepData &&
         (data.runtimeType.toString().contains("Map") ||
             data.runtimeType.toString().contains("List"))) {
-      collectionData["data"].addAll(data);
+      collectionData.addAll(data);
     } else {
-      collectionData["data"] = data;
+      collectionData = data;
     }
     if (log && storageListeners.hasStreamId(getPath())) {
       storageListeners.setDate(getPath());
@@ -84,14 +82,11 @@ class StorageCollection {
         "This collection has not yet been created",
       );
     }
-    Map collectionData = jsonDecode(
-      storageDatabase.source.getData(collectionId)!,
-    );
+    dynamic collectionData = storageDatabase.source.getData(collectionId);
     if (log && storageListeners.hasStreamId(getPath())) {
       storageListeners.getDate(getPath());
     }
-    storageDatabase.source.setData(collectionId, jsonEncode(collectionData));
-    return collectionData["data"];
+    return collectionData;
   }
 
   String getPath() => collectionId;
@@ -107,26 +102,12 @@ class StorageCollection {
     }
   }
 
-  List<int> getDates() {
-    if (!storageDatabase.checkCollectionIdExists(collectionId)) {
-      throw StorageDatabaseException(
-        "This collection has not yet been created",
-      );
-    }
-    Map collectionData = jsonDecode(
-      storageDatabase.source.getData(collectionId)!,
-    );
-    return [
-      collectionData.containsKey("set_date") ? collectionData["set_date"] : 1,
-      collectionData.containsKey("get_date") ? collectionData["get_date"] : 0,
-    ];
-  }
-
   Stream stream() async* {
+    storageListeners.initStream(getPath());
     while (true) {
       await Future.delayed(const Duration(milliseconds: 200));
-      List<int> dates = getDates();
-      if (dates[0] > dates[1]) {
+      Map dates = storageListeners.getDates(getPath());
+      if (dates["set_date"] > dates["get_date"]) {
         yield get();
       }
     }
@@ -143,7 +124,7 @@ class StorageCollection {
 
   StorageDocument document(String docId) {
     if (!storageDatabase.checkCollectionIdExists(collectionId)) {
-      storageDatabase.source.setData(collectionId, '{"data": {}}');
+      storageDatabase.source.setData(collectionId, {});
     }
     try {
       Map.from(get());
