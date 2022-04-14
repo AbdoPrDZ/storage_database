@@ -10,7 +10,6 @@ void main() {
       print(event);
     });
   });
-  return;
   test(
     'test storage database',
     () async {

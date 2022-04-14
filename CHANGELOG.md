@@ -1,3 +1,7 @@
 ## 0.0.1
 
-* TODO: Describe initial release.
+* Initial package.
+
+## 0.0.2
+
+* fix some know bugs in collection class.
