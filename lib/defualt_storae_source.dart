@@ -6,23 +6,17 @@ import 'src/storage_database_source.dart';
 class DefualtStorageSource extends StorageDatabaseSource {
   final SharedPreferences storage;
 
-  DefualtStorageSource(this.storage) {
-    setData = _setData;
-    getData = _getData;
-    containsKey = _containsKey;
-    clear = storage.clear;
-    remove = _remove;
-  }
+  DefualtStorageSource(this.storage);
 
   static Future<DefualtStorageSource> getInstance() async =>
       DefualtStorageSource(await SharedPreferences.getInstance());
 
-  Future<bool> _setData(String id, dynamic data) async {
-    data = jsonEncode(data);
-    return storage.setString(id, data);
-  }
+  @override
+  Future<bool> setData(String id, dynamic data) =>
+      storage.setString(id, jsonEncode(data));
 
-  dynamic _getData(String id) {
+  @override
+  Future<dynamic> getData(String id) async {
     String? data = storage.getString(id);
     if (data != null) {
       return jsonDecode(data);
@@ -31,7 +25,12 @@ class DefualtStorageSource extends StorageDatabaseSource {
     }
   }
 
-  bool _containsKey(String key) => storage.containsKey(key);
+  @override
+  bool containsKey(String id) => storage.containsKey(id);
 
-  Future<bool> _remove(String id) async => await storage.remove(id);
+  @override
+  Future<bool> remove(String id) async => await storage.remove(id);
+
+  @override
+  Future<bool> clear() async => await storage.clear();
 }

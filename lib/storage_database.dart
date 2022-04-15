@@ -1,13 +1,17 @@
-library storage_database;
-
 import './defualt_storae_source.dart';
 import './storage_collection.dart';
+import 'api/api.dart';
 import 'src/storage_database_excption.dart';
 import 'src/storage_database_source.dart';
 import './storage_document.dart';
+import 'storage_explorer/storage_explorer.dart';
 
 class StorageDatabase {
   final StorageDatabaseSource source;
+  StorageExplorer? explorer;
+  StorageAPI? storageAPI;
+
+  List<Function> onClear = [];
 
   StorageDatabase(this.source);
 
@@ -18,13 +22,28 @@ class StorageDatabase {
         source ?? await DefualtStorageSource.getInstance(),
       );
 
-  StorageCollection collection(String collectionId) {
-    return StorageCollection(this, collectionId);
+  Future initExplorer() async =>
+      explorer = await StorageExplorer.getInstance(this);
+
+  Future initAPI({
+    required String apiUrl,
+    Map<String, String> headers = const {},
+    // Function(APIResponse response)? onReRequestResponse,
+  }) async {
+    storageAPI = StorageAPI(
+      storageDatabase: this,
+      apiUrl: apiUrl,
+      headers: headers,
+      // onReRequestResponse: onReRequestResponse,
+    );
   }
+
+  StorageCollection collection(String collectionId) =>
+      StorageCollection(this, collectionId);
 
   StorageDocument document(String documentPath) {
     if (!documentPath.contains("/")) {
-      throw StorageDatabaseException(
+      throw const StorageDatabaseException(
         "Incorrect document path, ex: 'collection/doc/docChild'",
       );
     }
@@ -39,9 +58,26 @@ class StorageDatabase {
     return document;
   }
 
-  bool checkCollectionIdExists(String collectionId) {
-    return source.containsKey(collectionId);
-  }
+  checkCollectionIdExists(String collectionId) =>
+      source.containsKey(collectionId);
 
-  Future<bool> clear() async => await source.clear();
+  Future clear({
+    bool clearExplorer = true,
+    bool clearNetworkFiles = true,
+    bool clearAPI = true,
+  }) async {
+    if (clearExplorer && explorer != null) await explorer!.clear();
+    if (clearNetworkFiles &&
+        explorer != null &&
+        explorer!.networkFiles != null) {
+      await explorer!.networkFiles!.clear();
+    }
+    if (clearAPI && storageAPI != null) await storageAPI!.clear();
+
+    await source.clear();
+
+    for (Function onClearFunc in onClear) {
+      onClearFunc();
+    }
+  }
 }

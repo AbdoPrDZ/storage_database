@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import './storage_database.dart';
 import 'src/storage_database_excption.dart';
 import 'src/storage_listeners.dart';
@@ -5,83 +7,119 @@ import 'src/storage_listeners.dart';
 class StorageDocument {
   final StorageDatabase storageDatabase;
   final parrent;
-  final String documentId, parrentId;
-  final bool isCollection;
+  final dynamic documentId, parrentId;
   final StorageListeners storageListeners;
 
   StorageDocument(
     this.storageDatabase,
     this.parrent,
-    this.isCollection,
     this.parrentId,
     this.documentId,
     this.storageListeners,
   );
 
-  Map getParrentData({bool log = true}) => parrent.get(log: log);
+  Future<dynamic> getParrentData() async {
+    var parrentData = await parrent.get();
+    try {
+      Map.from(parrentData);
+    } catch (e) {
+      try {
+        List.from(parrentData);
+      } catch (e) {
+        print("document error: $e");
+        throw const StorageDatabaseException(
+          "Document parrent doesn't support documents",
+        );
+      }
+    }
+    return parrentData;
+  }
 
-  checkType(Type dataType) {
-    Map parrentData = getParrentData(log: false);
-    bool isMap = dataType.toString().contains("Map");
+  bool isMap(var data) {
+    bool isMap = true;
+    try {
+      Map.from(data);
+    } catch (e) {
+      isMap = false;
+    }
+    return isMap;
+  }
+
+  bool isList(var data) {
+    bool isList = true;
+    try {
+      List.from(data);
+    } catch (e) {
+      isList = false;
+    }
+    return isList;
+  }
+
+  Future checkType(var data) async {
+    dynamic parrentData = await getParrentData();
     if (!parrentData.containsKey(documentId)) {
-      parrent.set({documentId: isMap ? {} : []});
-      return dataType.toString().contains("Map")
+      var initialData = isMap(data)
           ? {}
-          : dataType.toString().contains("List")
+          : isList(data)
               ? []
               : null;
+      await parrent.set({documentId: initialData});
+      return initialData;
     } else {
       var docData = parrentData[documentId];
       bool currectType = false;
       try {
-        if (dataType.toString().contains("Map")) {
+        if (isMap(data)) {
           Map.from(docData);
           currectType = true;
-        } else if (dataType.toString().contains("List")) {
+        } else if (isList(data)) {
           List.from(docData);
           currectType = true;
         } else {
-          currectType = docData.runtimeType == dataType;
+          currectType = docData.runtimeType == data.runtimeType;
         }
       } catch (e) {
         print("document check type: $e");
       }
       if (!currectType) {
         throw StorageDatabaseException(
-          "The data type must be ${docData.runtimeType}",
+          "The data type must be ${docData.runtimeType}, but current type is (${data.runtimeType})",
         );
       }
       return docData;
     }
   }
 
-  set(var data, {bool log = true, bool keepData = true}) {
-    var docData = checkType(data.runtimeType);
-    if (keepData &&
-        (data.runtimeType.toString().contains("Map") ||
-            data.runtimeType.toString().contains("List"))) {
+  Future set(var data, {bool log = true, bool keepData = true}) async {
+    var docData = await checkType(data);
+    if (keepData && isMap(data)) {
+      for (var key in data.keys) {
+        docData[key] = data[key];
+      }
+    } else if (keepData && isList(data)) {
       docData.addAll(data);
     } else {
       docData = data;
     }
-    if (log && storageListeners.hasStreamId(getPath())) {
-      storageListeners.setDate(getPath());
+    if (log) {
+      for (var streamId in storageListeners.getPathStreamIds(path)) {
+        if (await storageListeners.hasStreamId(path, streamId)) {
+          storageListeners.setDate(path, streamId);
+        }
+      }
     }
-    parrent.set({documentId: docData});
+    await parrent.set({documentId: docData});
   }
 
-  StorageDocument document(String docId) {
-    try {
-      Map.from(get(log: false));
-    } catch (e) {
-      print("document error $e");
-      throw StorageDatabaseException(
-        "This parrent doesn't support documents",
-      );
-    }
-    List<String> docIds = docId.split("/");
+  StorageDocument document(dynamic docId) {
+    List docIds = docId.runtimeType == String ? docId.split("/") : [docId];
     StorageDocument document = StorageDocument(
-        storageDatabase, this, true, documentId, docIds[0], storageListeners);
+      storageDatabase,
+      this,
+      documentId,
+      docIds[0],
+      storageListeners,
+    );
     for (int i = 1; i < docIds.length; i++) {
       document.set({docIds[i - 1]: {}});
       document = document.document(docIds[i]);
@@ -89,42 +127,90 @@ class StorageDocument {
     return document;
   }
 
-  get({bool log = true}) {
-    Map parrentData = getParrentData(log: false);
-    if (log && storageListeners.hasStreamId(getPath())) {
-      storageListeners.getDate(getPath());
+  Future<dynamic> get({String? streamId}) async {
+    dynamic parrentData = await getParrentData();
+    if (streamId != null &&
+        await storageListeners.hasStreamId(path, streamId)) {
+      storageListeners.getDate(path, streamId);
     }
     return parrentData[documentId];
   }
 
-  delete({bool log = true}) {
-    Map parrentData = getParrentData(log: false);
-    parrentData.remove(documentId);
-    parrent.set(parrentData);
-    if (log) {
-      storageListeners.setDate(getPath());
-    }
-  }
-
-  deleteItem(itemId, {bool log = true}) {
-    Map parrentData = getParrentData();
-    parrentData[documentId].remove(itemId);
-    parrent.set(parrentData, keepData: false);
-    if (log) {
-      storageListeners.setDate(getPath());
-    }
-  }
-
-  String getPath() => "${parrent.getPath()}/$documentId";
-
-  Stream stream() async* {
-    storageListeners.initStream(getPath());
-    while (true) {
-      await Future.delayed(const Duration(milliseconds: 200));
-      Map dates = storageListeners.getDates(getPath());
-      if (dates["set_date"] > dates["get_date"]) {
-        yield get();
+  Future delete({bool log = true}) async {
+    parrent.deleteItem(documentId);
+    for (String streamId in storageListeners.getPathStreamIds(path)) {
+      if (log && await storageListeners.hasStreamId(path, streamId)) {
+        storageListeners.setDate(path, streamId);
       }
     }
+  }
+
+  Future deleteItem(var itemId, {bool log = true}) async {
+    var docData = await get();
+    if (isMap(docData)) {
+      docData.remove(itemId);
+    } else if (isList(docData)) {
+      docData.removeAt(itemId);
+    } else {
+      throw const StorageDatabaseException(
+        'This Document not support documents',
+      );
+    }
+    await set(docData, keepData: false);
+    for (String streamId in storageListeners.getPathStreamIds(path)) {
+      if (log && storageListeners.hasStreamId(path, streamId)) {
+        storageListeners.setDate(path, streamId);
+      }
+    }
+  }
+
+  String get path => "${parrent.path}/$documentId";
+
+  String get randomStreamId => String.fromCharCodes(
+        List.generate(8, (index) => Random().nextInt(33) + 89),
+      );
+
+  Stream stream({delayCheck = const Duration(milliseconds: 50)}) async* {
+    String streamId = randomStreamId;
+    storageListeners.initStream(path, streamId);
+    while (true) {
+      await Future.delayed(delayCheck);
+      Map dates = storageListeners.getDates(path, streamId);
+      if (dates["set_date"] >= dates["get_date"]) {
+        yield await get(streamId: streamId);
+      }
+    }
+  }
+
+  Stream<Map<dynamic, StorageDocument>> streamDocs() {
+    return stream().asyncExpand<Map<dynamic, StorageDocument>>((data) async* {
+      if (data != null) yield getMapDocs(data);
+    });
+  }
+
+  Map<dynamic, StorageDocument> getDocs() => getMapDocs(get());
+
+  Map<dynamic, StorageDocument> getMapDocs(var data) {
+    List docsIds;
+    if (isMap(data)) {
+      docsIds = data.keys.toList();
+    } else if (isList(data)) {
+      docsIds = [for (int i = 0; i < data.length; i++) i];
+    } else {
+      throw StorageDatabaseException(
+        "This document ($documentId) does not support documents",
+      );
+    }
+    Map<dynamic, StorageDocument> docs = {};
+    for (dynamic docId in docsIds) {
+      docs[docId] = StorageDocument(
+        storageDatabase,
+        this,
+        documentId,
+        docId,
+        storageListeners,
+      );
+    }
+    return docs;
   }
 }

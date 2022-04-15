@@ -1,52 +1,41 @@
-import 'dart:convert';
-
-import '../storage_database.dart';
-
 class StorageListeners {
-  StorageDatabase storageDatabase;
+  StorageListeners();
 
-  StorageListeners(this.storageDatabase) {
-    if (!storageDatabase.source.containsKey('listeners')) {
-      storageDatabase.source.setData("listeners", "{}");
-    }
-  }
+  Map listenersData = {};
 
-  Map getListenersData() => jsonDecode(
-        storageDatabase.source.getData("listeners") ?? "{}",
-      );
+  List<String> getPathStreamIds(String path) =>
+      List<String>.from(listenersData[path]?.keys.toList() ?? []);
 
-  Future<bool> setListenersData(Map data) => storageDatabase.source.setData(
-        "listeners",
-        jsonEncode(data),
-      );
-
-  bool hasStreamId(String streamId) {
+  bool hasStreamId(String path, String streamId) {
     try {
-      Map listenersData = getListenersData();
-      return listenersData.containsKey(streamId);
+      return listenersData.containsKey(path) &&
+          listenersData[path].containsKey(streamId);
     } catch (e) {
       print("has stream id: $e");
       return false;
     }
   }
 
-  initStream(String streamId) {
-    Map listenersData = getListenersData();
-    listenersData[streamId] = {"set_date": 1, "get_date": 0};
-    setListenersData(listenersData);
+  initStream(String path, String streamId) {
+    if (listenersData[path] == null) listenersData[path] = {};
+    listenersData[path][streamId] = {"set_date": 1, "get_date": 0};
   }
 
-  setDate(String streamId) {
-    Map listenersData = getListenersData();
-    listenersData[streamId]["set_date"] = DateTime.now().millisecondsSinceEpoch;
-    setListenersData(listenersData);
+  int setDate(String path, String streamId, {int? microseconds}) {
+    int microsecondsSinceEpoch =
+        microseconds ?? DateTime.now().microsecondsSinceEpoch;
+    listenersData[path][streamId]["set_date"] = microsecondsSinceEpoch;
+    return microsecondsSinceEpoch;
   }
 
-  getDate(String streamId) {
-    Map listenersData = getListenersData();
-    listenersData[streamId]["get_date"] = DateTime.now().millisecondsSinceEpoch;
-    setListenersData(listenersData);
+  int getDate(String path, String streamId, {int? microseconds}) {
+    int microsecondsSinceEpoch =
+        microseconds ?? DateTime.now().microsecondsSinceEpoch;
+    listenersData[path][streamId]["get_date"] = microsecondsSinceEpoch;
+    return microsecondsSinceEpoch;
   }
 
-  Map getDates(String streamId) => getListenersData()[streamId];
+  Map getDates(String path, String streamId) {
+    return listenersData[path][streamId];
+  }
 }

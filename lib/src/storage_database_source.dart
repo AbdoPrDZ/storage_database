@@ -1,7 +1,7 @@
-class StorageDatabaseSource {
-  late final Function(String id, dynamic data) setData;
-  late final Function(String id) getData;
-  late final Function(String id) containsKey;
-  late final Function clear;
-  late final Function remove;
+abstract class StorageDatabaseSource {
+  Future setData(String id, dynamic data);
+  Future<dynamic> getData(String id);
+  bool containsKey(String id);
+  Future clear();
+  Future remove(String id);
 }

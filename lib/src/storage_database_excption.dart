@@ -1,10 +1,16 @@
-class StorageDatabaseException {
-  final String errorMesssage;
+abstract class StorageDatabaseError implements Exception {
+  final String? message;
 
-  StorageDatabaseException(this.errorMesssage);
+  const StorageDatabaseError([this.message]);
 
-  String get message => errorMesssage;
-  int errorCode = 21347;
+  @override
+  String toString() {
+    String result = 'StorageDatabaseError';
+    if (message is String) return '$result: $message';
+    return result;
+  }
+}
 
-  String toString() => message;
+class StorageDatabaseException extends StorageDatabaseError {
+  const StorageDatabaseException([String? message]) : super(message);
 }
