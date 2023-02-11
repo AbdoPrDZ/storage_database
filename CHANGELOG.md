@@ -82,3 +82,6 @@
 
 ## 0.0.6+6
 * Fix StorageExplorer NetworkFiles clear and fix Image Data error.
+
+## 0.0.6+7
+* Fix some bugs.
