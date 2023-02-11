@@ -85,3 +85,6 @@
 
 ## 0.0.6+7
 * Fix some bugs.
+
+## 0.0.6+8
+* Fix containsKey error.

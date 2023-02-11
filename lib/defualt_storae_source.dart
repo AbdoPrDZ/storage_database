@@ -26,7 +26,7 @@ class DefualtStorageSource extends StorageDatabaseSource {
   }
 
   @override
-  Future<bool> containsKey(String id) async => storage.containsKey(id);
+  bool containsKey(String id) => storage.containsKey(id);
 
   @override
   Future<bool> remove(String id) async => await storage.remove(id);

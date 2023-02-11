@@ -6,6 +6,16 @@ import 'src/storage_database_source.dart';
 import './storage_document.dart';
 import 'storage_explorer/storage_explorer.dart';
 
+export 'src/storage_database_source.dart';
+
+export 'storage_explorer/explorer_network_files.dart';
+export 'storage_explorer/explorer_directory.dart';
+export 'storage_explorer/explorer_file.dart';
+
+export 'api/api.dart';
+export 'api/request.dart';
+export 'api/response.dart';
+
 class StorageDatabase {
   final StorageDatabaseSource source;
   StorageExplorer? explorer;
