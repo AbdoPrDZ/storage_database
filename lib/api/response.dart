@@ -21,21 +21,23 @@ class APIResponse<T> {
     String response,
     int statusCode, {
     bool log = true,
+    String errorsField = 'errors',
   }) {
     if (log) print("response body: $response");
     try {
       Map responseData = jsonDecode(response);
       if (statusCode == 200) {
-        if (responseData.containsKey("errors")) {
+        if (responseData.containsKey(errorsField)) {
           Map<String, String> errors = {};
-          for (String name in (responseData['errors'] as Map).keys) {
+          for (String name in (responseData[errorsField] as Map).keys) {
             try {
-              errors[name] = (responseData['errors'][name] as List).join(', ');
+              errors[name] =
+                  (responseData[errorsField][name] as List).join(', ');
             } catch (e) {
-              errors[name] = responseData['errors'][name].toString();
+              errors[name] = responseData[errorsField][name].toString();
             }
           }
-          responseData['errors'] = errors;
+          responseData[errorsField] = errors;
         }
       } else {
         switch (statusCode) {
@@ -62,7 +64,7 @@ class APIResponse<T> {
           responseData["success"] ?? false,
           responseData["message"] ?? "",
           statusCode,
-          errors: responseData["errors"],
+          errors: responseData[errorsField],
           body: responseData,
         );
       } else if (values.length == 1) {
@@ -70,7 +72,7 @@ class APIResponse<T> {
           responseData["success"] ?? false,
           responseData["message"] ?? "",
           statusCode,
-          errors: responseData["errors"],
+          errors: responseData[errorsField],
           body: responseData,
           value: values[values.keys.first],
         );
@@ -79,7 +81,7 @@ class APIResponse<T> {
           responseData["success"] ?? false,
           responseData["message"] ?? "",
           statusCode,
-          errors: responseData["errors"],
+          errors: responseData[errorsField],
           body: responseData,
           value: values as T,
         );
@@ -91,7 +93,7 @@ class APIResponse<T> {
         strBody.length < 10 ? strBody.length : 10,
       );
       print("ERROR:" + e.toString());
-      print("body: $body...");
+      print("body: $body");
       return APIResponse(
         false,
         "body: $body...",

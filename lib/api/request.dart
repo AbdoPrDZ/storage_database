@@ -82,7 +82,12 @@ class APIRequest {
         responseBody = response.body;
         statusCode = response.statusCode;
       }
-      return APIResponse.fromResponse(responseBody, statusCode, log: log);
+      return APIResponse.fromResponse(
+        responseBody,
+        statusCode,
+        log: log,
+        errorsField: errorsField,
+      );
     } on SocketException {
       if (onNoConnection != null) onNoConnection();
       if (log) print("[StorageDatabaseAPI] reqError: No Internt Connection");

@@ -32,9 +32,9 @@ class ExplorerNetworkFiles {
     if (log) {
       print('[StorageExplorer.NetworkFile] reqUrl: $url');
       print('[StorageExplorer.NetworkFile] reqEncodedUrl: $encodedUrl');
-      print('[StorageExplorer.NetworkFile] reqHeaders: $headers');
     }
     if (!file.exists || refresh) {
+      if (log) print('[StorageExplorer.NetworkFile] reqHeaders: $headers');
       Uint8List? fileData = await downloadFile(
         Uri.parse(url),
         log: log,
