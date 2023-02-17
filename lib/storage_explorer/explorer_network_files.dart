@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer' as dev;
 import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
@@ -30,11 +31,11 @@ class ExplorerNetworkFiles {
     String encodedUrl = encodeUrl(url);
     ExplorerFile file = networkDirFiles.file(encodedUrl);
     if (log) {
-      print('[StorageExplorer.NetworkFile] reqUrl: $url');
-      print('[StorageExplorer.NetworkFile] reqEncodedUrl: $encodedUrl');
+      dev.log('[StorageExplorer.NetworkFile] reqUrl: $url');
+      dev.log('[StorageExplorer.NetworkFile] reqEncodedUrl: $encodedUrl');
     }
     if (!file.exists || refresh) {
-      if (log) print('[StorageExplorer.NetworkFile] reqHeaders: $headers');
+      if (log) dev.log('[StorageExplorer.NetworkFile] reqHeaders: $headers');
       Uint8List? fileData = await downloadFile(
         Uri.parse(url),
         log: log,
@@ -56,12 +57,13 @@ class ExplorerNetworkFiles {
   }) async {
     http.Response response = (await http.get(uri, headers: headers));
     if (response.statusCode == 200) {
-      print("[StorageExplorer.NetworkFile] success");
+      dev.log("[StorageExplorer.NetworkFile] success");
       return response.bodyBytes;
     } else {
       if (log) {
-        print("[StorageExplorer.NetworkFile] resCode: ${response.statusCode}");
-        print("[StorageExplorer.NetworkFile] resBody: ${response.body}");
+        dev.log(
+            "[StorageExplorer.NetworkFile] resCode: ${response.statusCode}");
+        dev.log("[StorageExplorer.NetworkFile] resBody: ${response.body}");
       }
       return null;
     }
@@ -100,7 +102,7 @@ class ExplorerNetworkFiles {
       );
 
   Future clear() {
-    print('here');
+    dev.log('here');
     return networkDirFiles.clear();
   }
 }

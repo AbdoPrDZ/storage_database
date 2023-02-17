@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer' as dev;
 import 'dart:math';
 
 import './storage_database.dart';
@@ -62,7 +63,7 @@ class StorageCollection {
           currectType = collectionData.runtimeType == data.runtimeType;
         }
       } catch (e) {
-        print("collection check type: $e");
+        dev.log("collection check type: $e");
       }
       if (!currectType) {
         throw StorageDatabaseException(
@@ -120,7 +121,7 @@ class StorageCollection {
     try {
       return Map.from(await get()).containsKey(documentId);
     } catch (e) {
-      print("has id: $e");
+      dev.log("has id: $e");
       throw StorageDatabaseException(
         "This Collection ($collectionId) does not support documents",
       );

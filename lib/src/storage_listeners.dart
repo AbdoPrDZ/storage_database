@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 class StorageListeners {
   StorageListeners();
 
@@ -11,7 +13,7 @@ class StorageListeners {
       return listenersData.containsKey(path) &&
           listenersData[path].containsKey(streamId);
     } catch (e) {
-      print("has stream id: $e");
+      log("has stream id: $e");
       return false;
     }
   }

@@ -1,11 +1,11 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:developer' as dev;
 import 'dart:io';
 
 import 'package:http/http.dart' as http;
 
 import '../storage_database.dart';
-import 'response.dart';
 
 class APIRequest {
   final StorageDatabase storageDatabase;
@@ -29,8 +29,8 @@ class APIRequest {
     if (appendHeader) headers = {...headers, ...this.headers};
     String url = '$apiUrl/$target';
     if (log) {
-      print("[StorageDatabaseAPI] reqUrl: $url");
-      print("[StorageDatabaseAPI] reqHeaders: $headers");
+      dev.log("[StorageDatabaseAPI] reqUrl: $url");
+      dev.log("[StorageDatabaseAPI] reqHeaders: $headers");
     }
     String responseBody = '';
     int statusCode = 400;
@@ -90,7 +90,7 @@ class APIRequest {
       );
     } on SocketException {
       if (onNoConnection != null) onNoConnection();
-      if (log) print("[StorageDatabaseAPI] reqError: No Internt Connection");
+      if (log) dev.log("[StorageDatabaseAPI] reqError: No Internt Connection");
       return APIResponse<T>(false, "No Internt Connection", statusCode);
     } catch (e) {
       return APIResponse<T>(false, 'ExceptionError: $e', statusCode);

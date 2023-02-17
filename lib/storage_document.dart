@@ -1,3 +1,4 @@
+import 'dart:developer' as dev;
 import 'dart:math';
 
 import './storage_database.dart';
@@ -6,7 +7,7 @@ import 'src/storage_listeners.dart';
 
 class StorageDocument {
   final StorageDatabase storageDatabase;
-  final parrent;
+  final dynamic parrent;
   final dynamic documentId, parrentId;
   final StorageListeners storageListeners;
 
@@ -26,7 +27,7 @@ class StorageDocument {
       try {
         List.from(parrentData);
       } catch (e) {
-        print("document error: $e");
+        dev.log("document error: $e");
         throw const StorageDatabaseException(
           "Document parrent doesn't support documents",
         );
@@ -79,7 +80,7 @@ class StorageDocument {
           currectType = docData.runtimeType == data.runtimeType;
         }
       } catch (e) {
-        print("document check type: $e");
+        dev.log("document check type: $e");
       }
       if (!currectType) {
         throw StorageDatabaseException(
@@ -103,7 +104,7 @@ class StorageDocument {
     }
     if (log) {
       for (var streamId in storageListeners.getPathStreamIds(path)) {
-        if (await storageListeners.hasStreamId(path, streamId)) {
+        if (storageListeners.hasStreamId(path, streamId)) {
           storageListeners.setDate(path, streamId);
         }
       }
@@ -129,8 +130,7 @@ class StorageDocument {
 
   Future<dynamic> get({String? streamId}) async {
     dynamic parrentData = await getParrentData();
-    if (streamId != null &&
-        await storageListeners.hasStreamId(path, streamId)) {
+    if (streamId != null && storageListeners.hasStreamId(path, streamId)) {
       storageListeners.getDate(path, streamId);
     }
     return parrentData[documentId];
@@ -139,7 +139,7 @@ class StorageDocument {
   Future delete({bool log = true}) async {
     parrent.deleteItem(documentId);
     for (String streamId in storageListeners.getPathStreamIds(path)) {
-      if (log && await storageListeners.hasStreamId(path, streamId)) {
+      if (log && storageListeners.hasStreamId(path, streamId)) {
         storageListeners.setDate(path, streamId);
       }
     }

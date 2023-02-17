@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer' as dev;
 import 'dart:io';
 import 'dart:math';
 
@@ -64,7 +65,7 @@ class ExplorerFile {
         return null;
       }
     } catch (e) {
-      print("DecodeError: $e");
+      dev.log("DecodeError: $e");
       throw StorageDatabaseException("Can't decode file ($filename) content.");
     }
   }

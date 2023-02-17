@@ -1,8 +1,6 @@
 import 'package:http/http.dart' as http;
 
 import '../storage_database.dart';
-import 'request.dart';
-import 'response.dart';
 
 class StorageAPI {
   final StorageDatabase storageDatabase;

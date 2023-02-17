@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer' as dev;
 
 class APIResponse<T> {
   final bool success;
@@ -23,7 +24,7 @@ class APIResponse<T> {
     bool log = true,
     String errorsField = 'errors',
   }) {
-    if (log) print("response body: $response");
+    if (log) dev.log("response body: $response");
     try {
       Map responseData = jsonDecode(response);
       if (statusCode == 200) {
@@ -92,8 +93,8 @@ class APIResponse<T> {
         0,
         strBody.length < 10 ? strBody.length : 10,
       );
-      print("ERROR:" + e.toString());
-      print("body: $body");
+      dev.log("ERROR:$e");
+      dev.log("body: $body");
       return APIResponse(
         false,
         "body: $body...",

@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
@@ -118,8 +119,8 @@ class _MyHomePageState extends State<MyHomePage> {
         log: true,
       );
     });
-    print(networkImage);
-    print("'Authorization': ${tokenController.text}");
+    log('$networkImage');
+    log("'Authorization': ${tokenController.text}");
     snackbar('Successfully getting image');
   }
 
@@ -155,7 +156,7 @@ class _MyHomePageState extends State<MyHomePage> {
     await storageDatabase!
         .collection(collectionController.text)
         .set(collectionDataController.text);
-    print(await storageDatabase!.collection(collectionController.text).get());
+    log(await storageDatabase!.collection(collectionController.text).get());
     snackbar('storageCollection created successfully');
   }
 
@@ -181,7 +182,7 @@ class _MyHomePageState extends State<MyHomePage> {
     );
     imagePath = result?.files.single.path!;
     setState(() {});
-    print(imagePath);
+    log('$imagePath');
     if (imagePath != null) snackbar('Successfully choseing image');
   }
 
@@ -215,7 +216,7 @@ class _MyHomePageState extends State<MyHomePage> {
       },
       log: true,
       onFilesUpload: (bytes, totalBytes) {
-        print("progress: ${bytes / totalBytes * 100}%");
+        log("progress: ${bytes / totalBytes * 100}%");
         this.bytes = bytes;
         this.totalBytes = totalBytes;
         setState(() {});
@@ -228,7 +229,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    SizedBox gap = SizedBox(height: 10);
+    SizedBox gap = const SizedBox(height: 10);
     return Scaffold(
       appBar: AppBar(
         title: const Text('StorageDatabase Test'),
@@ -242,17 +243,17 @@ class _MyHomePageState extends State<MyHomePage> {
               direction: Axis.vertical,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Divider(),
+                const Divider(),
                 ElevatedButton(
                   onPressed: initStorageDatabase,
                   child: const Text('Init StorageDatabase'),
                 ),
-                Divider(),
+                const Divider(),
                 ElevatedButton(
                   onPressed: initStorageExplorer,
                   child: const Text('Init StorageExplorer'),
                 ),
-                Divider(),
+                const Divider(),
                 TextField(
                   controller: apiUrlController,
                   decoration: const InputDecoration(hintText: 'API URL'),
@@ -262,7 +263,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   onPressed: initStorageAPI,
                   child: const Text('Init StorageAPI'),
                 ),
-                Divider(),
+                const Divider(),
                 TextField(
                   controller: collectionController,
                   decoration: const InputDecoration(hintText: 'Collection'),
@@ -278,18 +279,18 @@ class _MyHomePageState extends State<MyHomePage> {
                   onPressed: createCollection,
                   child: const Text('Create Collection'),
                 ),
-                Divider(),
+                const Divider(),
                 ElevatedButton(
                   onPressed: getCollectionData,
                   child: const Text('Get Collection Data'),
                 ),
-                Divider(),
+                const Divider(),
                 InkWell(
                   onTap: choseImage,
                   child: Container(
                     height: 200,
                     decoration: BoxDecoration(
-                      color: Color.fromARGB(255, 217, 217, 217),
+                      color: const Color.fromARGB(255, 217, 217, 217),
                       image: imagePath != null
                           ? DecorationImage(
                               image: FileImage(
@@ -313,12 +314,12 @@ class _MyHomePageState extends State<MyHomePage> {
                   onPressed: upladImage,
                   child: const Text('Upload Image'),
                 ),
-                Divider(),
+                const Divider(),
                 ElevatedButton(
                   onPressed: initNetworkFiles,
                   child: const Text('init NetworkFiles'),
                 ),
-                Divider(),
+                const Divider(),
                 TextField(
                   controller: imageUrlController,
                   decoration: const InputDecoration(hintText: 'Image Url'),

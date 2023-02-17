@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:storage_database/src/storage_database_values.dart';
 import 'package:storage_database/storage_database.dart';
-import 'package:storage_database/storage_explorer/explorer_file.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -20,8 +19,8 @@ class _HomePageState extends State<HomePage> {
     storageDatabase = await StorageDatabase.getInstance();
     await storageDatabase.initExplorer();
     await storageDatabase.clear();
-    chatsFile = await storageDatabase.explorer!.file("chats.json");
-    camFile = await storageDatabase.explorer!.file("camp.png");
+    chatsFile = storageDatabase.explorer!.file("chats.json");
+    camFile = storageDatabase.explorer!.file("camp.png");
     await addChat();
     return true;
   }
