@@ -88,3 +88,8 @@
 
 ## 0.0.6+8
 * Fix containsKey error.
+
+
+## 0.0.6+9
+* Remove custom path in StorageExplorer and replace it with full path, and fix some bugs in containsKey in StorageDatabaseSource.
+

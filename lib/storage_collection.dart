@@ -173,9 +173,12 @@ class StorageCollection {
   }
 
   StorageDocument document(dynamic docId) {
-    if (!storageDatabase.checkCollectionIdExists(collectionId)) {
-      storageDatabase.source.setData(collectionId, {});
-    }
+    // if (!storageDatabase.checkCollectionIdExists(collectionId)) {
+    //   storageDatabase.source.setData(collectionId, {});
+    // }
+    storageDatabase.checkCollectionIdExists(collectionId).then((contain) {
+      if (!contain) storageDatabase.source.setData(collectionId, {});
+    });
     List docIds = docId.runtimeType == String ? docId.split("/") : [docId];
 
     StorageDocument document = StorageDocument(

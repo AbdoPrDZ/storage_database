@@ -23,10 +23,13 @@ class StorageExplorer {
 
   static Future<ExplorerDirectory> initLocalDirectory(
     StorageListeners storageListeners, {
-    String? customPath,
+    // String? customPath,
+    String? path,
   }) async {
     Directory localIODirectory = Directory(
-      "${(await getApplicationDocumentsDirectory()).path}\\storage_database_explorer${customPath != null ? '\\$customPath' : ''}",
+      path ??
+          // "${(await getApplicationDocumentsDirectory()).path}\\storage_database_explorer${customPath != null ? '\\$customPath' : ''}",
+          "${(await getApplicationDocumentsDirectory()).path}\\storage_database_explorer",
     );
     String localDirName = localIODirectory.path.split("\\").last;
     if (!localIODirectory.existsSync()) localIODirectory.createSync();
@@ -40,12 +43,14 @@ class StorageExplorer {
 
   static Future<StorageExplorer> getInstance(
     StorageDatabase storageDatabase, {
-    String? customPath,
+    // String? customPath,
+    String? path,
   }) async {
     StorageListeners storageListeners = StorageListeners();
     ExplorerDirectory localDirectory = await initLocalDirectory(
       storageListeners,
-      customPath: customPath,
+      // customPath: customPath,
+      path: path,
     );
     return StorageExplorer(
       storageDatabase,

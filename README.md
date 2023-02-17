@@ -59,7 +59,7 @@ class MyStorageSourceClass extends StorageDatabaseSource {
 
   // check for id function
   @override
-  bool containsKey(String key) => storage.containsKey(key);
+  Future<bool> containsKey(String key) async => storage.containsKey(key);
 
   // remove function
   @override

@@ -32,8 +32,8 @@ class StorageDatabase {
         source ?? await DefualtStorageSource.getInstance(),
       );
 
-  Future initExplorer() async =>
-      explorer = await StorageExplorer.getInstance(this);
+  Future initExplorer({String? path}) async =>
+      explorer = await StorageExplorer.getInstance(this, path: path);
 
   Future initAPI({
     required String apiUrl,
@@ -68,7 +68,7 @@ class StorageDatabase {
     return document;
   }
 
-  checkCollectionIdExists(String collectionId) =>
+  Future checkCollectionIdExists(String collectionId) =>
       source.containsKey(collectionId);
 
   Future clear({
