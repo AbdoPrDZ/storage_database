@@ -93,3 +93,6 @@
 ## 0.0.6+9
 * Remove custom path in StorageExplorer and replace it with full path, and fix some bugs in containsKey in StorageDatabaseSource.
 
+
+## 0.0.6+10
+* Fix some bugs in StorageExplorer.
