@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'dart:math';
 
+import 'package:path/path.dart';
+
 import '../src/storage_listeners.dart';
 import 'explorer_directory_item.dart';
 
@@ -23,7 +25,8 @@ class ExplorerDirectory {
     List<FileSystemEntity> ioFiles = ioDirectory.listSync();
     List<ExplorerDirectoryItem> items = [];
     for (FileSystemEntity item in ioFiles) {
-      String itemName = item.path.split("\\").last;
+      // String itemName = item.path.split("\\").last;
+      String itemName = basename(item.path);
       bool isDirectory = item.runtimeType.toString().contains("Directory");
       if (isDirectory) {
         items.add(
@@ -42,11 +45,11 @@ class ExplorerDirectory {
   }
 
   bool hasFile(String filename) =>
-      File("${ioDirectory.path}\\$filename").existsSync();
+      File("${ioDirectory.path}/$filename").existsSync();
 
   ExplorerFile file(String filename) {
     return ExplorerFile(
-      File("${ioDirectory.path}\\$filename"),
+      File("${ioDirectory.path}/$filename"),
       shortPath,
       filename,
       storageListeners,
@@ -56,8 +59,9 @@ class ExplorerDirectory {
   ExplorerDirectory directory(String dirName, {String? streamId}) {
     List<String> dirNames =
         dirName.contains("/") ? dirName.split("/") : [dirName];
+    dirNames = [for (String name in dirNames) name.replaceAll('\\', '/')];
 
-    Directory nioDirectory = Directory("${ioDirectory.path}\\${dirNames[0]}");
+    Directory nioDirectory = Directory("${ioDirectory.path}/${dirNames[0]}");
     if (!nioDirectory.existsSync()) nioDirectory.createSync();
 
     if (streamId != null && storageListeners.hasStreamId(shortPath, streamId)) {

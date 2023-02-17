@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../src/storage_listeners.dart';
@@ -28,9 +29,10 @@ class StorageExplorer {
     Directory localIODirectory = Directory(
       path ??
           // "${(await getApplicationDocumentsDirectory()).path}\\storage_database_explorer${customPath != null ? '\\$customPath' : ''}",
-          "${(await getApplicationDocumentsDirectory()).path}\\storage_database_explorer",
+          "${(await getApplicationDocumentsDirectory()).path}/storage_database_explorer",
     );
-    String localDirName = localIODirectory.path.split("\\").last;
+    // String localDirName = localIODirectory.path.split("\\").last;
+    String localDirName = basename(localIODirectory.path);
     if (!localIODirectory.existsSync()) localIODirectory.createSync();
     return ExplorerDirectory(
       localIODirectory,
@@ -69,9 +71,10 @@ class StorageExplorer {
   ExplorerDirectory directory(String dirName, {bool log = true}) {
     List<String> dirNames =
         dirName.contains("/") ? dirName.split("/") : [dirName];
+    dirNames = [for (String name in dirNames) name.replaceAll('\\', '/')];
 
     Directory nIODirectory = Directory(
-      "${localDirectory.ioDirectory.path}\\${dirNames[0]}",
+      "${localDirectory.ioDirectory.path}/${dirNames[0]}",
     );
     if (!nIODirectory.existsSync()) nIODirectory.createSync();
 
