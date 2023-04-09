@@ -692,6 +692,8 @@ class ProductMigration extends LaravelEchoMigration {
 
 # Contact Us
 
-- [GitHub Profile]: ("https://github.com/AIabdoPr")
-- WhatsApp + Telegram (+213778185797)
-- [Facebook Account]: ("https://www.facebook.com/profile.php?id=100008024286034")
+[GitHub Profile]("https://github.com/AIabdoPr")
+
+WhatsApp + Telegram (+213778185797)
+
+[Facebook Account]("https://www.facebook.com/profile.php?id=100008024286034")
