@@ -8,8 +8,6 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shimmer/shimmer.dart';
 
-import 'explorer_directory.dart';
-import 'explorer_file.dart';
 import 'storage_explorer.dart';
 
 class ExplorerNetworkFiles {

@@ -7,19 +7,16 @@
 
 ```dart
 import 'package:storage_database/storage_database.dart';
-import 'package:storage_database/defualt_storage_source.dart';
-import 'package:storage_database/storage_database_collection.dart';
-import 'package:storage_database/storage_database_document.dart';
 ```
 
 ### Initializing
 
 ```dart
 // You have to give source class extended by 'StorageDatabaseSource'
-// Defualt source is 'DefualtStorageSource' class
-StorageDatabase storage = await StorageDatabase.getInctance(); 
+// Default source is 'DefaultStorageSource' class
+StorageDatabase storage = await StorageDatabase.getInstance(); 
 // In this example you should to create source class extended with 'StorageDatabaseSource'
-StorageDatabase storageEx2 = StorageDatabase(await MyStorageSourceClass.getInctance());
+StorageDatabase storageEx2 = StorageDatabase(await MyStorageSourceClass.getInstance());
 ```
 
 ### SourceClass
@@ -28,7 +25,7 @@ StorageDatabase storageEx2 = StorageDatabase(await MyStorageSourceClass.getIncta
 import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:storage_data bease/src/storage_database_source.dart';
+import 'package:storage_database/src/storage_database_source.dart';
 
 class MyStorageSourceClass extends StorageDatabaseSource {
   final SharedPreferences storage;
@@ -41,14 +38,14 @@ class MyStorageSourceClass extends StorageDatabaseSource {
 
   // setting data function
   @override
-  Future<bool> setdata (String id, dynamic data ) async {
+  Future<bool> setData (String id, dynamic data ) async {
     data = jsonEncode(data);
     return storage.setString(id, data);
   }
 
   // getting data function
   @override
-  Future<dynamic> getdata (String id) {
+  Future<dynamic> getData (String id) {
     String? data = storage.getString(id);
     if (data != null) {
       return jsonDecode(data);
@@ -133,7 +130,7 @@ storage.collection("collection-3").document("documentId").get()
 // d-6 => ['item 4']
 ```
 
-### Deleteing data
+### Deleting data
 
 ```dart
 // delete collection
@@ -144,7 +141,7 @@ await storage.collection("testCollection").document("testDocument").delete();
 await storage.collection("testCollection").deleteItem("testDocument");
 // delete item from document
 await storage.collection("testCollection").document("testDocument").deleteItem("testDocument");
-// note: 'delteItem' working only with map and list type
+// note: 'deleteItem' working only with map and list type
 ```
 
 ### Getting Document using document path
@@ -208,14 +205,10 @@ Column(
 
 This feature use to manage files and directories.
 
-### Impoerting
+### Importing
 
 ```dart
 import 'package:storage_database/storage_explorer/storage_explorer.dart';
-import 'package:storage_database/storage_explorer/explorer_file.dart';
-import 'package:storage_database/storage_explorer/explorer_directory.dart';
-import 'package:storage_database/storage_explorer/explorer_directory_item.dart';
-import 'package:storage_database/storage_explorer/explorer_network_files.dart';
 ```
 
 ### Initializing
@@ -232,26 +225,26 @@ StorageExplorer storageExplorer = StorageExplorer.getInstance(storageDatabase, c
 // 2: initializing from StorageDatabase Class
 await storageDatabase.initExplorer();
 // for use it
-storageDatabase.explorer!.<FunctionName> // <FunctionNale>: name of function you want to use
+storageDatabase.explorer!.<FunctionName> // <FunctionName>: name of function you want to use
 ```
 
 ### Create Directory
 
 ```dart
 // into local directory
-ExolorerDirectory dir = explorer!.directory("dirName");
+ExplorerDirectory dir = explorer!.directory("dirName");
 
 // into directory
-ExolorerDirectory otherDir = dir.direcory("other dirName");
+ExplorerDirectory otherDir = dir.directory("other dirName");
 
 // using path
-ExolorerDirectory otherDir = explorer!.directory("dirName/other dirName");
+ExplorerDirectory otherDir = explorer!.directory("dirName/other dirName");
 // Notes:
 // 1- working with local directory and normal directory.
 // 2- don't use real path:
 //    - false Path: "C:\users\user\document\dirName\other dirName"
 //    - true Path: "dirName/other dirName"
-// 3- don't use backslach:
+// 3- don't use backslash:
 //    - false path: "dir\other dir"
 //    - true path:  "dir/other dir"
 ```
@@ -284,7 +277,7 @@ await bytesFile.setBytes(bytes);
 // json: setting Json data
 await jsonFile.set({"key": "val"}); // Map
 await jsonFile.set(["item 1", "item 2"]); // List
-//// setMode (only with Map and List data, defualt mode is <append>)
+//// setMode (only with Map and List data, default mode is <append>)
 await jsonFile.set({"other key": "other val"}, setMode: SetMode.append); // this mode for append values
 // when get => {"key": "val", "other key": "other val"}
 await jsonFile.set({"key": "val"}, setMode: SetMode.remove); // this mode for remove values
@@ -308,7 +301,7 @@ List fileJsonData = await listJsonFile.getJson(); // with List => ["item 1", "it
 ...
 ```
 
-### Working with Direcory Stream
+### Working with Directory Stream
 
 ```dart
 // used for watch directory items
@@ -321,7 +314,7 @@ StreamBuilder<List<ExplorerDirectoryItem>>(
     }
     return ListView(
       children: List.generate(
-        dirItems.lenght,
+        dirItems.length,
         (index) => Text("<${item.itemType}>: ${dirItems[index].itemName}"),
       );
     )
@@ -349,7 +342,7 @@ file.jsonStream();
 This feature downloads the file from the Internet, then stores it where the file can be used later without re-downloading it, and it can also work even in an offline state.
 
 ```dart
-// you need to initail it from explorer
+// you need to initial it from explorer
 await storageDatabase.explorer!.initNetWorkFiles();
 
 // call it like that
@@ -363,7 +356,7 @@ The feature contains a ready-made widget, especially for images, where it displa
 await storageDatabase.explorer!.networkFiles!.networkImage(
   'http://your.image.url',
   width: 100,
-  heith: 100,
+  heigh: 100,
   borderRadius: 8,
   fit: BoxFit.fill,
 );
@@ -373,12 +366,10 @@ await storageDatabase.explorer!.networkFiles!.networkImage(
 
 This feature used for api requests and responses, and it has the feature of storing requests in an offline state, to be re-request it again later on online.
 
-### Impoerting
+### Importing
 
 ```dart
 import 'package:storage_database/api/api.dart';
-import 'package:storage_database/api/request.dart';
-import 'package:storage_database/api/response.dart';
 ```
 
 ### Initializing
@@ -391,8 +382,8 @@ StorageAPI storageApi = StorageExplorer(
   storageDatabase: storageDatabase,
   tokenSource: () => 'api-token',
   apiUrl: 'http://your.api.url',
-  // requiests cach removed for now
-  //cachOnOffline: true, // for store requests on offline
+  // requests cache removed for now
+  //cacheOnOffline: true, // for store requests on offline
   //onReRequestResponse: (response) => print(response.value),
 );
 
@@ -400,11 +391,11 @@ StorageAPI storageApi = StorageExplorer(
 await storageDatabase.initAPI(
   tokenSource: () async => 'api-token',
   apiUrl: 'http://your.api.url',
-  cachOnOffline: true, // for store requests on offline
+  cacheOnOffline: true, // for store requests on offline
   onReRequestResponse: (response) => print(response.value),
 );
 // for use it
-storageDatabase.storageAPI!.<FunctionName> // <FunctionNale>: name of function you want to use
+storageDatabase.storageAPI!.<FunctionName> // <FunctionName>: name of function you want to use
 ```
 
 ### Working with APIRequest
@@ -469,8 +460,238 @@ TypeOfValue value = response.value;
 // response.value => {"key1": "val1", "key2": ["val1"]}
 ```
 
+## Laravel Echo
+
+This feature used to laravel echo connection, and you listen to Laravel Models.
+
+### Importing
+
+```dart
+import 'package:storage_database/api/api.dart';
+```
+
+### Initializing
+
+```dart
+// Laravel Echo Connector, migrations
+storageDatabase.initLaravelEcho(connector, <LaravelEchoMigration>[]);
+
+storageDatabase.initSocketLaravelEcho(<connector parameters>);
+
+storageDatabase.initPusherLaravelEcho(<connector parameters>);
+```
+
+### Working with migrations
+
+This used to create migration to listen to Laravel Model events (Create, Update, Delete).
+
+```dart
+class ProductMigration extends LaravelEchoMigration {
+  final Echo echo;
+  ProductMigration(this.echo, super.storageDatabase, super.collectionId);
+
+  @override
+  String get migrationName => 'Product';
+
+  @override
+  String get indexName => 'id';
+
+  @override
+  String get itemName => 'product';
+
+  @override
+  Map<EventsType, String> get eventsNames => {
+        EventsType.create: '${migrationName}CreatedEvent',
+        EventsType.update: '${migrationName}UpdatedEvent',
+        EventsType.delete: '${migrationName}DeletedEvent',
+      };
+
+  @override
+  Channel get channel => echo.private('products');
+
+  @override
+  onCreate(Map data) {
+    print('Product Created $data');
+    return super.onCreate(data);
+  }
+
+  @override
+  onUpdate(Map data) {
+    print('Product Updated $data');
+    return super.onUpdate(data);
+  }
+
+  @override
+  onDelete(Map data) {
+    print('Product Deleted $data');
+    return super.onDelete(data);
+  }
+}
+```
+
+#### Your Events must be like that:
+
+- Create:
+
+  ```php
+  class ProductCreatedEvent implements ShouldBroadcast {
+
+    use Dispatchable, InteractsWithSockets, SerializesModels;
+
+    /**
+    * @var Product
+    */
+    private $product;
+
+    /**
+    * Create a new event instance.
+    * @param Product $product
+    */
+    public function __construct(Product $product) {
+      $this->product = $product;
+    }
+
+    /**
+    * Get the channels the event should broadcast on.
+    *
+    * @return array<int, \Illuminate\Broadcasting\Channel>
+    */
+    public function broadcastOn(): array {
+      return [
+        new PrivateChannel('products'),
+      ];
+    }
+
+    /**
+    * The event's broadcast name.
+    *
+    * @return string
+    */
+    public function broadcastAs() {
+      return 'ProductCreatedEvent';
+    }
+
+    /**
+    * The event's broadcast name.
+    *
+    * @return array
+    */
+    public function broadcastWith() {
+      return [
+        'product' // Item Name
+            => $this->product->toArray()
+      ];
+    }
+  }
+  ```
+
+- Update:
+
+  ```php
+  class ProductUpdatedEvent implements ShouldBroadcast {
+
+    use Dispatchable, InteractsWithSockets, SerializesModels;
+
+    /**
+    * @var Product
+    */
+    private $product;
+
+    /**
+    * Create a new event instance.
+    * @param Product $product
+    */
+    public function __construct(Product $product) {
+      $this->product = $product;
+    }
+
+    /**
+    * Get the channels the event should broadcast on.
+    *
+    * @return array<int, \Illuminate\Broadcasting\Channel>
+    */
+    public function broadcastOn(): array {
+      return [
+        new PrivateChannel('products'),
+      ];
+    }
+
+    /**
+    * The event's broadcast name.
+    *
+    * @return string
+    */
+    public function broadcastAs() {
+      return 'ProductUpdatedEvent';
+    }
+
+    /**
+    * The event's broadcast name.
+    *
+    * @return array
+    */
+    public function broadcastWith() {
+      return [
+        'product' // Item Name
+            => $this->product->toArray()
+      ];
+    }
+  }
+  ```
+
+- Delete:
+
+  ```php
+  class ProductDeletedEvent implements ShouldBroadcast {
+
+    use Dispatchable, InteractsWithSockets, SerializesModels;
+
+    /**
+    * @var Product
+    */
+    private $product;
+
+    /**
+    * Create a new event instance.
+    * @param Product $product
+    */
+    public function __construct(Product $product) {
+      $this->product = $product;
+    }
+
+    /**
+    * Get the channels the event should broadcast on.
+    *
+    * @return array<int, \Illuminate\Broadcasting\Channel>
+    */
+    public function broadcastOn(): array {
+      return [
+        new PrivateChannel('products'),
+      ];
+    }
+
+    /**
+    * The event's broadcast name.
+    *
+    * @return string
+    */
+    public function broadcastAs() {
+      return 'ProductDeletedEvent';
+    }
+
+    /**
+    * The event's broadcast name.
+    *
+    * @return array
+    */
+    public function broadcastWith() {
+      return ['id' => $this->product->id];
+    }
+  }
+  ```
+
 # Contact Us
 
-### [GitHub Profile]("https://github.com/AIabdoPr")
-
-### [Facebook Account]("https://www.facebook.com/profile.php?id=100008024286034")
+- [GitHub Profile]("https://github.com/AIabdoPr")
+- WhatsApp + Telegram (+213778185797)
+- [Facebook Account]("https://www.facebook.com/profile.php?id=100008024286034")

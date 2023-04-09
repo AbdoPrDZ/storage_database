@@ -47,7 +47,7 @@ class APIResponse<T> {
             break;
           case 403:
             responseData["message"] =
-                "Error[$statusCode]: Unauthorised response";
+                "Error[$statusCode]: Unauthorized response";
             break;
           default:
             responseData["message"] =

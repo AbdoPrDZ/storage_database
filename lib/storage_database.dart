@@ -1,27 +1,30 @@
-import './defualt_storae_source.dart';
+import 'package:pusher_client/pusher_client.dart';
+
+import 'src/default_storage_source.dart';
 import './storage_collection.dart';
 import 'api/api.dart';
-import 'src/storage_database_excption.dart';
+import 'laravel_echo/laravel_echo.dart';
+import 'src/storage_database_exception.dart';
 import 'src/storage_database_source.dart';
 import './storage_document.dart';
+import 'src/storage_listeners.dart';
 import 'storage_explorer/storage_explorer.dart';
 
 export 'src/storage_database_source.dart';
+export 'src/storage_database_values.dart';
 
-export 'storage_explorer/explorer_network_files.dart';
-export 'storage_explorer/explorer_directory.dart';
-export 'storage_explorer/explorer_file.dart';
+export 'storage_explorer/storage_explorer.dart';
 
 export 'api/api.dart';
-export 'api/request.dart';
-export 'api/response.dart';
+
+export 'laravel_echo/laravel_echo.dart';
 
 class StorageDatabase {
   final StorageDatabaseSource source;
-  StorageExplorer? explorer;
-  StorageAPI? storageAPI;
 
   List<Function> onClear = [];
+
+  StorageListeners storageListeners = StorageListeners();
 
   StorageDatabase(this.source);
 
@@ -29,24 +32,73 @@ class StorageDatabase {
     StorageDatabaseSource? source,
   }) async =>
       StorageDatabase(
-        source ?? await DefualtStorageSource.getInstance(),
+        source ?? await DefaultStorageSource.instance,
       );
 
+  StorageExplorer? explorer;
   Future initExplorer({String? path}) async =>
       explorer = await StorageExplorer.getInstance(this, path: path);
 
-  Future initAPI({
+  StorageAPI? storageAPI;
+  initAPI({
     required String apiUrl,
     Map<String, String> headers = const {},
     // Function(APIResponse response)? onReRequestResponse,
-  }) async {
-    storageAPI = StorageAPI(
-      storageDatabase: this,
-      apiUrl: apiUrl,
-      headers: headers,
-      // onReRequestResponse: onReRequestResponse,
-    );
-  }
+  }) =>
+      storageAPI = StorageAPI(
+        storageDatabase: this,
+        apiUrl: apiUrl,
+        headers: headers,
+        // onReRequestResponse: onReRequestResponse,
+      );
+
+  LaravelEcho? laravelEcho;
+  initLaravelEcho(Connector connector, List<LaravelEchoMigration> migrations) =>
+      laravelEcho = LaravelEcho(this, connector);
+
+  initSocketLaravelEcho(
+    String host, {
+    Map? auth,
+    String? authEndpoint,
+    String? key,
+    String? namespace,
+    bool autoConnect = false,
+    Map moreOptions = const {},
+  }) =>
+      laravelEcho = LaravelEcho.socket(
+        this,
+        host,
+        auth: auth,
+        authEndpoint: authEndpoint,
+        key: key,
+        namespace: namespace,
+        autoConnect: autoConnect,
+        moreOptions: moreOptions,
+      );
+
+  initPusherLaravelEcho(
+    String appKey,
+    PusherOptions options, {
+    Map? auth,
+    String? authEndpoint,
+    String? host,
+    String? key,
+    String? namespace,
+    bool autoConnect = true,
+    bool enableLogging = true,
+    Map moreOptions = const {},
+  }) =>
+      laravelEcho = LaravelEcho.pusher(
+        this,
+        appKey,
+        options,
+        auth: auth,
+        authEndpoint: authEndpoint,
+        key: key,
+        namespace: namespace,
+        autoConnect: autoConnect,
+        moreOptions: moreOptions,
+      );
 
   StorageCollection collection(String collectionId) =>
       StorageCollection(this, collectionId);

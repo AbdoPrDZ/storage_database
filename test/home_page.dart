@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:storage_database/src/storage_database_values.dart';
 import 'package:storage_database/storage_database.dart';
 
 class HomePage extends StatefulWidget {
@@ -46,7 +45,7 @@ class _HomePageState extends State<HomePage> {
       body: FutureBuilder<bool>(
         future: initStorage(),
         builder: (context, snapshot) {
-          // print("shanpshot: ${snapshot.data}");
+          // print("snapshot: ${snapshot.data}");
           return snapshot.hasData && snapshot.data == true
               ? Flex(
                   direction: Axis.vertical,

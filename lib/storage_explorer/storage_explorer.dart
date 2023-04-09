@@ -5,36 +5,42 @@ import 'package:path_provider/path_provider.dart';
 
 import '../src/storage_listeners.dart';
 import '../storage_database.dart';
+import 'explorer_network_files.dart';
+import 'src/default_explorer_source.dart';
+import 'src/explorer_source.dart';
 
-export '../src/storage_database_values.dart';
+export './explorer_directory.dart';
+export './explorer_file.dart';
 
 class StorageExplorer {
   final StorageDatabase storageDatabase;
+  final ExplorerSource explorerSource;
   final StorageListeners storageListeners;
   final ExplorerDirectory localDirectory;
 
   StorageExplorer(
     this.storageDatabase,
+    this.explorerSource,
     this.storageListeners,
     this.localDirectory,
   ) {
-    storageDatabase.onClear.add(() => initLocalDirectory(storageListeners));
+    storageDatabase.onClear
+        .add(() => initLocalDirectory(storageListeners, explorerSource));
   }
 
   static Future<ExplorerDirectory> initLocalDirectory(
-    StorageListeners storageListeners, {
-    // String? customPath,
+    StorageListeners storageListeners,
+    ExplorerSource source, {
     String? path,
   }) async {
     Directory localIODirectory = Directory(
       path ??
-          // "${(await getApplicationDocumentsDirectory()).path}\\storage_database_explorer${customPath != null ? '\\$customPath' : ''}",
           "${(await getApplicationDocumentsDirectory()).path}/storage_database_explorer",
     );
-    // String localDirName = localIODirectory.path.split("\\").last;
     String localDirName = basename(localIODirectory.path);
     if (!localIODirectory.existsSync()) localIODirectory.createSync();
     return ExplorerDirectory(
+      source,
       localIODirectory,
       localDirName,
       localDirName,
@@ -44,27 +50,29 @@ class StorageExplorer {
 
   static Future<StorageExplorer> getInstance(
     StorageDatabase storageDatabase, {
-    // String? customPath,
+    ExplorerSource? source,
     String? path,
   }) async {
     StorageListeners storageListeners = StorageListeners();
+    source = source ?? DefaultExplorerSource();
     ExplorerDirectory localDirectory = await initLocalDirectory(
       storageListeners,
-      // customPath: customPath,
+      source,
       path: path,
     );
     return StorageExplorer(
       storageDatabase,
+      source,
       storageListeners,
       localDirectory,
     );
   }
 
   ExplorerNetworkFiles? networkFiles;
-  initNetWorkFiles({ExplorerDirectory? cachDirictory}) {
+  initNetWorkFiles({ExplorerDirectory? cacheDirectory}) {
     networkFiles = ExplorerNetworkFiles(
       this,
-      cachDirictory ?? directory('network-files'),
+      cacheDirectory ?? directory('network-files'),
     );
   }
 
@@ -73,7 +81,8 @@ class StorageExplorer {
         dirName.contains("/") ? dirName.split("/") : [dirName];
     dirNames = [for (String name in dirNames) name.replaceAll('\\', '/')];
 
-    Directory nIODirectory = Directory(
+    // Directory nIODirectory = Directory(
+    Directory nIODirectory = explorerSource.dirSync(
       "${localDirectory.ioDirectory.path}/${dirNames[0]}",
     );
     if (!nIODirectory.existsSync()) nIODirectory.createSync();
@@ -87,6 +96,7 @@ class StorageExplorer {
     }
 
     ExplorerDirectory explorerDirectory = ExplorerDirectory(
+      explorerSource,
       nIODirectory,
       dirNames[0],
       dirNames[0],
@@ -101,11 +111,14 @@ class StorageExplorer {
   }
 
   ExplorerFile file(String filename) {
-    File ioFile = File("${localDirectory.ioDirectory.path}\\$filename");
+    // File ioFile = File("${localDirectory.ioDirectory.path}\\$filename");
+    File ioFile = explorerSource
+        .fileSync("${localDirectory.ioDirectory.path}\\$filename");
     if (!ioFile.existsSync()) {
       ioFile.createSync();
     }
     return ExplorerFile(
+      explorerSource,
       ioFile,
       "",
       filename,

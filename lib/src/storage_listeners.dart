@@ -23,6 +23,18 @@ class StorageListeners {
     listenersData[path][streamId] = {"set_date": 1, "get_date": 0};
   }
 
+  List<String> getPathParents(String path) {
+    List<String> paths = [];
+    if (listenersData.containsKey(path.split('/').first)) {
+      String lastPath = '';
+      for (String item in path.split('/')) {
+        lastPath = '${lastPath == '' ? '' : '$lastPath/'}$item';
+        if (listenersData.containsKey(lastPath)) paths.add(lastPath);
+      }
+    }
+    return paths;
+  }
+
   int setDate(String path, String streamId, {int? microseconds}) {
     int microsecondsSinceEpoch =
         microseconds ?? DateTime.now().microsecondsSinceEpoch;
@@ -37,7 +49,5 @@ class StorageListeners {
     return microsecondsSinceEpoch;
   }
 
-  Map getDates(String path, String streamId) {
-    return listenersData[path][streamId];
-  }
+  Map getDates(String path, String streamId) => listenersData[path][streamId];
 }

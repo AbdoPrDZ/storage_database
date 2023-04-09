@@ -2,11 +2,14 @@ import 'package:http/http.dart' as http;
 
 import '../storage_database.dart';
 
+export './request.dart';
+export './response.dart';
+
 class StorageAPI {
   final StorageDatabase storageDatabase;
   final String apiUrl;
-  // final bool cachOnOffline;
-  // final Function(APIResponse respnse)? onReRequestResponse;
+  // final bool cacheOnOffline;
+  // final Function(APIResponse response)? onReRequestResponse;
 
   late APIRequest apiRequest;
 
@@ -17,7 +20,7 @@ class StorageAPI {
       'Content-Type': 'application/json; charset=UTF-8',
       'Accept': 'application/json',
     },
-    // this.cachOnOffline = true,
+    // this.cacheOnOffline = true,
     // this.onReRequestResponse,
   }) {
     apiRequest = APIRequest(
@@ -51,7 +54,7 @@ class StorageAPI {
         headers: headers,
         appendHeader: appendHeader,
         onNoConnection: () async {
-          // if (cachOnOffline) {
+          // if (cacheOnOffline) {
           //   var reqId = DateTime.now().millisecondsSinceEpoch;
           // await storageDatabase.document('api/requests').set({
           //   '$reqId': {
@@ -85,7 +88,7 @@ class StorageAPI {
 
   // Future resendRequests({
   //   List ids = const [],
-  //   Function(APIResponse respnse)? onResponse,
+  //   Function(APIResponse response)? onResponse,
   // }) async {
   //   if (ids.isEmpty) {
   //     ids =

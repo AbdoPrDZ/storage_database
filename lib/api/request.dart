@@ -90,8 +90,8 @@ class APIRequest {
       );
     } on SocketException {
       if (onNoConnection != null) onNoConnection();
-      if (log) dev.log("[StorageDatabaseAPI] reqError: No Internt Connection");
-      return APIResponse<T>(false, "No Internt Connection", statusCode);
+      if (log) dev.log("[StorageDatabaseAPI] reqError: No Internet Connection");
+      return APIResponse<T>(false, "No Internet Connection", statusCode);
     } catch (e) {
       return APIResponse<T>(false, 'ExceptionError: $e', statusCode);
     }

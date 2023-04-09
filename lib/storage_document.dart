@@ -2,38 +2,38 @@ import 'dart:developer' as dev;
 import 'dart:math';
 
 import './storage_database.dart';
-import 'src/storage_database_excption.dart';
+import 'src/storage_database_exception.dart';
 import 'src/storage_listeners.dart';
 
 class StorageDocument {
   final StorageDatabase storageDatabase;
-  final dynamic parrent;
-  final dynamic documentId, parrentId;
-  final StorageListeners storageListeners;
+  final dynamic parent;
+  final dynamic documentId, parentId;
 
   StorageDocument(
     this.storageDatabase,
-    this.parrent,
-    this.parrentId,
+    this.parent,
+    this.parentId,
     this.documentId,
-    this.storageListeners,
   );
 
-  Future<dynamic> getParrentData() async {
-    var parrentData = await parrent.get();
+  StorageListeners get storageListeners => parent.storageListeners;
+
+  Future<dynamic> getParentData() async {
+    var parentData = await parent.get();
     try {
-      Map.from(parrentData);
+      Map.from(parentData);
     } catch (e) {
       try {
-        List.from(parrentData);
+        List.from(parentData);
       } catch (e) {
         dev.log("document error: $e");
         throw const StorageDatabaseException(
-          "Document parrent doesn't support documents",
+          "Document parent doesn't support documents",
         );
       }
     }
-    return parrentData;
+    return parentData;
   }
 
   bool isMap(var data) {
@@ -57,32 +57,32 @@ class StorageDocument {
   }
 
   Future checkType(var data) async {
-    dynamic parrentData = await getParrentData();
-    if (!parrentData.containsKey(documentId)) {
+    dynamic parentData = await getParentData();
+    if (!parentData.containsKey(documentId)) {
       var initialData = isMap(data)
           ? {}
           : isList(data)
               ? []
               : null;
-      await parrent.set({documentId: initialData});
+      await parent.set({documentId: initialData});
       return initialData;
     } else {
-      var docData = parrentData[documentId];
-      bool currectType = false;
+      var docData = parentData[documentId];
+      bool currentType = false;
       try {
         if (isMap(data)) {
           Map.from(docData);
-          currectType = true;
+          currentType = true;
         } else if (isList(data)) {
           List.from(docData);
-          currectType = true;
+          currentType = true;
         } else {
-          currectType = docData.runtimeType == data.runtimeType;
+          currentType = docData.runtimeType == data.runtimeType;
         }
       } catch (e) {
         dev.log("document check type: $e");
       }
-      if (!currectType) {
+      if (!currentType) {
         throw StorageDatabaseException(
           "The data type must be ${docData.runtimeType}, but current type is (${data.runtimeType})",
         );
@@ -103,13 +103,15 @@ class StorageDocument {
       docData = data;
     }
     if (log) {
-      for (var streamId in storageListeners.getPathStreamIds(path)) {
-        if (storageListeners.hasStreamId(path, streamId)) {
-          storageListeners.setDate(path, streamId);
+      for (String path in storageListeners.getPathParents(path)) {
+        for (var streamId in storageListeners.getPathStreamIds(path)) {
+          if (storageListeners.hasStreamId(path, streamId)) {
+            storageListeners.setDate(path, streamId);
+          }
         }
       }
     }
-    await parrent.set({documentId: docData});
+    await parent.set({documentId: docData});
   }
 
   StorageDocument document(dynamic docId) {
@@ -119,7 +121,6 @@ class StorageDocument {
       this,
       documentId,
       docIds[0],
-      storageListeners,
     );
     for (int i = 1; i < docIds.length; i++) {
       document.set({docIds[i - 1]: {}});
@@ -129,18 +130,20 @@ class StorageDocument {
   }
 
   Future<dynamic> get({String? streamId}) async {
-    dynamic parrentData = await getParrentData();
+    dynamic parentData = await getParentData();
     if (streamId != null && storageListeners.hasStreamId(path, streamId)) {
       storageListeners.getDate(path, streamId);
     }
-    return parrentData[documentId];
+    return parentData[documentId];
   }
 
   Future delete({bool log = true}) async {
-    parrent.deleteItem(documentId);
-    for (String streamId in storageListeners.getPathStreamIds(path)) {
-      if (log && storageListeners.hasStreamId(path, streamId)) {
-        storageListeners.setDate(path, streamId);
+    parent.deleteItem(documentId);
+    for (String path in storageListeners.getPathParents(path)) {
+      for (String streamId in storageListeners.getPathStreamIds(path)) {
+        if (log && storageListeners.hasStreamId(path, streamId)) {
+          storageListeners.setDate(path, streamId);
+        }
       }
     }
   }
@@ -157,14 +160,16 @@ class StorageDocument {
       );
     }
     await set(docData, keepData: false);
-    for (String streamId in storageListeners.getPathStreamIds(path)) {
-      if (log && storageListeners.hasStreamId(path, streamId)) {
-        storageListeners.setDate(path, streamId);
+    for (String path in storageListeners.getPathParents(path)) {
+      for (String streamId in storageListeners.getPathStreamIds(path)) {
+        if (log && storageListeners.hasStreamId(path, streamId)) {
+          storageListeners.setDate(path, streamId);
+        }
       }
     }
   }
 
-  String get path => "${parrent.path}/$documentId";
+  String get path => "${parent.path}/$documentId";
 
   String get randomStreamId => String.fromCharCodes(
         List.generate(8, (index) => Random().nextInt(33) + 89),
@@ -208,7 +213,6 @@ class StorageDocument {
         this,
         documentId,
         docId,
-        storageListeners,
       );
     }
     return docs;

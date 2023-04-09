@@ -1,15 +1,15 @@
 import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
-import 'src/storage_database_source.dart';
+import 'storage_database_source.dart';
 
-class DefualtStorageSource extends StorageDatabaseSource {
+class DefaultStorageSource extends StorageDatabaseSource {
   final SharedPreferences storage;
 
-  DefualtStorageSource(this.storage);
+  DefaultStorageSource(this.storage);
 
-  static Future<DefualtStorageSource> getInstance() async =>
-      DefualtStorageSource(await SharedPreferences.getInstance());
+  static Future<DefaultStorageSource> get instance async =>
+      DefaultStorageSource(await SharedPreferences.getInstance());
 
   @override
   Future<bool> setData(String id, dynamic data) =>

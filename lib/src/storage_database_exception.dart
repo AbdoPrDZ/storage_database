@@ -4,11 +4,8 @@ abstract class StorageDatabaseError implements Exception {
   const StorageDatabaseError([this.message]);
 
   @override
-  String toString() {
-    String result = 'StorageDatabaseError';
-    if (message is String) return '$result: $message';
-    return result;
-  }
+  String toString() =>
+      'StorageDatabaseError${message is String ? ': $message' : ''}';
 }
 
 class StorageDatabaseException extends StorageDatabaseError {

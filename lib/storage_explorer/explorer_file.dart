@@ -5,11 +5,13 @@ import 'dart:math';
 
 import 'dart:typed_data';
 
-import '../src/storage_database_excption.dart';
+import '../src/storage_database_exception.dart';
 import '../src/storage_database_values.dart';
 import '../src/storage_listeners.dart';
+import 'src/explorer_source.dart';
 
 class ExplorerFile {
+  final ExplorerSource explorerSource;
   File ioFile;
   final String dirPath, filename;
   final StorageListeners storageListeners;
@@ -18,6 +20,7 @@ class ExplorerFile {
   final bool flush;
 
   ExplorerFile(
+    this.explorerSource,
     this.ioFile,
     this.dirPath,
     this.filename,
@@ -139,7 +142,7 @@ class ExplorerFile {
     } else if (setMode != SetMode.replace &&
         currentData != null &&
         currentData.runtimeType != data.runtimeType) {
-      throw const StorageDatabaseException("Can't append difrent data");
+      throw const StorageDatabaseException("Can't append different data");
     } else {
       currentData = data;
     }

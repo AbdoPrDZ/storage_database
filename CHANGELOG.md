@@ -63,36 +63,49 @@
 * Fix requests headers.
 
 ## 0.0.6
+
 * Fix some bugs and removing "api requests caching" feature due to some bugs.
 
 ## 0.0.6+1
+
 * Fix dart sdk version error.
 
 ## 0.0.6+2
+
 * Fix api request response null return.
 
 ## 0.0.6+3
+
 * Fix api response map error exception.
 
 ## 0.0.6+4
+
 * Fix network files headers.
 
 ## 0.0.6+5
+
 * Fix some bugs.
 
 ## 0.0.6+6
+
 * Fix StorageExplorer NetworkFiles clear and fix Image Data error.
 
 ## 0.0.6+7
+
 * Fix some bugs.
 
 ## 0.0.6+8
+
 * Fix containsKey error.
 
-
 ## 0.0.6+9
+
 * Remove custom path in StorageExplorer and replace it with full path, and fix some bugs in containsKey in StorageDatabaseSource.
 
-
 ## 0.0.6+10
+
 * Fix some bugs in StorageExplorer.
+
+## 0.0.7
+
+* Add Laravel Echo feature and fix some bugs in collection and document streaming.

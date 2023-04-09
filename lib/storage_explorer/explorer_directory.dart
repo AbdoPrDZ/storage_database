@@ -7,13 +7,16 @@ import '../src/storage_listeners.dart';
 import 'explorer_directory_item.dart';
 
 import 'explorer_file.dart';
+import 'src/explorer_source.dart';
 
 class ExplorerDirectory {
+  final ExplorerSource explorerSource;
   final Directory ioDirectory;
   final String directoryName, shortPath;
   final StorageListeners storageListeners;
 
   ExplorerDirectory(
+    this.explorerSource,
     this.ioDirectory,
     this.directoryName,
     this.shortPath,
@@ -45,11 +48,14 @@ class ExplorerDirectory {
   }
 
   bool hasFile(String filename) =>
-      File("${ioDirectory.path}/$filename").existsSync();
+      // File("${ioDirectory.path}/$filename").existsSync();
+      explorerSource.fileSync("${ioDirectory.path}/$filename").existsSync();
 
   ExplorerFile file(String filename) {
     return ExplorerFile(
-      File("${ioDirectory.path}/$filename"),
+      explorerSource,
+      // File("${ioDirectory.path}/$filename"),
+      explorerSource.fileSync("${ioDirectory.path}/$filename"),
       shortPath,
       filename,
       storageListeners,
@@ -61,14 +67,17 @@ class ExplorerDirectory {
         dirName.contains("/") ? dirName.split("/") : [dirName];
     dirNames = [for (String name in dirNames) name.replaceAll('\\', '/')];
 
-    Directory nioDirectory = Directory("${ioDirectory.path}/${dirNames[0]}");
+    // Directory nioDirectory = Directory("${ioDirectory.path}/${dirNames[0]}");
+    Directory nioDirectory =
+        explorerSource.dirSync("${ioDirectory.path}/${dirNames[0]}");
     if (!nioDirectory.existsSync()) nioDirectory.createSync();
 
     if (streamId != null && storageListeners.hasStreamId(shortPath, streamId)) {
       storageListeners.setDate(shortPath, streamId);
     }
 
-    ExplorerDirectory exolorerDirectory = ExplorerDirectory(
+    ExplorerDirectory explorerDirectory = ExplorerDirectory(
+      explorerSource,
       nioDirectory,
       dirNames[0],
       "$shortPath/${dirNames[0]}",
@@ -76,12 +85,12 @@ class ExplorerDirectory {
     );
 
     for (int i = 1; i < dirNames.length; i++) {
-      exolorerDirectory = exolorerDirectory.directory(
+      explorerDirectory = explorerDirectory.directory(
         dirNames[i],
       );
     }
 
-    return exolorerDirectory;
+    return explorerDirectory;
   }
 
   Future delete({bool log = true}) async {

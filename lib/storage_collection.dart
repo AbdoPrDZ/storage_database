@@ -3,38 +3,34 @@ import 'dart:developer' as dev;
 import 'dart:math';
 
 import './storage_database.dart';
-import 'src/storage_database_excption.dart';
+import 'src/storage_database_exception.dart';
 import './storage_document.dart';
 import 'src/storage_listeners.dart';
 
 class StorageCollection {
   final StorageDatabase storageDatabase;
   final String collectionId;
-  late String collectionContentType;
-  late StorageListeners storageListeners;
 
-  StorageCollection(this.storageDatabase, this.collectionId) {
-    storageListeners = StorageListeners();
-  }
+  StorageCollection(this.storageDatabase, this.collectionId);
 
-  bool isMap(var data) {
-    bool isMap = true;
+  StorageListeners get storageListeners => storageDatabase.storageListeners;
+
+  bool isMap(dynamic data) {
     try {
       Map.from(data);
+      return true;
     } catch (e) {
-      isMap = false;
+      return false;
     }
-    return isMap;
   }
 
   bool isList(var data) {
-    bool isList = true;
     try {
       List.from(data);
+      return true;
     } catch (e) {
-      isList = false;
+      return false;
     }
-    return isList;
   }
 
   Future<dynamic> checkType(var data) async {
@@ -49,23 +45,23 @@ class StorageCollection {
     } else {
       dynamic collectionData =
           await storageDatabase.source.getData(collectionId);
-      bool currectType = false;
+      bool currentType = false;
       try {
         if (collectionData == null) {
-          currectType = true;
+          currentType = true;
         } else if (isMap(data)) {
           Map.from(collectionData);
-          currectType = true;
+          currentType = true;
         } else if (isList(data)) {
           List.from(collectionData);
-          currectType = true;
+          currentType = true;
         } else {
-          currectType = collectionData.runtimeType == data.runtimeType;
+          currentType = collectionData.runtimeType == data.runtimeType;
         }
       } catch (e) {
         dev.log("collection check type: $e");
       }
-      if (!currectType) {
+      if (!currentType) {
         throw StorageDatabaseException(
           "The data type must be ${collectionData.runtimeType}, but current type is (${data.runtimeType})",
         );
@@ -129,8 +125,7 @@ class StorageCollection {
   }
 
   String get randomStreamId => String.fromCharCodes(
-        List.generate(8, (index) => Random().nextInt(33) + 89),
-      );
+      List.generate(8, (index) => Random().nextInt(33) + 89));
 
   Stream stream({delayCheck = const Duration(milliseconds: 50)}) async* {
     String streamId = randomStreamId;
@@ -154,12 +149,20 @@ class StorageCollection {
     return res;
   }
 
-  deleteItem(itemId, {bool log = true}) async {
+  Future deleteItem(itemId, {bool log = true}) async {
     var collectionData = await get();
     if (isMap(collectionData)) {
-      collectionData.remove(itemId);
+      if ((collectionData as Map).containsKey(itemId)) {
+        collectionData.remove(itemId);
+      } else {
+        throw const StorageDatabaseException('Undefined item id');
+      }
     } else if (isList(collectionData)) {
-      collectionData.removeAt(itemId);
+      if (itemId >= 0 && (collectionData as List).length >= itemId) {
+        collectionData.removeAt(itemId);
+      } else {
+        throw const StorageDatabaseException('Undefined item id');
+      }
     } else {
       throw const StorageDatabaseException(
         'This Collection doesn\'t support documents',
@@ -187,7 +190,6 @@ class StorageCollection {
       this,
       collectionId,
       docIds[0],
-      storageListeners,
     );
     for (int i = 1; i < docIds.length; i++) {
       document.set({docIds[i - 1]: {}});
@@ -222,7 +224,6 @@ class StorageCollection {
         this,
         collectionId,
         docId,
-        storageListeners,
       );
     }
     return docs;
