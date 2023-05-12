@@ -109,3 +109,7 @@
 ## 0.0.7
 
 * Add Laravel Echo feature and fix some bugs in collection and document streaming.
+
+## 0.0.7+1
+
+* Fix "The data type must be null, but current type is (AnyType)".

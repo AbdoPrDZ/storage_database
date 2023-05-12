@@ -70,7 +70,9 @@ class StorageDocument {
       var docData = parentData[documentId];
       bool currentType = false;
       try {
-        if (isMap(data)) {
+        if (docData == null) {
+          currentType = true;
+        } else if (isMap(data)) {
           Map.from(docData);
           currentType = true;
         } else if (isList(data)) {
