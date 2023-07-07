@@ -113,3 +113,7 @@
 ## 0.0.7+1
 
 * Fix "The data type must be null, but current type is (AnyType)".
+
+## 0.0.8
+
+* Upgrade flutter sdk, laravel_echo_null and socket_io_client packages.

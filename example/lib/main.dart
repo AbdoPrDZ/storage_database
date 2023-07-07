@@ -244,9 +244,7 @@ class _MyHomePageState extends State<MyHomePage> {
     snackbar('Directory created successfully');
   }
 
-  TextEditingController echoTokenController = TextEditingController(
-    text: '279|X2GXNVF8g7Niz1LfvAhufbQHb0aJO2RdrnFxxyn3',
-  );
+  TextEditingController echoTokenController = TextEditingController();
   bool laravelEchoConnected = false;
   Map products = {};
   connectLaravelEcho() {

@@ -1,5 +1,5 @@
 // CLients
-import 'package:pusher_client/pusher_client.dart';
+import 'package:pusher_client_fixed/pusher_client_fixed.dart';
 import 'package:socket_io_client/socket_io_client.dart';
 
 import '../storage_database.dart';
