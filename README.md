@@ -692,7 +692,7 @@ class ProductMigration extends LaravelEchoMigration {
 
 # Contact Us
 
-GitHub Profile: <https://github.com/AIabdoPr>
+GitHub Profile: <https://github.com/AbdoPrDZ>
 
 WhatsApp + Telegram (+213778185797)
 
