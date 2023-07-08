@@ -18,6 +18,7 @@ class StorageCollection {
   bool isMap(dynamic data) {
     try {
       Map.from(data);
+
       return true;
     } catch (e) {
       return false;
@@ -27,6 +28,7 @@ class StorageCollection {
   bool isList(var data) {
     try {
       List.from(data);
+
       return true;
     } catch (e) {
       return false;
@@ -40,12 +42,16 @@ class StorageCollection {
           : isList(data)
               ? []
               : null;
+
       await storageDatabase.source.setData(collectionId, initialData);
+
       return initialData;
     } else {
       dynamic collectionData =
           await storageDatabase.source.getData(collectionId);
+
       bool currentType = false;
+
       try {
         if (collectionData == null) {
           currentType = true;
@@ -61,30 +67,39 @@ class StorageCollection {
       } catch (e) {
         dev.log("collection check type: $e");
       }
+
       if (!currentType) {
         throw StorageDatabaseException(
           "The data type must be ${collectionData.runtimeType}, but current type is (${data.runtimeType})",
         );
       }
+
       return collectionData;
     }
   }
 
   Future set(var data, {bool log = true, bool keepData = true}) async {
-    dynamic collectionData = await checkType(data);
-    if (keepData && isMap(data)) {
-      for (var key in data.keys) {
-        collectionData[key] = data[key];
-      }
-    } else if (keepData && isList(data)) {
-      for (var item in data) {
-        if (!collectionData.contains(item)) {
-          collectionData.add(item);
-        }
-      }
-    } else {
+    dynamic collectionData;
+
+    if (!keepData) {
       collectionData = data;
+    } else {
+      collectionData = await checkType(data);
+      if (isMap(data)) {
+        for (var key in data.keys) {
+          collectionData[key] = data[key];
+        }
+      } else if (isList(data)) {
+        for (var item in data) {
+          if (!collectionData.contains(item)) {
+            collectionData.add(item);
+          }
+        }
+      } else {
+        collectionData = data;
+      }
     }
+
     if (log) {
       for (var streamId in storageListeners.getPathStreamIds(path)) {
         if (storageListeners.hasStreamId(path, streamId)) {
@@ -92,6 +107,7 @@ class StorageCollection {
         }
       }
     }
+
     await storageDatabase.source.setData(
       collectionId,
       collectionData,
@@ -104,10 +120,13 @@ class StorageCollection {
         "This collection ($collectionId) has not yet been created",
       );
     }
+
     dynamic collectionData = storageDatabase.source.getData(collectionId);
+
     if (streamId != null && storageListeners.hasStreamId(path, streamId)) {
       storageListeners.getDate(path, streamId);
     }
+
     return collectionData;
   }
 
@@ -118,6 +137,7 @@ class StorageCollection {
       return Map.from(await get()).containsKey(documentId);
     } catch (e) {
       dev.log("has id: $e");
+
       throw StorageDatabaseException(
         "This Collection ($collectionId) does not support documents",
       );
@@ -129,10 +149,14 @@ class StorageCollection {
 
   Stream stream({delayCheck = const Duration(milliseconds: 50)}) async* {
     String streamId = randomStreamId;
+
     storageListeners.initStream(path, streamId);
+
     while (true) {
       await Future.delayed(delayCheck);
+
       Map dates = storageListeners.getDates(path, streamId);
+
       if (dates["set_date"] >= dates["get_date"]) {
         yield await get(streamId: streamId);
       }
@@ -141,16 +165,19 @@ class StorageCollection {
 
   Future<bool> delete({bool log = true}) async {
     bool res = await storageDatabase.source.remove(collectionId);
+
     for (String streamId in storageListeners.getPathStreamIds(path)) {
       if (log && storageListeners.hasStreamId(path, streamId)) {
         storageListeners.setDate(path, streamId);
       }
     }
+
     return res;
   }
 
   Future deleteItem(itemId, {bool log = true}) async {
     var collectionData = await get();
+
     if (isMap(collectionData)) {
       if ((collectionData as Map).containsKey(itemId)) {
         collectionData.remove(itemId);
@@ -168,6 +195,7 @@ class StorageCollection {
         'This Collection doesn\'t support documents',
       );
     }
+
     await set(collectionData, keepData: false);
     for (String streamId in storageListeners.getPathStreamIds(path)) {
       if (log && storageListeners.hasStreamId(path, streamId)) {
@@ -180,9 +208,11 @@ class StorageCollection {
     // if (!storageDatabase.checkCollectionIdExists(collectionId)) {
     //   storageDatabase.source.setData(collectionId, {});
     // }
+
     storageDatabase.checkCollectionIdExists(collectionId).then((contain) {
       if (!contain) storageDatabase.source.setData(collectionId, {});
     });
+
     List docIds = docId.runtimeType == String ? docId.split("/") : [docId];
 
     StorageDocument document = StorageDocument(
@@ -191,10 +221,12 @@ class StorageCollection {
       collectionId,
       docIds[0],
     );
+
     for (int i = 1; i < docIds.length; i++) {
       document.set({docIds[i - 1]: {}});
       document = document.document(docIds[i]);
     }
+
     return document;
   }
 
@@ -208,6 +240,7 @@ class StorageCollection {
 
   Map<dynamic, StorageDocument> getMapDocs(var data) {
     List docsIds;
+
     if (isMap(data)) {
       docsIds = data.keys.toList();
     } else if (isList(data)) {
@@ -217,7 +250,9 @@ class StorageCollection {
         "This collection ($collectionId) does not support documents",
       );
     }
+
     Map<dynamic, StorageDocument> docs = {};
+
     for (dynamic docId in docsIds) {
       docs[docId] = StorageDocument(
         storageDatabase,
@@ -226,6 +261,7 @@ class StorageCollection {
         docId,
       );
     }
+
     return docs;
   }
 }

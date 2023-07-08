@@ -467,7 +467,7 @@ This feature used to laravel echo connection, and you listen to Laravel Models.
 ### Importing
 
 ```dart
-import 'package:storage_database/api/api.dart';
+import 'package:storage_database/laravel_echo/laravel_echo.dart';
 ```
 
 ### Initializing
@@ -480,6 +480,8 @@ storageDatabase.initSocketLaravelEcho(<connector parameters>);
 
 storageDatabase.initPusherLaravelEcho(<connector parameters>);
 ```
+
+#### Please read [laravel_echo_null](https://pub.dev/packages/laravel_echo_null) for more information
 
 ### Working with migrations
 

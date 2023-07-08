@@ -117,3 +117,7 @@
 ## 0.0.8
 
 * Upgrade flutter sdk, laravel_echo_null and socket_io_client packages.
+
+## 0.0.8+1
+
+* fix some issues.
