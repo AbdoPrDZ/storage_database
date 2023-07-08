@@ -255,6 +255,13 @@ class _MyHomePageState extends State<MyHomePage> {
 
     storageDatabase!.initSocketLaravelEcho(
       'http://localhost:6001',
+      [
+        ProductMigration(
+          storageDatabase!.laravelEcho!,
+          storageDatabase!,
+          'products',
+        )
+      ],
       autoConnect: false,
       auth: {
         'headers': {'Authorization': 'Bearer ${echoTokenController.text}'}
@@ -279,13 +286,6 @@ class _MyHomePageState extends State<MyHomePage> {
     storageDatabase!.laravelEcho!.connector.onError((err) {
       log('socketError: $err');
     });
-    storageDatabase!.laravelEcho!.setupMigrations([
-      ProductMigration(
-        storageDatabase!.laravelEcho!,
-        storageDatabase!,
-        'products',
-      )
-    ]);
     storageDatabase!
         .collection('products')
         .stream()

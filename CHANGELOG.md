@@ -121,3 +121,7 @@
 ## 0.0.8+1
 
 * Fix laravel_echo migrations, and fix some other know bugs.
+
+## 0.0.8+2
+
+* Fix laravel_echo setup migrations.

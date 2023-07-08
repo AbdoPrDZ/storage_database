@@ -53,37 +53,35 @@ class StorageDatabase {
       );
 
   LaravelEcho? laravelEcho;
-  initLaravelEcho(Connector connector, List<LaravelEchoMigration> migrations) {
-    laravelEcho = LaravelEcho(this, connector);
-    laravelEcho!.setupMigrations(migrations);
-  }
+  initLaravelEcho(Connector connector, List<LaravelEchoMigration> migrations) =>
+      laravelEcho = LaravelEcho(this, connector, migrations);
 
   initSocketLaravelEcho(
-    String host, {
+    String host,
+    List<LaravelEchoMigration> migrations, {
     Map? auth,
     String? authEndpoint,
     String? key,
     String? namespace,
     bool autoConnect = false,
     Map moreOptions = const {},
-    List<LaravelEchoMigration> migrations = const [],
-  }) {
-    laravelEcho = LaravelEcho.socket(
-      this,
-      host,
-      auth: auth,
-      authEndpoint: authEndpoint,
-      key: key,
-      namespace: namespace,
-      autoConnect: autoConnect,
-      moreOptions: moreOptions,
-    );
-    laravelEcho!.setupMigrations(migrations);
-  }
+  }) =>
+      laravelEcho = LaravelEcho.socket(
+        this,
+        host,
+        migrations,
+        auth: auth,
+        authEndpoint: authEndpoint,
+        key: key,
+        namespace: namespace,
+        autoConnect: autoConnect,
+        moreOptions: moreOptions,
+      );
 
   initPusherLaravelEcho(
     String appKey,
-    PusherOptions options, {
+    PusherOptions options,
+    List<LaravelEchoMigration> migrations, {
     Map? auth,
     String? authEndpoint,
     String? host,
@@ -92,21 +90,19 @@ class StorageDatabase {
     bool autoConnect = true,
     bool enableLogging = true,
     Map moreOptions = const {},
-    List<LaravelEchoMigration> migrations = const [],
-  }) {
-    laravelEcho = LaravelEcho.pusher(
-      this,
-      appKey,
-      options,
-      auth: auth,
-      authEndpoint: authEndpoint,
-      key: key,
-      namespace: namespace,
-      autoConnect: autoConnect,
-      moreOptions: moreOptions,
-    );
-    laravelEcho!.setupMigrations(migrations);
-  }
+  }) =>
+      laravelEcho = LaravelEcho.pusher(
+        this,
+        appKey,
+        options,
+        migrations,
+        auth: auth,
+        authEndpoint: authEndpoint,
+        key: key,
+        namespace: namespace,
+        autoConnect: autoConnect,
+        moreOptions: moreOptions,
+      );
 
   StorageCollection collection(String collectionId) =>
       StorageCollection(this, collectionId);

@@ -460,7 +460,7 @@ TypeOfValue value = response.value;
 // response.value => {"key1": "val1", "key2": ["val1"]}
 ```
 
-## Laravel Echo
+## Laravel Echo (Beta)
 
 This feature used to laravel echo connection, and you listen to Laravel Models.
 
@@ -476,9 +476,10 @@ import 'package:storage_database/laravel_echo/laravel_echo.dart';
 // Laravel Echo Connector, migrations
 storageDatabase.initLaravelEcho(connector, <LaravelEchoMigration>[]);
 
-storageDatabase.initSocketLaravelEcho(<connector parameters>, migrations: <LaravelEchoMigration>[]);
+storageDatabase.initSocketLaravelEcho(<connector parameters>, <LaravelEchoMigration>[]);
 
-storageDatabase.initPusherLaravelEcho(<connector parameters>, migrations: <LaravelEchoMigration>[]);
+storageDatabase.initPusherLaravelEcho(<connector parameters>, <LaravelEchoMigration>[]);
+
 ```
 
 #### Note: Please read [laravel_echo_null](https://pub.dev/packages/laravel_echo_null) for more information if you use connector to initializing
