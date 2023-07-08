@@ -120,4 +120,4 @@
 
 ## 0.0.8+1
 
-* fix some issues.
+* Fix laravel_echo migrations, and fix some other know bugs.

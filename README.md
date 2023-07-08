@@ -476,12 +476,12 @@ import 'package:storage_database/laravel_echo/laravel_echo.dart';
 // Laravel Echo Connector, migrations
 storageDatabase.initLaravelEcho(connector, <LaravelEchoMigration>[]);
 
-storageDatabase.initSocketLaravelEcho(<connector parameters>);
+storageDatabase.initSocketLaravelEcho(<connector parameters>, migrations: <LaravelEchoMigration>[]);
 
-storageDatabase.initPusherLaravelEcho(<connector parameters>);
+storageDatabase.initPusherLaravelEcho(<connector parameters>, migrations: <LaravelEchoMigration>[]);
 ```
 
-#### Please read [laravel_echo_null](https://pub.dev/packages/laravel_echo_null) for more information
+#### Note: Please read [laravel_echo_null](https://pub.dev/packages/laravel_echo_null) for more information if you use connector to initializing
 
 ### Working with migrations
 

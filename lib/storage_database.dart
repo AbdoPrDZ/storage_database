@@ -53,8 +53,10 @@ class StorageDatabase {
       );
 
   LaravelEcho? laravelEcho;
-  initLaravelEcho(Connector connector, List<LaravelEchoMigration> migrations) =>
-      laravelEcho = LaravelEcho(this, connector);
+  initLaravelEcho(Connector connector, List<LaravelEchoMigration> migrations) {
+    laravelEcho = LaravelEcho(this, connector);
+    laravelEcho!.setupMigrations(migrations);
+  }
 
   initSocketLaravelEcho(
     String host, {
@@ -64,17 +66,20 @@ class StorageDatabase {
     String? namespace,
     bool autoConnect = false,
     Map moreOptions = const {},
-  }) =>
-      laravelEcho = LaravelEcho.socket(
-        this,
-        host,
-        auth: auth,
-        authEndpoint: authEndpoint,
-        key: key,
-        namespace: namespace,
-        autoConnect: autoConnect,
-        moreOptions: moreOptions,
-      );
+    List<LaravelEchoMigration> migrations = const [],
+  }) {
+    laravelEcho = LaravelEcho.socket(
+      this,
+      host,
+      auth: auth,
+      authEndpoint: authEndpoint,
+      key: key,
+      namespace: namespace,
+      autoConnect: autoConnect,
+      moreOptions: moreOptions,
+    );
+    laravelEcho!.setupMigrations(migrations);
+  }
 
   initPusherLaravelEcho(
     String appKey,
@@ -87,18 +92,21 @@ class StorageDatabase {
     bool autoConnect = true,
     bool enableLogging = true,
     Map moreOptions = const {},
-  }) =>
-      laravelEcho = LaravelEcho.pusher(
-        this,
-        appKey,
-        options,
-        auth: auth,
-        authEndpoint: authEndpoint,
-        key: key,
-        namespace: namespace,
-        autoConnect: autoConnect,
-        moreOptions: moreOptions,
-      );
+    List<LaravelEchoMigration> migrations = const [],
+  }) {
+    laravelEcho = LaravelEcho.pusher(
+      this,
+      appKey,
+      options,
+      auth: auth,
+      authEndpoint: authEndpoint,
+      key: key,
+      namespace: namespace,
+      autoConnect: autoConnect,
+      moreOptions: moreOptions,
+    );
+    laravelEcho!.setupMigrations(migrations);
+  }
 
   StorageCollection collection(String collectionId) =>
       StorageCollection(this, collectionId);
