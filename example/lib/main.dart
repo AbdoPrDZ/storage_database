@@ -255,13 +255,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
     storageDatabase!.initSocketLaravelEcho(
       'http://localhost:6001',
-      [
-        ProductMigration(
-          storageDatabase!.laravelEcho!,
-          storageDatabase!,
-          'products',
-        )
-      ],
+      [ProductMigration(storageDatabase!, 'products')],
       autoConnect: false,
       auth: {
         'headers': {'Authorization': 'Bearer ${echoTokenController.text}'}
@@ -458,8 +452,7 @@ class _MyHomePageState extends State<MyHomePage> {
 }
 
 class ProductMigration extends LaravelEchoMigration {
-  final Echo echo;
-  ProductMigration(this.echo, super.storageDatabase, super.collectionId);
+  ProductMigration(super.storageDatabase, super.collectionId);
 
   @override
   String get migrationName => 'Product';
@@ -468,7 +461,14 @@ class ProductMigration extends LaravelEchoMigration {
   String get itemName => 'product';
 
   @override
-  Channel get channel => echo.private('products');
+  Channel get channel => storageDatabase.laravelEcho!.private('products');
+
+  @override
+  Map<EventsType, String> get eventsNames => {
+        EventsType.create: '${migrationName}CreatedEvent',
+        EventsType.update: '${migrationName}UpdatedEvent',
+        EventsType.delete: '${migrationName}DeletedEvent',
+      };
 
   @override
   onCreate(Map data) {

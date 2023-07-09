@@ -17,27 +17,6 @@ class LaravelEcho<ClientType, ChannelType>
     connector.onConnect((data) => setupMigrations());
   }
 
-  setupMigration(LaravelEchoMigration migration) {
-    if (migration.eventsNames.containsKey(EventsType.create)) {
-      migration.channel.listen(
-        migration.eventsNames[EventsType.create]!,
-        migration.onCreate,
-      );
-    }
-    if (migration.eventsNames.containsKey(EventsType.update)) {
-      migration.channel.listen(
-        migration.eventsNames[EventsType.update]!,
-        migration.onUpdate,
-      );
-    }
-    if (migration.eventsNames.containsKey(EventsType.delete)) {
-      migration.channel.listen(
-        migration.eventsNames[EventsType.delete]!,
-        migration.onDelete,
-      );
-    }
-  }
-
   removeMigration(LaravelEchoMigration migration) {
     migration.channel.unsubscribe();
     migrations.remove(migration);
@@ -45,7 +24,7 @@ class LaravelEcho<ClientType, ChannelType>
 
   setupMigrations() {
     for (LaravelEchoMigration migration in migrations) {
-      setupMigration(migration);
+      migration.setup();
     }
   }
 

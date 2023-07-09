@@ -490,18 +490,18 @@ This used to create migration to listen to Laravel Model events (Create, Update,
 
 ```dart
 class ProductMigration extends LaravelEchoMigration {
-  final Echo echo;
-  ProductMigration(this.echo, super.storageDatabase, super.collectionId);
+  ProductMigration(super.storageDatabase, super.collectionId);
 
   @override
   String get migrationName => 'Product';
 
   @override
-  String get indexName => 'id';
-
-  @override
   String get itemName => 'product';
 
+  @override
+  Channel get channel => storageDatabase.laravelEcho!.private('products');
+
+  // you can custom your events names and remove what you don't need
   @override
   Map<EventsType, String> get eventsNames => {
         EventsType.create: '${migrationName}CreatedEvent',
@@ -510,23 +510,20 @@ class ProductMigration extends LaravelEchoMigration {
       };
 
   @override
-  Channel get channel => echo.private('products');
-
-  @override
   onCreate(Map data) {
-    print('Product Created $data');
+    log('Product Created $data');
     return super.onCreate(data);
   }
 
   @override
   onUpdate(Map data) {
-    print('Product Updated $data');
+    log('Product Updated $data');
     return super.onUpdate(data);
   }
 
   @override
   onDelete(Map data) {
-    print('Product Deleted $data');
+    log('Product Deleted $data');
     return super.onDelete(data);
   }
 }

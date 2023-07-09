@@ -125,3 +125,7 @@
 ## 0.0.8+2
 
 * Fix laravel_echo setup migrations.
+
+## 0.0.8+3
+
+* Fix laravel_echo setup migrations.
