@@ -137,3 +137,7 @@
 ## 0.0.8+5
 
 * Upgrade laravel_echo_null to 0.0.5+1.
+
+## 0.0.8+6
+
+* Upgrade laravel_echo_null to 0.0.5+2.
