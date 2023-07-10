@@ -133,3 +133,7 @@
 ## 0.0.8+4
 
 * Fix laravel_echo issues.
+
+## 0.0.8+5
+
+* Upgrade laravel_echo_null to 0.0.5+1.

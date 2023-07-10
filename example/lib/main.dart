@@ -245,6 +245,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   TextEditingController echoTokenController = TextEditingController();
+  String broadcaster = 'socket.io';
   bool laravelEchoConnected = false;
   Map products = {};
   connectLaravelEcho() {
@@ -253,27 +254,49 @@ class _MyHomePageState extends State<MyHomePage> {
       return;
     }
 
-    storageDatabase!.initSocketLaravelEcho(
-      'http://localhost:6001',
-      [ProductMigration(storageDatabase!, 'products')],
-      autoConnect: false,
-      auth: {
-        'headers': {'Authorization': 'Bearer ${echoTokenController.text}'}
-      },
-      moreOptions: {
-        'transports': ['websocket'],
-      },
-    );
-    storageDatabase!.laravelEcho!.connect();
-    storageDatabase!.laravelEcho!.connector.onConnect((data) {
+    if (broadcaster == 'socket.io') {
+      storageDatabase!.initSocketLaravelEcho(
+        'http://192.168.1.105:6001',
+        [ProductMigration(storageDatabase!, 'products')],
+        autoConnect: false,
+        authHeaders: {'Authorization': 'Bearer ${echoTokenController.text}'},
+        moreOptions: {
+          'transports': ['websocket'],
+        },
+      );
+    } else if (broadcaster == 'pusher') {
+      // const String appId = "1321495";
+      const String key = "037c47e0cbdc81fb7144";
+      const String cluster = "mt1";
+      const String hostEndPoint = "192.168.1.105";
+      const String hostAuthEndPoint = "http://$hostEndPoint/broadcasting/auth";
+      const String token = "34|yzWaxwGZz75Xqk4tXviP4uhAc0sVB14OLVXEmoxg";
+      const int port = 6001;
+      storageDatabase!.initPusherLaravelEcho(
+        key,
+        [ProductMigration(storageDatabase!, 'products')],
+        host: hostEndPoint,
+        wsPort: port,
+        cluster: cluster,
+        encrypted: true,
+        authEndPoint: hostAuthEndPoint,
+        authHeaders: {
+          'Authorization': 'Bearer $token',
+        },
+        autoConnect: false,
+        enableLogging: true,
+      );
+    }
+    storageDatabase!.laravelEcho?.connect();
+    storageDatabase!.laravelEcho?.connector.onConnect((data) {
       setState(() => laravelEchoConnected = true);
       log('socket connected');
     });
-    storageDatabase!.laravelEcho!.connector.onDisconnect((data) {
+    storageDatabase!.laravelEcho?.connector.onDisconnect((data) {
       setState(() => laravelEchoConnected = false);
       log('socket disconnected');
     });
-    storageDatabase!.laravelEcho!.connector.onConnectError((err) {
+    storageDatabase!.laravelEcho?.connector.onConnectError((err) {
       setState(() => laravelEchoConnected = false);
       log('socketConnectError: $err');
     });

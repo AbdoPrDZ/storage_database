@@ -32,22 +32,17 @@ class LaravelEcho<ClientType, ChannelType>
     StorageDatabase storageDatabase,
     String host,
     List<LaravelEchoMigration> migrations, {
-    Map? auth,
-    String? authEndpoint,
-    String? key,
-    String? namespace,
-    bool autoConnect = false,
+    Map<String, String>? authHeaders,
+    String? nameSpace,
+    bool autoConnect = true,
     Map moreOptions = const {},
   }) =>
       LaravelEcho<Socket, SocketIoChannel>(
         storageDatabase,
         SocketIoConnector(
-          io(host, {'autoConnect': autoConnect, ...moreOptions}),
-          auth: auth,
-          authEndpoint: authEndpoint,
-          host: host,
-          key: key,
-          namespace: namespace,
+          host,
+          authHeaders: authHeaders,
+          namespace: nameSpace,
           autoConnect: autoConnect,
           moreOptions: moreOptions,
         ),
@@ -57,34 +52,51 @@ class LaravelEcho<ClientType, ChannelType>
   static LaravelEcho<PusherClient, PusherChannel> pusher(
     StorageDatabase storageDatabase,
     String appKey,
-    PusherOptions options,
     List<LaravelEchoMigration> migrations, {
-    Map? auth,
-    String? authEndpoint,
-    String? host,
-    String? key,
-    String? namespace,
-    bool autoConnect = true,
+    required String authEndPoint,
+    Map<String, String> authHeaders = const {
+      'Content-Type': 'application/json'
+    },
+    String? cluster,
+    required String host,
+    int wsPort = 80,
+    int wssPort = 443,
+    bool encrypted = true,
+    int activityTimeout = 120000,
+    int pongTimeout = 30000,
+    int maxReconnectionAttempts = 6,
+    int maxReconnectGapInSeconds = 30,
     bool enableLogging = true,
-    Map moreOptions = const {},
+    bool autoConnect = true,
+    String? nameSpace,
   }) =>
       LaravelEcho<PusherClient, PusherChannel>(
         storageDatabase,
         PusherConnector(
-          PusherClient(
-            appKey,
-            options,
-            autoConnect: autoConnect,
-            enableLogging: enableLogging,
-          ),
-          auth: auth,
-          authEndpoint: authEndpoint,
+          appKey,
+          authEndPoint: authEndPoint,
+          authHeaders: authHeaders,
+          cluster: cluster,
           host: host,
-          key: key,
-          namespace: namespace,
+          wsPort: wsPort,
+          wssPort: wssPort,
+          encrypted: encrypted,
+          activityTimeout: activityTimeout,
+          pongTimeout: pongTimeout,
+          maxReconnectionAttempts: maxReconnectionAttempts,
+          maxReconnectGapInSeconds: maxReconnectGapInSeconds,
+          enableLogging: enableLogging,
           autoConnect: autoConnect,
-          moreOptions: moreOptions,
+          nameSpace: nameSpace,
         ),
         migrations,
       );
+
+  @override
+  void disconnect() {
+    for (var migration in migrations) {
+      migration.delete();
+    }
+    super.disconnect();
+  }
 }

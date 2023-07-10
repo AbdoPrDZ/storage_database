@@ -1,5 +1,3 @@
-import 'package:pusher_client_fixed/pusher_client_fixed.dart';
-
 import 'src/default_storage_source.dart';
 import './storage_collection.dart';
 import 'api/api.dart';
@@ -59,50 +57,65 @@ class StorageDatabase {
   initSocketLaravelEcho(
     String host,
     List<LaravelEchoMigration> migrations, {
-    Map? auth,
+    Map<String, String>? authHeaders,
     String? authEndpoint,
-    String? key,
-    String? namespace,
-    bool autoConnect = false,
-    Map moreOptions = const {},
-  }) =>
-      laravelEcho = LaravelEcho.socket(
-        this,
-        host,
-        migrations,
-        auth: auth,
-        authEndpoint: authEndpoint,
-        key: key,
-        namespace: namespace,
-        autoConnect: autoConnect,
-        moreOptions: moreOptions,
-      );
+    String? nameSpace,
+    bool autoConnect = true,
+    Map<dynamic, dynamic> moreOptions = const {},
+  }) {
+    if (laravelEcho != null) laravelEcho!.disconnect();
+    laravelEcho = LaravelEcho.socket(
+      this,
+      host,
+      migrations,
+      authHeaders: authHeaders,
+      nameSpace: nameSpace,
+      autoConnect: autoConnect,
+      moreOptions: moreOptions,
+    );
+  }
 
   initPusherLaravelEcho(
     String appKey,
-    PusherOptions options,
     List<LaravelEchoMigration> migrations, {
-    Map? auth,
-    String? authEndpoint,
-    String? host,
-    String? key,
-    String? namespace,
-    bool autoConnect = true,
+    required String authEndPoint,
+    Map<String, String> authHeaders = const {
+      'Content-Type': 'application/json'
+    },
+    String? cluster,
+    required String host,
+    int wsPort = 80,
+    int wssPort = 443,
+    bool encrypted = true,
+    int activityTimeout = 120000,
+    int pongTimeout = 30000,
+    int maxReconnectionAttempts = 6,
+    int maxReconnectGapInSeconds = 30,
     bool enableLogging = true,
-    Map moreOptions = const {},
-  }) =>
-      laravelEcho = LaravelEcho.pusher(
-        this,
-        appKey,
-        options,
-        migrations,
-        auth: auth,
-        authEndpoint: authEndpoint,
-        key: key,
-        namespace: namespace,
-        autoConnect: autoConnect,
-        moreOptions: moreOptions,
-      );
+    bool autoConnect = true,
+    String? nameSpace,
+  }) {
+    if (laravelEcho != null) laravelEcho!.disconnect();
+    laravelEcho = LaravelEcho.pusher(
+      this,
+      appKey,
+      migrations,
+      authEndPoint: authEndPoint,
+      authHeaders: authHeaders,
+      cluster: cluster,
+      host: host,
+      wsPort: wsPort,
+      wssPort: wssPort,
+      encrypted: encrypted,
+      activityTimeout: activityTimeout,
+      pongTimeout: pongTimeout,
+      maxReconnectionAttempts: maxReconnectionAttempts,
+      maxReconnectGapInSeconds: maxReconnectGapInSeconds,
+      enableLogging: enableLogging,
+      autoConnect: autoConnect,
+      nameSpace: nameSpace,
+    );
+  }
 
   StorageCollection collection(String collectionId) =>
       StorageCollection(this, collectionId);
