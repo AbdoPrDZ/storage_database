@@ -17,7 +17,7 @@ class StorageDocument {
     this.documentId,
   );
 
-  StorageListeners get _storageListeners => parent.storageListeners;
+  StorageListeners get storageListeners => parent.storageListeners;
 
   Future<dynamic> _getParentData() async {
     var parentData = await parent.get();
@@ -122,10 +122,10 @@ class StorageDocument {
       }
 
       if (log) {
-        for (String path in _storageListeners.getPathParents(path)) {
-          for (var streamId in _storageListeners.getPathStreamIds(path)) {
-            if (_storageListeners.hasStreamId(path, streamId)) {
-              _storageListeners.setDate(path, streamId);
+        for (String path in storageListeners.getPathParents(path)) {
+          for (var streamId in storageListeners.getPathStreamIds(path)) {
+            if (storageListeners.hasStreamId(path, streamId)) {
+              storageListeners.setDate(path, streamId);
             }
           }
         }
@@ -177,8 +177,8 @@ class StorageDocument {
   Future<dynamic> get({String? streamId}) async {
     dynamic parentData = await _getParentData();
 
-    if (streamId != null && _storageListeners.hasStreamId(path, streamId)) {
-      _storageListeners.getDate(path, streamId);
+    if (streamId != null && storageListeners.hasStreamId(path, streamId)) {
+      storageListeners.getDate(path, streamId);
     }
 
     return parentData[documentId];
@@ -187,10 +187,10 @@ class StorageDocument {
   Future delete({bool log = true}) async {
     parent.deleteItem(documentId);
 
-    for (String path in _storageListeners.getPathParents(path)) {
-      for (String streamId in _storageListeners.getPathStreamIds(path)) {
-        if (log && _storageListeners.hasStreamId(path, streamId)) {
-          _storageListeners.setDate(path, streamId);
+    for (String path in storageListeners.getPathParents(path)) {
+      for (String streamId in storageListeners.getPathStreamIds(path)) {
+        if (log && storageListeners.hasStreamId(path, streamId)) {
+          storageListeners.setDate(path, streamId);
         }
       }
     }
@@ -211,10 +211,10 @@ class StorageDocument {
 
     await set(docData, keepData: false);
 
-    for (String path in _storageListeners.getPathParents(path)) {
-      for (String streamId in _storageListeners.getPathStreamIds(path)) {
-        if (log && _storageListeners.hasStreamId(path, streamId)) {
-          _storageListeners.setDate(path, streamId);
+    for (String path in storageListeners.getPathParents(path)) {
+      for (String streamId in storageListeners.getPathStreamIds(path)) {
+        if (log && storageListeners.hasStreamId(path, streamId)) {
+          storageListeners.setDate(path, streamId);
         }
       }
     }
@@ -229,12 +229,12 @@ class StorageDocument {
   Stream stream({delayCheck = const Duration(milliseconds: 50)}) async* {
     String streamId = randomStreamId;
 
-    _storageListeners.initStream(path, streamId);
+    storageListeners.initStream(path, streamId);
 
     while (true) {
       await Future.delayed(delayCheck);
 
-      Map dates = _storageListeners.getDates(path, streamId);
+      Map dates = storageListeners.getDates(path, streamId);
 
       if (dates["set_date"] >= dates["get_date"]) {
         yield await get(streamId: streamId);

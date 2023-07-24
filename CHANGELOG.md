@@ -145,3 +145,7 @@
 ## 0.0.9
 
 * Clean code and set some functions and variables to private and add hasId function to StorageDocument class.
+
+## 0.0.9+1
+
+* Fix has no instance getter 'storageListeners' error.

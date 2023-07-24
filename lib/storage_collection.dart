@@ -13,7 +13,7 @@ class StorageCollection {
 
   StorageCollection(this.storageDatabase, this.collectionId);
 
-  StorageListeners get _storageListeners => storageDatabase.storageListeners;
+  StorageListeners get storageListeners => storageDatabase.storageListeners;
 
   bool _isMap(dynamic data) {
     try {
@@ -101,9 +101,9 @@ class StorageCollection {
     }
 
     if (log) {
-      for (var streamId in _storageListeners.getPathStreamIds(path)) {
-        if (_storageListeners.hasStreamId(path, streamId)) {
-          _storageListeners.setDate(path, streamId);
+      for (var streamId in storageListeners.getPathStreamIds(path)) {
+        if (storageListeners.hasStreamId(path, streamId)) {
+          storageListeners.setDate(path, streamId);
         }
       }
     }
@@ -123,8 +123,8 @@ class StorageCollection {
 
     dynamic collectionData = storageDatabase.source.getData(collectionId);
 
-    if (streamId != null && _storageListeners.hasStreamId(path, streamId)) {
-      _storageListeners.getDate(path, streamId);
+    if (streamId != null && storageListeners.hasStreamId(path, streamId)) {
+      storageListeners.getDate(path, streamId);
     }
 
     return collectionData;
@@ -161,12 +161,12 @@ class StorageCollection {
   Stream stream({delayCheck = const Duration(milliseconds: 50)}) async* {
     String streamId = randomStreamId;
 
-    _storageListeners.initStream(path, streamId);
+    storageListeners.initStream(path, streamId);
 
     while (true) {
       await Future.delayed(delayCheck);
 
-      Map dates = _storageListeners.getDates(path, streamId);
+      Map dates = storageListeners.getDates(path, streamId);
 
       if (dates["set_date"] >= dates["get_date"]) {
         yield await get(streamId: streamId);
@@ -177,9 +177,9 @@ class StorageCollection {
   Future<bool> delete({bool log = true}) async {
     bool res = await storageDatabase.source.remove(collectionId);
 
-    for (String streamId in _storageListeners.getPathStreamIds(path)) {
-      if (log && _storageListeners.hasStreamId(path, streamId)) {
-        _storageListeners.setDate(path, streamId);
+    for (String streamId in storageListeners.getPathStreamIds(path)) {
+      if (log && storageListeners.hasStreamId(path, streamId)) {
+        storageListeners.setDate(path, streamId);
       }
     }
 
@@ -208,9 +208,9 @@ class StorageCollection {
     }
 
     await set(collectionData, keepData: false);
-    for (String streamId in _storageListeners.getPathStreamIds(path)) {
-      if (log && _storageListeners.hasStreamId(path, streamId)) {
-        _storageListeners.setDate(path, streamId);
+    for (String streamId in storageListeners.getPathStreamIds(path)) {
+      if (log && storageListeners.hasStreamId(path, streamId)) {
+        storageListeners.setDate(path, streamId);
       }
     }
   }
