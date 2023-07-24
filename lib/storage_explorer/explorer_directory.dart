@@ -51,8 +51,7 @@ class ExplorerDirectory {
       // File("${ioDirectory.path}/$filename").existsSync();
       explorerSource.fileSync("${ioDirectory.path}/$filename").existsSync();
 
-  ExplorerFile file(String filename) {
-    return ExplorerFile(
+  ExplorerFile file(String filename) => ExplorerFile(
       explorerSource,
       // File("${ioDirectory.path}/$filename"),
       explorerSource.fileSync("${ioDirectory.path}/$filename"),
@@ -60,7 +59,6 @@ class ExplorerDirectory {
       filename,
       storageListeners,
     );
-  }
 
   ExplorerDirectory directory(String dirName, {String? streamId}) {
     List<String> dirNames =
@@ -104,13 +102,13 @@ class ExplorerDirectory {
     }
   }
 
-  String get randomStreamId => String.fromCharCodes(
+  String get _randomStreamId => String.fromCharCodes(
         List.generate(8, (index) => Random().nextInt(33) + 89),
       );
 
   Stream<List<ExplorerDirectoryItem>> stream(
       {delayCheck = const Duration(milliseconds: 50)}) async* {
-    String streamId = randomStreamId;
+    String streamId = _randomStreamId;
     storageListeners.initStream(shortPath, streamId);
     while (true) {
       await Future.delayed(delayCheck);

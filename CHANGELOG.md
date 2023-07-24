@@ -141,3 +141,7 @@
 ## 0.0.8+6
 
 * Upgrade laravel_echo_null to 0.0.5+2.
+
+## 0.0.9
+
+* Clean code and set some functions and variables to private and add hasId function to StorageDocument class.

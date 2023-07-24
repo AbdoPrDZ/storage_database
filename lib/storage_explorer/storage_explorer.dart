@@ -25,10 +25,10 @@ class StorageExplorer {
     this.localDirectory,
   ) {
     storageDatabase.onClear
-        .add(() => initLocalDirectory(storageListeners, explorerSource));
+        .add(() => _initLocalDirectory(storageListeners, explorerSource));
   }
 
-  static Future<ExplorerDirectory> initLocalDirectory(
+  static Future<ExplorerDirectory> _initLocalDirectory(
     StorageListeners storageListeners,
     ExplorerSource source, {
     String? path,
@@ -55,7 +55,7 @@ class StorageExplorer {
   }) async {
     StorageListeners storageListeners = StorageListeners();
     source = source ?? DefaultExplorerSource();
-    ExplorerDirectory localDirectory = await initLocalDirectory(
+    ExplorerDirectory localDirectory = await _initLocalDirectory(
       storageListeners,
       source,
       path: path,

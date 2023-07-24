@@ -13,9 +13,9 @@ class StorageCollection {
 
   StorageCollection(this.storageDatabase, this.collectionId);
 
-  StorageListeners get storageListeners => storageDatabase.storageListeners;
+  StorageListeners get _storageListeners => storageDatabase.storageListeners;
 
-  bool isMap(dynamic data) {
+  bool _isMap(dynamic data) {
     try {
       Map.from(data);
 
@@ -25,7 +25,7 @@ class StorageCollection {
     }
   }
 
-  bool isList(var data) {
+  bool _isList(var data) {
     try {
       List.from(data);
 
@@ -35,11 +35,11 @@ class StorageCollection {
     }
   }
 
-  Future<dynamic> checkType(var data) async {
+  Future<dynamic> _checkType(var data) async {
     if (!await storageDatabase.checkCollectionIdExists(collectionId)) {
-      var initialData = isMap(data)
+      var initialData = _isMap(data)
           ? {}
-          : isList(data)
+          : _isList(data)
               ? []
               : null;
 
@@ -55,10 +55,10 @@ class StorageCollection {
       try {
         if (collectionData == null) {
           currentType = true;
-        } else if (isMap(data)) {
+        } else if (_isMap(data)) {
           Map.from(collectionData);
           currentType = true;
-        } else if (isList(data)) {
+        } else if (_isList(data)) {
           List.from(collectionData);
           currentType = true;
         } else {
@@ -84,12 +84,12 @@ class StorageCollection {
     if (!keepData) {
       collectionData = data;
     } else {
-      collectionData = await checkType(data);
-      if (isMap(data)) {
+      collectionData = await _checkType(data);
+      if (_isMap(data)) {
         for (var key in data.keys) {
           collectionData[key] = data[key];
         }
-      } else if (isList(data)) {
+      } else if (_isList(data)) {
         for (var item in data) {
           if (!collectionData.contains(item)) {
             collectionData.add(item);
@@ -101,9 +101,9 @@ class StorageCollection {
     }
 
     if (log) {
-      for (var streamId in storageListeners.getPathStreamIds(path)) {
-        if (storageListeners.hasStreamId(path, streamId)) {
-          storageListeners.setDate(path, streamId);
+      for (var streamId in _storageListeners.getPathStreamIds(path)) {
+        if (_storageListeners.hasStreamId(path, streamId)) {
+          _storageListeners.setDate(path, streamId);
         }
       }
     }
@@ -123,8 +123,8 @@ class StorageCollection {
 
     dynamic collectionData = storageDatabase.source.getData(collectionId);
 
-    if (streamId != null && storageListeners.hasStreamId(path, streamId)) {
-      storageListeners.getDate(path, streamId);
+    if (streamId != null && _storageListeners.hasStreamId(path, streamId)) {
+      _storageListeners.getDate(path, streamId);
     }
 
     return collectionData;
@@ -132,15 +132,26 @@ class StorageCollection {
 
   String get path => collectionId;
 
-  Future<bool> hasDocumentId(dynamic documentId) async {
+  Future<bool> hasDocumentId(dynamic docId) async {
+    final data = await get();
     try {
-      return Map.from(await get()).containsKey(documentId);
+      return Map.from(data).containsKey(docId);
     } catch (e) {
-      dev.log("has id: $e");
+      try {
+        List lData = List.from(data);
+        try {
+          lData[docId];
+          return true;
+        } catch (e) {
+          return false;
+        }
+      } catch (e) {
+        dev.log("has id: $e");
 
-      throw StorageDatabaseException(
-        "This Collection ($collectionId) does not support documents",
-      );
+        throw StorageDatabaseException(
+          "This Collection ($collectionId) does not support documents",
+        );
+      }
     }
   }
 
@@ -150,12 +161,12 @@ class StorageCollection {
   Stream stream({delayCheck = const Duration(milliseconds: 50)}) async* {
     String streamId = randomStreamId;
 
-    storageListeners.initStream(path, streamId);
+    _storageListeners.initStream(path, streamId);
 
     while (true) {
       await Future.delayed(delayCheck);
 
-      Map dates = storageListeners.getDates(path, streamId);
+      Map dates = _storageListeners.getDates(path, streamId);
 
       if (dates["set_date"] >= dates["get_date"]) {
         yield await get(streamId: streamId);
@@ -166,9 +177,9 @@ class StorageCollection {
   Future<bool> delete({bool log = true}) async {
     bool res = await storageDatabase.source.remove(collectionId);
 
-    for (String streamId in storageListeners.getPathStreamIds(path)) {
-      if (log && storageListeners.hasStreamId(path, streamId)) {
-        storageListeners.setDate(path, streamId);
+    for (String streamId in _storageListeners.getPathStreamIds(path)) {
+      if (log && _storageListeners.hasStreamId(path, streamId)) {
+        _storageListeners.setDate(path, streamId);
       }
     }
 
@@ -178,13 +189,13 @@ class StorageCollection {
   Future deleteItem(itemId, {bool log = true}) async {
     var collectionData = await get();
 
-    if (isMap(collectionData)) {
+    if (_isMap(collectionData)) {
       if ((collectionData as Map).containsKey(itemId)) {
         collectionData.remove(itemId);
       } else {
         throw const StorageDatabaseException('Undefined item id');
       }
-    } else if (isList(collectionData)) {
+    } else if (_isList(collectionData)) {
       if (itemId >= 0 && (collectionData as List).length >= itemId) {
         collectionData.removeAt(itemId);
       } else {
@@ -197,9 +208,9 @@ class StorageCollection {
     }
 
     await set(collectionData, keepData: false);
-    for (String streamId in storageListeners.getPathStreamIds(path)) {
-      if (log && storageListeners.hasStreamId(path, streamId)) {
-        storageListeners.setDate(path, streamId);
+    for (String streamId in _storageListeners.getPathStreamIds(path)) {
+      if (log && _storageListeners.hasStreamId(path, streamId)) {
+        _storageListeners.setDate(path, streamId);
       }
     }
   }
@@ -241,9 +252,9 @@ class StorageCollection {
   Map<dynamic, StorageDocument> getMapDocs(var data) {
     List docsIds;
 
-    if (isMap(data)) {
+    if (_isMap(data)) {
       docsIds = data.keys.toList();
-    } else if (isList(data)) {
+    } else if (_isList(data)) {
       docsIds = [for (int i = 0; i < data.length; i++) i];
     } else {
       throw StorageDatabaseException(

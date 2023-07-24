@@ -14,7 +14,7 @@ class LaravelEcho<ClientType, ChannelType>
   List<LaravelEchoMigration> migrations;
 
   LaravelEcho(this.storageDatabase, super.connector, this.migrations) {
-    connector.onConnect((data) => setupMigrations());
+    connector.onConnect((data) => _setupMigrations());
   }
 
   removeMigration(LaravelEchoMigration migration) {
@@ -22,7 +22,7 @@ class LaravelEcho<ClientType, ChannelType>
     migrations.remove(migration);
   }
 
-  setupMigrations() {
+  _setupMigrations() {
     for (LaravelEchoMigration migration in migrations) {
       migration.setup();
     }
