@@ -66,6 +66,7 @@ class StorageCollection {
         }
       } catch (e) {
         dev.log("collection check type: $e");
+        throw StorageDatabaseException("Collection Check Type Error: $e");
       }
 
       if (!currentType) {
@@ -86,14 +87,14 @@ class StorageCollection {
     } else {
       collectionData = await _checkType(data);
       if (_isMap(data)) {
+        collectionData = collectionData ?? {};
         for (var key in data.keys) {
           collectionData[key] = data[key];
         }
       } else if (_isList(data)) {
+        collectionData = collectionData ?? [];
         for (var item in data) {
-          if (!collectionData.contains(item)) {
-            collectionData.add(item);
-          }
+          if (!collectionData.contains(item)) collectionData.add(item);
         }
       } else {
         collectionData = data;

@@ -91,6 +91,7 @@ class StorageDocument {
         }
       } catch (e) {
         dev.log("document check type: $e");
+        throw StorageDatabaseException("Document Check Type Error: $e");
       }
 
       if (!currentType) {
@@ -112,11 +113,15 @@ class StorageDocument {
       docData = await _checkType(data);
 
       if (_isMap(data)) {
+        docData = docData ?? {};
         for (var key in data.keys) {
           docData[key] = data[key];
         }
       } else if (_isList(data)) {
-        docData.addAll(data);
+        docData = docData ?? [];
+        for (var item in data) {
+          if (!docData.contains(item)) docData.add(item);
+        }
       } else {
         docData = data;
       }

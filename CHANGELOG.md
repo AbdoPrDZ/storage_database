@@ -149,3 +149,7 @@
 ## 0.0.9+1
 
 * Fix has no instance getter 'storageListeners' error.
+
+## 0.0.9+2
+
+* Fix "The method 'addAll' was called on null" error when set data in collection and document.
