@@ -235,7 +235,7 @@ class StorageCollection {
     );
 
     for (int i = 1; i < docIds.length; i++) {
-      document.set({docIds[i - 1]: {}});
+      document.set({docIds[i - 1]: {}, log: false});
       document = document.document(docIds[i]);
     }
 

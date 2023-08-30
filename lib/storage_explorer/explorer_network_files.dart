@@ -99,10 +99,7 @@ class ExplorerNetworkFiles {
         log: log,
       );
 
-  Future clear() {
-    dev.log('here');
-    return networkDirFiles.clear();
-  }
+  Future clear() => networkDirFiles.clear();
 }
 
 class ExplorerNetworkImage extends StatefulWidget {

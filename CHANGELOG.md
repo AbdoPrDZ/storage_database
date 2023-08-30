@@ -153,3 +153,7 @@
 ## 0.0.9+2
 
 * Fix "The method 'addAll' was called on null" error when set data in collection and document.
+
+## 0.0.9+3
+
+* Fix stream error when create document (disable log when creating document).
