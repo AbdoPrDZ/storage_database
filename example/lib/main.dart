@@ -1,13 +1,15 @@
+import 'dart:convert';
 import 'dart:developer';
-import 'dart:io';
+import 'dart:io' as io;
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:socket_io_client/socket_io_client.dart';
 
 import 'package:storage_database/storage_database.dart';
 
-Future<void> main() async {
+void main() {
   runApp(const MyApp());
 }
 
@@ -53,8 +55,12 @@ class _MyHomePageState extends State<MyHomePage> {
       return;
     }
     storageDatabase = await StorageDatabase.getInstance();
+    await storageDatabase!.collection('messages').set({});
+    storageDatabase!
+        .collection('messages')
+        .stream()
+        .listen((data) => setState(() => messages = data));
     setState(() {});
-    storageDatabase!.collection('products').set({});
     snackbar('StorageDatabase initializing successfully');
   }
 
@@ -245,10 +251,12 @@ class _MyHomePageState extends State<MyHomePage> {
     snackbar('Directory created successfully');
   }
 
-  TextEditingController echoTokenController = TextEditingController();
+  TextEditingController echoTokenController = TextEditingController(
+    text: '2|9xjc76eOWsJ459sws1W5yl47VoJ8UjFOtkltjPNGf0752ef7',
+  );
   String broadcaster = 'socket.io';
   bool laravelEchoConnected = false;
-  Map products = {};
+  Map messages = {};
   connectLaravelEcho() {
     if (storageDatabase == null) {
       snackbar("You need to init StorageDatabase first");
@@ -257,8 +265,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
     if (broadcaster == 'socket.io') {
       storageDatabase!.initSocketLaravelEcho(
-        'http://192.168.1.105:6001',
-        [ProductMigration(storageDatabase!, 'products')],
+        'http://localhost:6001',
+        [MessageMigration(storageDatabase!, 'messages')],
         autoConnect: false,
         authHeaders: {'Authorization': 'Bearer ${echoTokenController.text}'},
         moreOptions: {
@@ -269,20 +277,19 @@ class _MyHomePageState extends State<MyHomePage> {
       // const String appId = "1321495";
       const String key = "037c47e0cbdc81fb7144";
       const String cluster = "mt1";
-      const String hostEndPoint = "192.168.1.105";
+      const String hostEndPoint = "localhost";
       const String hostAuthEndPoint = "http://$hostEndPoint/broadcasting/auth";
-      const String token = "34|yzWaxwGZz75Xqk4tXviP4uhAc0sVB14OLVXEmoxg";
       const int port = 6001;
       storageDatabase!.initPusherLaravelEcho(
         key,
-        [ProductMigration(storageDatabase!, 'products')],
+        [MessageMigration(storageDatabase!, 'messages')],
         host: hostEndPoint,
         wsPort: port,
         cluster: cluster,
         encrypted: true,
         authEndPoint: hostAuthEndPoint,
         authHeaders: {
-          'Authorization': 'Bearer $token',
+          'Authorization': 'Bearer ${echoTokenController.text}',
         },
         autoConnect: false,
         enableLogging: true,
@@ -304,10 +311,6 @@ class _MyHomePageState extends State<MyHomePage> {
     storageDatabase!.laravelEcho!.connector.onError((err) {
       log('socketError: $err');
     });
-    storageDatabase!
-        .collection('products')
-        .stream()
-        .listen((data) => setState(() => products = data));
     snackbar('Laravel echo connected successfully');
   }
 
@@ -384,7 +387,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         color: const Color.fromARGB(255, 217, 217, 217),
                         image: imagePath != null
                             ? DecorationImage(
-                                image: FileImage(File(imagePath!)),
+                                image: FileImage(io.File(imagePath!)),
                               )
                             : null,
                       ),
@@ -434,6 +437,28 @@ class _MyHomePageState extends State<MyHomePage> {
                     decoration:
                         const InputDecoration(hintText: 'Laravel Echo Token'),
                   ),
+                  Row(
+                    children: [
+                      const Text('Broadcaster:'),
+                      const SizedBox(width: 10),
+                      DropdownButton<String>(
+                        value: broadcaster,
+                        items: const [
+                          DropdownMenuItem(
+                            value: 'socket.io',
+                            child: Text('Socket.io'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'pusher',
+                            child: Text('Pusher'),
+                          ),
+                        ],
+                        onChanged: (value) => setState(
+                          () => broadcaster = value ?? broadcaster,
+                        ),
+                      ),
+                    ],
+                  ),
                   ElevatedButton(
                     onPressed: laravelEchoConnected
                         ? storageDatabase!.laravelEcho!.disconnect
@@ -454,7 +479,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                   if (storageDatabase != null)
                     // StreamBuilder(
-                    //   stream: storageDatabase!.collection('products').stream(),
+                    //   stream: storageDatabase!.collection('messages').stream(),
                     //   builder: (context, snapshot) =>
                     Container(
                       height: 200,
@@ -462,7 +487,8 @@ class _MyHomePageState extends State<MyHomePage> {
                       padding: const EdgeInsets.all(5),
                       child: SingleChildScrollView(
                         // child: Text(snapshot.data?.toString() ?? 'None'),
-                        child: Text(products.toString()),
+                        child: Text(const JsonEncoder.withIndent('  ')
+                            .convert(messages)),
                       ),
                     ),
                   // ),
@@ -475,40 +501,49 @@ class _MyHomePageState extends State<MyHomePage> {
       );
 }
 
-class ProductMigration extends LaravelEchoMigration {
-  ProductMigration(super.storageDatabase, super.collectionId);
+class MessageMigration extends LaravelEchoMigration {
+  MessageMigration(super.storageDatabase, super.collectionId);
 
   @override
-  String get migrationName => 'Product';
+  String get migrationName => 'messages';
 
   @override
-  String get itemName => 'product';
+  String get itemName => 'message';
 
   @override
-  Channel get channel => storageDatabase.laravelEcho!.private('products');
+  Channel get channel => storageDatabase.laravelEcho!.private('messages');
 
   @override
   Map<EventsType, String> get eventsNames => {
-        EventsType.create: '${migrationName}CreatedEvent',
-        EventsType.update: '${migrationName}UpdatedEvent',
-        EventsType.delete: '${migrationName}DeletedEvent',
+        EventsType.create: 'MessageCreatedEvent',
+        EventsType.update: 'MessageUpdatedEvent',
+        EventsType.delete: 'MessageDeletedEvent',
       };
 
   @override
+  setup() {
+    super.setup();
+    channel.listen('channel_subscribe_success', (Map messages) {
+      print('messages: $messages');
+      set(messages, keepData: false);
+    });
+  }
+
+  @override
   onCreate(Map data) {
-    log('Product Created $data');
+    log('Message Created $data');
     return super.onCreate(data);
   }
 
   @override
   onUpdate(Map data) {
-    log('Product Updated $data');
+    log('Message Updated $data');
     return super.onUpdate(data);
   }
 
   @override
   onDelete(Map data) {
-    log('Product Deleted $data');
+    log('Message Deleted $data');
     return super.onDelete(data);
   }
 }

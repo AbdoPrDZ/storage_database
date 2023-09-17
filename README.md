@@ -1,5 +1,7 @@
 # Getting started
 
+Please read the readme file carefully so that your project runs without problems.
+
 ## StorageDatabase
 
 ### Importing
@@ -488,17 +490,17 @@ storageDatabase.initPusherLaravelEcho(<connector parameters>, <LaravelEchoMigrat
 This used to create migration to listen to Laravel Model events (Create, Update, Delete).
 
 ```dart
-class ProductMigration extends LaravelEchoMigration {
-  ProductMigration(super.storageDatabase, super.collectionId);
+class MessageMigration extends LaravelEchoMigration {
+  MessageMigration(super.storageDatabase, super.collectionId);
 
   @override
-  String get migrationName => 'Product';
+  String get migrationName => 'Message';
 
   @override
-  String get itemName => 'product';
+  String get itemName => 'message';
 
   @override
-  Channel get channel => storageDatabase.laravelEcho!.private('products');
+  Channel get channel => storageDatabase.laravelEcho!.private('messages');
 
   // you can custom your events names and remove what you don't need
   @override
@@ -509,20 +511,30 @@ class ProductMigration extends LaravelEchoMigration {
       };
 
   @override
+  setup() {
+    super.setup();
+    // get messages
+    channel.listen('channel_subscribe_success', (Map messages) {
+      print('messages: $messages');
+      set(messages, keepData: false);
+    });
+  }
+
+  @override
   onCreate(Map data) {
-    log('Product Created $data');
+    log('Message Created $data');
     return super.onCreate(data);
   }
 
   @override
   onUpdate(Map data) {
-    log('Product Updated $data');
+    log('Message Updated $data');
     return super.onUpdate(data);
   }
 
   @override
   onDelete(Map data) {
-    log('Product Deleted $data');
+    log('Message Deleted $data');
     return super.onDelete(data);
   }
 }
@@ -533,21 +545,21 @@ class ProductMigration extends LaravelEchoMigration {
 - Create:
 
   ```php
-  class ProductCreatedEvent implements ShouldBroadcast {
+  class MessageCreatedEvent implements ShouldBroadcast {
 
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     /**
-    * @var Product
+    * @var Message
     */
-    private $product;
+    private $message;
 
     /**
     * Create a new event instance.
-    * @param Product $product
+    * @param Message $message
     */
-    public function __construct(Product $product) {
-      $this->product = $product;
+    public function __construct(Message $message) {
+      $this->message = $message;
     }
 
     /**
@@ -557,7 +569,7 @@ class ProductMigration extends LaravelEchoMigration {
     */
     public function broadcastOn(): array {
       return [
-        new PrivateChannel('products'),
+        new PrivateChannel('messages'),
       ];
     }
 
@@ -567,7 +579,7 @@ class ProductMigration extends LaravelEchoMigration {
     * @return string
     */
     public function broadcastAs() {
-      return 'ProductCreatedEvent';
+      return 'MessageCreatedEvent';
     }
 
     /**
@@ -577,8 +589,8 @@ class ProductMigration extends LaravelEchoMigration {
     */
     public function broadcastWith() {
       return [
-        'product' // Item Name
-            => $this->product->toArray()
+        'message' // Item Name
+            => $this->message->toArray()
       ];
     }
   }
@@ -587,21 +599,21 @@ class ProductMigration extends LaravelEchoMigration {
 - Update:
 
   ```php
-  class ProductUpdatedEvent implements ShouldBroadcast {
+  class MessageUpdatedEvent implements ShouldBroadcast {
 
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     /**
-    * @var Product
+    * @var Message
     */
-    private $product;
+    private $message;
 
     /**
     * Create a new event instance.
-    * @param Product $product
+    * @param Message $message
     */
-    public function __construct(Product $product) {
-      $this->product = $product;
+    public function __construct(Message $message) {
+      $this->message = $message;
     }
 
     /**
@@ -611,7 +623,7 @@ class ProductMigration extends LaravelEchoMigration {
     */
     public function broadcastOn(): array {
       return [
-        new PrivateChannel('products'),
+        new PrivateChannel('messages'),
       ];
     }
 
@@ -621,7 +633,7 @@ class ProductMigration extends LaravelEchoMigration {
     * @return string
     */
     public function broadcastAs() {
-      return 'ProductUpdatedEvent';
+      return 'MessageUpdatedEvent';
     }
 
     /**
@@ -631,8 +643,8 @@ class ProductMigration extends LaravelEchoMigration {
     */
     public function broadcastWith() {
       return [
-        'product' // Item Name
-            => $this->product->toArray()
+        'message' // Item Name
+            => $this->message->toArray()
       ];
     }
   }
@@ -641,21 +653,21 @@ class ProductMigration extends LaravelEchoMigration {
 - Delete:
 
   ```php
-  class ProductDeletedEvent implements ShouldBroadcast {
+  class MessageDeletedEvent implements ShouldBroadcast {
 
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     /**
-    * @var Product
+    * @var Message
     */
-    private $product;
+    private $message;
 
     /**
     * Create a new event instance.
-    * @param Product $product
+    * @param Message $message
     */
-    public function __construct(Product $product) {
-      $this->product = $product;
+    public function __construct(Message $message) {
+      $this->message = $message;
     }
 
     /**
@@ -665,7 +677,7 @@ class ProductMigration extends LaravelEchoMigration {
     */
     public function broadcastOn(): array {
       return [
-        new PrivateChannel('products'),
+        new PrivateChannel('messages'),
       ];
     }
 
@@ -675,7 +687,7 @@ class ProductMigration extends LaravelEchoMigration {
     * @return string
     */
     public function broadcastAs() {
-      return 'ProductDeletedEvent';
+      return 'MessageDeletedEvent';
     }
 
     /**
@@ -684,10 +696,43 @@ class ProductMigration extends LaravelEchoMigration {
     * @return array
     */
     public function broadcastWith() {
-      return ['id' => $this->product->id];
+      return ['id' => $this->message->id];
     }
   }
   ```
+#### You should connect events like that to model
+
+```php
+class Message extends Model {
+    use HasFactory;
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
+    protected $fillable = [
+        'title',
+        'content',
+    ];
+
+    protected $dispatchesEvents = [
+        'created' => MessageCreatedEvent::class,
+        'updated' => MessageUpdatedEvent::class,
+        'deleted' => MessageDeletedEvent::class,
+    ];
+}
+```
+
+#### You must to return all messages when channel subscribed like that:
+```php
+Broadcast::channel('messages', function ($user) {
+    foreach (App\Models\Message::all() as $message) {
+        $messages[$message->id] = $message;
+    }
+    return $messages;
+});
+```
 
 # Contact Us
 

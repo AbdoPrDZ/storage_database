@@ -157,3 +157,7 @@
 ## 0.0.9+3
 
 * Fix stream error when create document (disable log when creating document).
+
+## 0.0.9+4
+
+* Update Laravel Echo Migration in example to get default values.
