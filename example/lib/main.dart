@@ -5,7 +5,6 @@ import 'dart:io' as io;
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:socket_io_client/socket_io_client.dart';
 
 import 'package:storage_database/storage_database.dart';
 
