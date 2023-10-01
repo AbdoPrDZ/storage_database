@@ -52,13 +52,13 @@ class ExplorerDirectory {
       explorerSource.fileSync("${ioDirectory.path}/$filename").existsSync();
 
   ExplorerFile file(String filename) => ExplorerFile(
-      explorerSource,
-      // File("${ioDirectory.path}/$filename"),
-      explorerSource.fileSync("${ioDirectory.path}/$filename"),
-      shortPath,
-      filename,
-      storageListeners,
-    );
+        explorerSource,
+        // File("${ioDirectory.path}/$filename"),
+        explorerSource.fileSync("${ioDirectory.path}/$filename"),
+        shortPath,
+        filename,
+        storageListeners,
+      );
 
   ExplorerDirectory directory(String dirName, {String? streamId}) {
     List<String> dirNames =
@@ -83,9 +83,7 @@ class ExplorerDirectory {
     );
 
     for (int i = 1; i < dirNames.length; i++) {
-      explorerDirectory = explorerDirectory.directory(
-        dirNames[i],
-      );
+      explorerDirectory = explorerDirectory.directory(dirNames[i]);
     }
 
     return explorerDirectory;
@@ -122,7 +120,7 @@ class ExplorerDirectory {
   Future clear() async {
     List<ExplorerDirectoryItem> dirItems = get();
     for (var item in dirItems) {
-      if (item.itemType == ExplorerDirectory) {
+      if (item.itemType is ExplorerDirectory) {
         ExplorerDirectory dir = item.item;
         await dir.delete();
       } else {

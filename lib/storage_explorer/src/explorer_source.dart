@@ -6,9 +6,9 @@ abstract class ExplorerSource {
   Directory dirSync(String path);
   File fileSync(String path);
 
-  onDirCreate(String path);
-  onDirUpdate(String path);
-  onDirDelete(String path);
+  onDirCreate(String dir);
+  onDirUpdate(String dir);
+  onDirDelete(String dir);
 
   onFileCreate(String path);
   onFileUpdate(String path);

@@ -4,14 +4,25 @@ import 'dart:math';
 
 import './storage_database.dart';
 import 'src/storage_database_exception.dart';
-import './storage_document.dart';
 import 'src/storage_listeners.dart';
 
 class StorageCollection {
   final StorageDatabase storageDatabase;
-  final String collectionId;
+  StorageCollection? parent;
+  String collectionId;
 
-  StorageCollection(this.storageDatabase, this.collectionId);
+  StorageCollection(this.storageDatabase, this.collectionId, {this.parent}) {
+    if (collectionId.contains("/")) {
+      List<String> items = collectionId.split("/");
+      parent = StorageCollection(storageDatabase, items[0], parent: parent);
+      parent!.set({}, log: false);
+      for (var i = 0; i < items.length - 1; i++) {
+        parent = parent!.collection(items[i]);
+        parent!.set({}, log: false);
+      }
+      collectionId = items.last;
+    }
+  }
 
   StorageListeners get storageListeners => storageDatabase.storageListeners;
 
@@ -36,19 +47,26 @@ class StorageCollection {
   }
 
   Future<dynamic> _checkType(var data) async {
-    if (!await storageDatabase.checkCollectionIdExists(collectionId)) {
+    if ((parent != null && await parent!.hasCollectionId(collectionId)) ||
+        (parent == null &&
+            !await storageDatabase.checkCollectionIdExists(collectionId))) {
       var initialData = _isMap(data)
           ? {}
           : _isList(data)
               ? []
               : null;
 
-      await storageDatabase.source.setData(collectionId, initialData);
+      if (parent != null) {
+        await parent!.set({collectionId: initialData});
+      } else {
+        await storageDatabase.source.setData(collectionId, initialData);
+      }
 
       return initialData;
     } else {
-      dynamic collectionData =
-          await storageDatabase.source.getData(collectionId);
+      dynamic collectionData = (parent != null
+          ? (await parent!.get())[collectionId]
+          : await storageDatabase.source.getData(collectionId));
 
       bool currentType = false;
 
@@ -109,20 +127,30 @@ class StorageCollection {
       }
     }
 
-    await storageDatabase.source.setData(
-      collectionId,
-      collectionData,
-    );
+    if (parent != null) {
+      await parent!.set({collectionId: collectionData});
+    } else {
+      await storageDatabase.source.setData(
+        collectionId,
+        collectionData,
+      );
+    }
   }
 
   Future<dynamic> get({String? streamId}) async {
-    if (!await storageDatabase.checkCollectionIdExists(collectionId)) {
+    if ((parent != null && await parent!.hasCollectionId(collectionId)) ||
+        (parent == null &&
+            !await storageDatabase.checkCollectionIdExists(collectionId))) {
       throw StorageDatabaseException(
         "This collection ($collectionId) has not yet been created",
       );
     }
 
-    dynamic collectionData = storageDatabase.source.getData(collectionId);
+    // dynamic collectionData = storageDatabase.source.getData(collectionId);
+
+    dynamic collectionData = (parent != null
+        ? (await parent!.get())[collectionId]
+        : await storageDatabase.source.getData(collectionId));
 
     if (streamId != null && storageListeners.hasStreamId(path, streamId)) {
       storageListeners.getDate(path, streamId);
@@ -133,7 +161,7 @@ class StorageCollection {
 
   String get path => collectionId;
 
-  Future<bool> hasDocumentId(dynamic docId) async {
+  Future<bool> hasCollectionId(dynamic docId) async {
     final data = await get();
     try {
       return Map.from(data).containsKey(docId);
@@ -150,11 +178,14 @@ class StorageCollection {
         dev.log("has id: $e");
 
         throw StorageDatabaseException(
-          "This Collection ($collectionId) does not support documents",
+          "This Collection ($collectionId) does not support collections",
         );
       }
     }
   }
+
+  StorageCollection collection(String collectionId) =>
+      StorageCollection(storageDatabase, collectionId, parent: this);
 
   String get randomStreamId => String.fromCharCodes(
       List.generate(8, (index) => Random().nextInt(33) + 89));
@@ -176,18 +207,22 @@ class StorageCollection {
   }
 
   Future<bool> delete({bool log = true}) async {
-    bool res = await storageDatabase.source.remove(collectionId);
+    bool res = parent != null
+        ? await parent!.deleteItem(collectionId)
+        : await storageDatabase.source.remove(collectionId);
 
-    for (String streamId in storageListeners.getPathStreamIds(path)) {
-      if (log && storageListeners.hasStreamId(path, streamId)) {
-        storageListeners.setDate(path, streamId);
+    if (log) {
+      for (String streamId in storageListeners.getPathStreamIds(path)) {
+        if (storageListeners.hasStreamId(path, streamId)) {
+          storageListeners.setDate(path, streamId);
+        }
       }
     }
 
     return res;
   }
 
-  Future deleteItem(itemId, {bool log = true}) async {
+  Future<bool> deleteItem(itemId, {bool log = true}) async {
     var collectionData = await get();
 
     if (_isMap(collectionData)) {
@@ -204,53 +239,30 @@ class StorageCollection {
       }
     } else {
       throw const StorageDatabaseException(
-        'This Collection doesn\'t support documents',
+        'This Collection doesn\'t support collections',
       );
     }
 
     await set(collectionData, keepData: false);
-    for (String streamId in storageListeners.getPathStreamIds(path)) {
-      if (log && storageListeners.hasStreamId(path, streamId)) {
-        storageListeners.setDate(path, streamId);
+    if (log) {
+      for (String streamId in storageListeners.getPathStreamIds(path)) {
+        if (storageListeners.hasStreamId(path, streamId)) {
+          storageListeners.setDate(path, streamId);
+        }
       }
     }
+    return true;
   }
 
-  StorageDocument document(dynamic docId) {
-    // if (!storageDatabase.checkCollectionIdExists(collectionId)) {
-    //   storageDatabase.source.setData(collectionId, {});
-    // }
-
-    storageDatabase.checkCollectionIdExists(collectionId).then((contain) {
-      if (!contain) storageDatabase.source.setData(collectionId, {});
-    });
-
-    List docIds = docId.runtimeType == String ? docId.split("/") : [docId];
-
-    StorageDocument document = StorageDocument(
-      storageDatabase,
-      this,
-      collectionId,
-      docIds[0],
-    );
-
-    for (int i = 1; i < docIds.length; i++) {
-      document.set({docIds[i - 1]: {}, log: false});
-      document = document.document(docIds[i]);
-    }
-
-    return document;
-  }
-
-  Stream<Map<dynamic, StorageDocument>> streamDocs() =>
-      stream().asyncExpand<Map<dynamic, StorageDocument>>((data) async* {
-        if (data != null) yield getMapDocs(data);
+  Stream<Map<dynamic, StorageCollection>> streamDocs() =>
+      stream().asyncExpand<Map<dynamic, StorageCollection>>((data) async* {
+        if (data != null) yield getMapCollections(data);
       });
 
-  Future<Map<dynamic, StorageDocument>> getDocs() async =>
-      getMapDocs(await get());
+  Future<Map<dynamic, StorageCollection>> getCollections() async =>
+      getMapCollections(await get());
 
-  Map<dynamic, StorageDocument> getMapDocs(var data) {
+  Map<dynamic, StorageCollection> getMapCollections(var data) {
     List docsIds;
 
     if (_isMap(data)) {
@@ -259,21 +271,20 @@ class StorageCollection {
       docsIds = [for (int i = 0; i < data.length; i++) i];
     } else {
       throw StorageDatabaseException(
-        "This collection ($collectionId) does not support documents",
+        "This collection ($collectionId) does not support collections",
       );
     }
 
-    Map<dynamic, StorageDocument> docs = {};
+    Map<dynamic, StorageCollection> collections = {};
 
-    for (dynamic docId in docsIds) {
-      docs[docId] = StorageDocument(
+    for (dynamic collectionId in docsIds) {
+      collections[collectionId] = StorageCollection(
         storageDatabase,
-        this,
         collectionId,
-        docId,
+        parent: this,
       );
     }
 
-    return docs;
+    return collections;
   }
 }

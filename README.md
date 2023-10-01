@@ -76,31 +76,28 @@ await storage.collection("collection-1")
              .set("any data && any type"); // c-1
 await storage.collection("collection-1")
              .set("any new data but some type"); // c-2
-```
 
-### Create Document into Collection
-
-```dart
 // Map data : 
 await storage.collection("collection-2") // c-3
-             .document("documentId")
-             .set({'item 1': 'data 1', 'item 2': 'data 2'}); // d-1
+             .collection("subColId")
+             .set({'item 1': 'data 1', 'item 2': 'data 2'}); // sc-1
 await storage.collection("collection-2")
-             .document("documentId")
-             .set({'item 3': 'data 3'}); // d-2
+             .collection("subColId")
+             .set({'item 3': 'data 3'}); // sc-2
 await storage.collection("collection-2")
-             .document("documentId")
-             .set({'item 4': 'data 4'}, keep = false); // d-3
+             .collection("subColId")
+             .set({'item 4': 'data 4'}, keep = false); // sc-3
+
 // List data :
 await storage.collection("collection-3") 
-             .document("documentId")
-             .set(["item 1", "item 2"]); // d-4
+             .collection("subColId")
+             .set(["item 1", "item 2"]); // sc-4
 await storage.collection("collection-3")
-             .document("documentId")
-             .set(['item 3']); // d-5
+             .collection("subColId")
+             .set(['item 3']); // sc-5
 await storage.collection("collection-3")
-             .document("documentId")
-             .set(["item 4"], keep = false); // d-6
+             .collection("subColId")
+             .set(["item 4"], keep = false); // sc-6
 ```
 
 ### Getting Collection data
@@ -108,73 +105,48 @@ await storage.collection("collection-3")
 ```dart
 await storage.collection("collection-1").get(); // c-1 => 'any data && any type'
 await storage.collection("collection-1").get(); // c-2 => 'any data but some type'
-await storage.collection("collection-2").get(); // c-3 => {"documentId": {'item 1': 'data 1', 'item 2': 'data 2'}}
-```
+await storage.collection("collection-2").get(); // c-3 => {"subColId": {'item 1': 'data 1', 'item 2': 'data 2'}}
 
-### Getting Document data
-
-```dart
 //// Map:
-storage.collection("collection-2").document("documentId").get()
+storage.collection("collection-2").collection("subColId").get()
 // d-1 => {'item 1': 'data 1', 'item 2': 'data 2'}
-storage.collection("collection-2").document("documentId").get()
+storage.collection("collection-2").collection("subColId").get()
 // d-2 => {'item 1': 'data 1', 'item 2': 'data 2', 'item 3': 'data 3'}
-storage.collection("collection-2").document("documentId").get()
+storage.collection("collection-2").collection("subColId").get()
 // d-3 => {'item 4': 'data 4'}
 
 //// List: 
-storage.collection("collection-3").document("documentId").get()
+storage.collection("collection-3").collection("subColId").get()
 // d-4 => ['item 1', 'item 2']
-storage.collection("collection-3").document("documentId").get()
+storage.collection("collection-3").collection("subColId").get()
 // d-5 => ['item 1', 'item 2', 'item 3']
-storage.collection("collection-3").document("documentId").get()
+storage.collection("collection-3").collection("subColId").get()
 // d-6 => ['item 4']
-```
-
-### Deleting data
-
-```dart
-// delete collection
-await storage.collection("testCollection").delete();
-// delete document
-await storage.collection("testCollection").document("testDocument").delete();
-// delete item from collection
-await storage.collection("testCollection").deleteItem("testDocument");
-// delete item from document
-await storage.collection("testCollection").document("testDocument").deleteItem("testDocument");
-// note: 'deleteItem' working only with map and list type
-```
-
-### Getting Document using document path
-
-```dart
-StorageDocument document1 =  storage.collection('collection-2').document('documentId/item 1');
-StorageDocument document2 =  storage.document('collection-3/documentId');
 ```
 
 ### Working with stream
 
 ```dart
-List documentData = [];
+List collData = [];
 int itemIndex = 0;
 String lastItem = "";
 Column(
   children: [
     StreamBuilder(
-      stream: storage.collection("collection-3").document("documentId").stream(),
+      stream: storage.collection("collection-3").collection("subColId").stream(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const CircularProgressIndicator();
         } else {
           if (snapshot.data != null) {
-            documentData = snapshot.data!;
+            collData = snapshot.data!;
           }
           return SingleChildScrollView(
             child: Column(
               children: List.generate(
-                documentData.length,
+                collData.length,
                 (index) => Text(
-                  documentData[index].toString(),
+                  collData[index].toString(),
                 ),
               ),
             ),
@@ -186,13 +158,13 @@ Column(
       onPressed: () {
         itemIndex += 1;
         lastItem = "item $itemIndex";
-        storage.collection("collection-3").document("documentId").set([lastItem]);
+        storage.collection("collection-3").collection("subColId").set([lastItem]);
       },
       child: const Text("Add item"),
     ),
     ElevatedButton(
       onPressed: () {
-        storage.collection("collection-3").document("documentId").deleteItem(lastChat);
+        storage.collection("collection-3").collection("subColId").deleteItem(lastChat);
         itemIndex -= 1;
         lastItem = "item $itemIndex";
       },
@@ -738,6 +710,6 @@ Broadcast::channel('messages', function ($user) {
 
 GitHub Profile: <https://github.com/AbdoPrDZ>
 
-WhatsApp + Telegram (+213778185797)
+<!-- WhatsApp + Telegram (+213778185797) -->
 
 Facebook Account: <https://www.facebook.com/profile.php?id=100008024286034>

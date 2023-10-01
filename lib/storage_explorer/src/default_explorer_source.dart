@@ -4,10 +4,10 @@ import 'explorer_source.dart';
 
 class DefaultExplorerSource extends ExplorerSource {
   @override
-  Future<Directory> dir(String path) async => dir(path);
+  Future<Directory> dir(String path) async => dirSync(path);
 
   @override
-  Future<File> file(String path) async => file(path);
+  Future<File> file(String path) async => fileSync(path);
 
   @override
   Directory dirSync(String path) => Directory(path);

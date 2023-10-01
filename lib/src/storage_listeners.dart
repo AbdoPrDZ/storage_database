@@ -1,8 +1,6 @@
 import 'dart:developer';
 
 class StorageListeners {
-  StorageListeners();
-
   Map listenersData = {};
 
   List<String> getPathStreamIds(String path) =>

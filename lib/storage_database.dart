@@ -1,15 +1,12 @@
 import 'src/default_storage_source.dart';
-import 'src/storage_database_exception.dart';
 import 'src/storage_database_source.dart';
 import 'src/storage_listeners.dart';
 import 'storage_explorer/storage_explorer.dart';
 import 'storage_collection.dart';
-import 'storage_document.dart';
 import 'api/api.dart';
 import 'laravel_echo/laravel_echo.dart';
 
 export 'storage_collection.dart';
-export 'storage_document.dart';
 
 export 'src/storage_database_source.dart';
 export 'src/storage_database_values.dart';
@@ -123,24 +120,7 @@ class StorageDatabase {
   StorageCollection collection(String collectionId) =>
       StorageCollection(this, collectionId);
 
-  StorageDocument document(String documentPath) {
-    if (!documentPath.contains("/")) {
-      throw const StorageDatabaseException(
-        "Incorrect document path, ex: 'collection/doc/docChild'",
-      );
-    }
-    List<String> docIds = documentPath.split("/");
-    StorageDocument document = StorageCollection(this, docIds[0]).document(
-      docIds[1],
-    );
-    for (int i = 2; i < docIds.length; i++) {
-      document.set({docIds[i - 1]: {}});
-      document = document.document(docIds[i]);
-    }
-    return document;
-  }
-
-  Future checkCollectionIdExists(String collectionId) =>
+  Future<bool> checkCollectionIdExists(String collectionId) =>
       source.containsKey(collectionId);
 
   Future clear({

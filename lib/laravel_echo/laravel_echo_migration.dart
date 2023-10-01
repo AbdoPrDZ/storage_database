@@ -48,13 +48,13 @@ abstract class LaravelEchoMigration extends StorageCollection {
   @mustCallSuper
   onCreate(Map data) async {
     Map item = data[itemName] ?? {};
-    await document(item[indexName].toString()).set(item, keepData: false);
+    await collection(item[indexName].toString()).set(item, keepData: false);
   }
 
   @mustCallSuper
   onUpdate(Map data) async {
     Map item = data[itemName] ?? {};
-    await document(item[indexName].toString()).set(item, keepData: false);
+    await collection(item[indexName].toString()).set(item, keepData: false);
   }
 
   @mustCallSuper

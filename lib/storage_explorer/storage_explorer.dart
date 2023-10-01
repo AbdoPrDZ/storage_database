@@ -107,6 +107,7 @@ class StorageExplorer {
         dirNames[i],
       );
     }
+
     return explorerDirectory;
   }
 

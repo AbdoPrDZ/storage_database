@@ -161,3 +161,7 @@
 ## 0.0.9+4
 
 * Update Laravel Echo Migration in example to get default values.
+
+## 0.0.10
+
+* Remove documents and use collections directly.
