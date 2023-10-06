@@ -1,167 +1,171 @@
 ## 0.0.1
 
-* Initial package.
+- Initial package.
 
 ## 0.0.2
 
-* fix some know bugs in collection class.
+- fix some know bugs in collection class.
 
 ## 0.0.2+1
 
-* fix string data when get data.
+- fix string data when get data.
 
 ## 0.0.2+2
 
-* Change how Map data is stored, and enable document naming using any type.
+- Change how Map data is stored, and enable document naming using any type.
 
 ## 0.0.3
 
-* Create StorageExplorer for manage files and directories, and fix some bugs in document and collection classes.
+- Create StorageExplorer for manage files and directories, and fix some bugs in document and collection classes.
 
 ## 0.0.3+1
 
-* Fix some know bugs.
+- Fix some know bugs.
 
 ## 0.0.4
 
-* Create StorageAPI to use it for api requests, and add Network Files service to explorer, and fix multi stream in collection and document.
+- Create StorageAPI to use it for api requests, and add Network Files service to explorer, and fix multi stream in collection and document.
 
 ## 0.0.4+1
 
-* Fix some bugs.
+- Fix some bugs.
 
 ## 0.0.4+2
 
-* Fix some bugs in StorageListeners.
+- Fix some bugs in StorageListeners.
 
 ## 0.0.4+3
 
-* Fix some bugs in StorageDocument and StorageCollection.
+- Fix some bugs in StorageDocument and StorageCollection.
 
 ## 0.0.4+4
 
-* Fix delete and deleteItem in StorageDocument and StorageCollection.
+- Fix delete and deleteItem in StorageDocument and StorageCollection.
 
 ## 0.0.4+5
 
-* Add docs stream in StorageDocument and StorageCollection.
+- Add docs stream in StorageDocument and StorageCollection.
 
 ## 0.0.5
 
-* Adding the sync feature to avoid the problem of crashing when reading and writing data, and fix some bugs in StorageExplorer.
+- Adding the sync feature to avoid the problem of crashing when reading and writing data, and fix some bugs in StorageExplorer.
 
 ## 0.0.5+1
 
-* Fix some bugs in StorageAPI.
+- Fix some bugs in StorageAPI.
 
 ## 0.0.5+2
 
-* Fix some bugs.
+- Fix some bugs.
 
 ## 0.0.5+3
 
-* Fix requests headers.
+- Fix requests headers.
 
 ## 0.0.6
 
-* Fix some bugs and removing "api requests caching" feature due to some bugs.
+- Fix some bugs and removing "api requests caching" feature due to some bugs.
 
 ## 0.0.6+1
 
-* Fix dart sdk version error.
+- Fix dart sdk version error.
 
 ## 0.0.6+2
 
-* Fix api request response null return.
+- Fix api request response null return.
 
 ## 0.0.6+3
 
-* Fix api response map error exception.
+- Fix api response map error exception.
 
 ## 0.0.6+4
 
-* Fix network files headers.
+- Fix network files headers.
 
 ## 0.0.6+5
 
-* Fix some bugs.
+- Fix some bugs.
 
 ## 0.0.6+6
 
-* Fix StorageExplorer NetworkFiles clear and fix Image Data error.
+- Fix StorageExplorer NetworkFiles clear and fix Image Data error.
 
 ## 0.0.6+7
 
-* Fix some bugs.
+- Fix some bugs.
 
 ## 0.0.6+8
 
-* Fix containsKey error.
+- Fix containsKey error.
 
 ## 0.0.6+9
 
-* Remove custom path in StorageExplorer and replace it with full path, and fix some bugs in containsKey in StorageDatabaseSource.
+- Remove custom path in StorageExplorer and replace it with full path, and fix some bugs in containsKey in StorageDatabaseSource.
 
 ## 0.0.6+10
 
-* Fix some bugs in StorageExplorer.
+- Fix some bugs in StorageExplorer.
 
 ## 0.0.7
 
-* Add Laravel Echo feature and fix some bugs in collection and document streaming.
+- Add Laravel Echo feature and fix some bugs in collection and document streaming.
 
 ## 0.0.7+1
 
-* Fix "The data type must be null, but current type is (AnyType)".
+- Fix "The data type must be null, but current type is (AnyType)".
 
 ## 0.0.8
 
-* Upgrade flutter sdk, laravel_echo_null and socket_io_client packages.
+- Upgrade flutter sdk, laravel_echo_null and socket_io_client packages.
 
 ## 0.0.8+1
 
-* Fix laravel_echo migrations, and fix some other know bugs.
+- Fix laravel_echo migrations, and fix some other know bugs.
 
 ## 0.0.8+2
 
-* Fix laravel_echo setup migrations.
+- Fix laravel_echo setup migrations.
 
 ## 0.0.8+3
 
-* Fix laravel_echo setup migrations.
+- Fix laravel_echo setup migrations.
 
 ## 0.0.8+4
 
-* Fix laravel_echo issues.
+- Fix laravel_echo issues.
 
 ## 0.0.8+5
 
-* Upgrade laravel_echo_null to 0.0.5+1.
+- Upgrade laravel_echo_null to 0.0.5+1.
 
 ## 0.0.8+6
 
-* Upgrade laravel_echo_null to 0.0.5+2.
+- Upgrade laravel_echo_null to 0.0.5+2.
 
 ## 0.0.9
 
-* Clean code and set some functions and variables to private and add hasId function to StorageDocument class.
+- Clean code and set some functions and variables to private and add hasId function to StorageDocument class.
 
 ## 0.0.9+1
 
-* Fix has no instance getter 'storageListeners' error.
+- Fix has no instance getter 'storageListeners' error.
 
 ## 0.0.9+2
 
-* Fix "The method 'addAll' was called on null" error when set data in collection and document.
+- Fix "The method 'addAll' was called on null" error when set data in collection and document.
 
 ## 0.0.9+3
 
-* Fix stream error when create document (disable log when creating document).
+- Fix stream error when create document (disable log when creating document).
 
 ## 0.0.9+4
 
-* Update Laravel Echo Migration in example to get default values.
+- Update Laravel Echo Migration in example to get default values.
 
 ## 0.0.10
 
-* Remove documents and use collections directly.
+- Remove documents and use collections directly.
+
+## 0.0.10+1
+
+- Fix some bugs

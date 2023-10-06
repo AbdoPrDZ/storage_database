@@ -9,15 +9,7 @@ import 'package:http/http.dart' as http;
 import 'package:storage_database/storage_database.dart';
 
 Future<void> main() async {
-  // runApp(const MyApp());
-  StorageDatabase storageDatabase = await StorageDatabase.getInstance();
-  await storageDatabase.clear();
-  await storageDatabase.collection('collection').set({});
-  await storageDatabase
-      .collection('collection')
-      .collection('subCollection')
-      .set("data");
-  print(await storageDatabase.collection('collection').get());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
