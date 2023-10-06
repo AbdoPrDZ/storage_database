@@ -168,4 +168,8 @@
 
 ## 0.0.10+1
 
-- Fix some bugs
+- Fix some bugs.
+
+## 0.0.10+2
+
+- Upgrade dependencies.
