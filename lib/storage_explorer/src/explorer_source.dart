@@ -1,16 +1,7 @@
-import 'dart:io';
+import 'directory_manager.dart';
+import 'file_manager.dart';
 
 abstract class ExplorerSource {
-  Future<Directory> dir(String path);
-  Future<File> file(String path);
-  Directory dirSync(String path);
-  File fileSync(String path);
-
-  onDirCreate(String dir);
-  onDirUpdate(String dir);
-  onDirDelete(String dir);
-
-  onFileCreate(String path);
-  onFileUpdate(String path);
-  onFileDelete(String path);
+  DirectoryManager dir(String path);
+  FileManager file(String path);
 }

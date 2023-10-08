@@ -12,11 +12,13 @@
 
 ## 0.0.2+2
 
-- Change how Map data is stored, and enable document naming using any type.
+- Change how Map data is stored.
+- Enable document naming using any type.
 
 ## 0.0.3
 
-- Create StorageExplorer for manage files and directories, and fix some bugs in document and collection classes.
+- Create StorageExplorer for manage files and directories.
+- Fix some bugs in document and collection classes.
 
 ## 0.0.3+1
 
@@ -24,7 +26,9 @@
 
 ## 0.0.4
 
-- Create StorageAPI to use it for api requests, and add Network Files service to explorer, and fix multi stream in collection and document.
+- Create StorageAPI to use it for api requests.
+- Add Network Files service to explorer.
+- Fix multi stream in collection and document.
 
 ## 0.0.4+1
 
@@ -48,7 +52,8 @@
 
 ## 0.0.5
 
-- Adding the sync feature to avoid the problem of crashing when reading and writing data, and fix some bugs in StorageExplorer.
+- Adding the sync feature to avoid the problem of crashing when reading and writing data.
+- Fix some bugs in StorageExplorer.
 
 ## 0.0.5+1
 
@@ -100,7 +105,8 @@
 
 ## 0.0.6+9
 
-- Remove custom path in StorageExplorer and replace it with full path, and fix some bugs in containsKey in StorageDatabaseSource.
+- Remove custom path in StorageExplorer and replace it with full path
+- Fix some bugs in containsKey in StorageDatabaseSource.
 
 ## 0.0.6+10
 
@@ -108,7 +114,8 @@
 
 ## 0.0.7
 
-- Add Laravel Echo feature and fix some bugs in collection and document streaming.
+- Add Laravel Echo feature.
+- Fix some bugs in collection and document streaming.
 
 ## 0.0.7+1
 
@@ -120,7 +127,8 @@
 
 ## 0.0.8+1
 
-- Fix laravel_echo migrations, and fix some other know bugs.
+- Fix laravel_echo migrations.
+- Fix some other know bugs.
 
 ## 0.0.8+2
 
@@ -144,7 +152,8 @@
 
 ## 0.0.9
 
-- Clean code and set some functions and variables to private and add hasId function to StorageDocument class.
+- Clean code and set some functions and variables to private.
+- Add hasId function to StorageDocument class.
 
 ## 0.0.9+1
 
@@ -173,3 +182,8 @@
 ## 0.0.10+2
 
 - Upgrade dependencies.
+
+## 0.0.11-beta
+
+- Add File and Directory manager to default StorageExplorerSource class.
+- Add second option to manage data (EncryptedStorageSource).

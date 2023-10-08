@@ -1,4 +1,4 @@
-import 'dart:io';
+// import 'dart:io';
 import 'dart:math';
 
 import 'package:path/path.dart';
@@ -7,11 +7,12 @@ import '../src/storage_listeners.dart';
 import 'explorer_directory_item.dart';
 
 import 'explorer_file.dart';
+import 'src/directory_manager.dart';
 import 'src/explorer_source.dart';
 
 class ExplorerDirectory {
   final ExplorerSource explorerSource;
-  final Directory ioDirectory;
+  final DirectoryManager ioDirectory;
   final String directoryName, shortPath;
   final StorageListeners storageListeners;
 
@@ -25,21 +26,15 @@ class ExplorerDirectory {
 
   List<ExplorerDirectoryItem> get({String? streamId}) {
     if (!ioDirectory.existsSync()) ioDirectory.createSync();
-    List<FileSystemEntity> ioFiles = ioDirectory.listSync();
+    List<DirectoryItemManager> ioFiles = ioDirectory.listSync();
     List<ExplorerDirectoryItem> items = [];
-    for (FileSystemEntity item in ioFiles) {
+    for (DirectoryItemManager item in ioFiles) {
       // String itemName = item.path.split("\\").last;
       String itemName = basename(item.path);
-      bool isDirectory = item.runtimeType.toString().contains("Directory");
-      if (isDirectory) {
-        items.add(
-          ExplorerDirectoryItem(itemName, directory(itemName), this),
-        );
-      } else {
-        items.add(
-          ExplorerDirectoryItem(itemName, file(itemName), this),
-        );
-      }
+      items.add(
+        ExplorerDirectoryItem(itemName,
+            item.isDirectory ? directory(itemName) : file(itemName), this),
+      );
     }
     if (streamId != null && storageListeners.hasStreamId(shortPath, streamId)) {
       storageListeners.setDate(shortPath, streamId);
@@ -49,12 +44,12 @@ class ExplorerDirectory {
 
   bool hasFile(String filename) =>
       // File("${ioDirectory.path}/$filename").existsSync();
-      explorerSource.fileSync("${ioDirectory.path}/$filename").existsSync();
+      explorerSource.file("${ioDirectory.path}/$filename").existsSync();
 
   ExplorerFile file(String filename) => ExplorerFile(
         explorerSource,
         // File("${ioDirectory.path}/$filename"),
-        explorerSource.fileSync("${ioDirectory.path}/$filename"),
+        explorerSource.file("${ioDirectory.path}/$filename"),
         shortPath,
         filename,
         storageListeners,
@@ -66,8 +61,8 @@ class ExplorerDirectory {
     dirNames = [for (String name in dirNames) name.replaceAll('\\', '/')];
 
     // Directory nioDirectory = Directory("${ioDirectory.path}/${dirNames[0]}");
-    Directory nioDirectory =
-        explorerSource.dirSync("${ioDirectory.path}/${dirNames[0]}");
+    DirectoryManager nioDirectory =
+        explorerSource.dir("${ioDirectory.path}/${dirNames[0]}");
     if (!nioDirectory.existsSync()) nioDirectory.createSync();
 
     if (streamId != null && storageListeners.hasStreamId(shortPath, streamId)) {
@@ -90,7 +85,7 @@ class ExplorerDirectory {
   }
 
   Future delete({bool log = true}) async {
-    await ioDirectory.delete(recursive: true);
+    await ioDirectory.delete();
     if (log) {
       for (String streamId in storageListeners.getPathStreamIds(shortPath)) {
         if (storageListeners.hasStreamId(shortPath, streamId)) {

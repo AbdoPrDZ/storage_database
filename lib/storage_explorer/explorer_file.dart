@@ -9,35 +9,27 @@ import '../src/storage_database_exception.dart';
 import '../src/storage_database_values.dart';
 import '../src/storage_listeners.dart';
 import 'src/explorer_source.dart';
+import 'src/file_manager.dart';
 
 class ExplorerFile {
   final ExplorerSource explorerSource;
-  File ioFile;
+  FileManager ioFile;
   final String dirPath, filename;
   final StorageListeners storageListeners;
-  final FileMode mode;
-  final Encoding encoding;
-  final bool flush;
 
-  ExplorerFile(
-    this.explorerSource,
-    this.ioFile,
-    this.dirPath,
-    this.filename,
-    this.storageListeners, {
-    this.mode = FileMode.write,
-    this.encoding = utf8,
-    this.flush = false,
-  });
+  ExplorerFile(this.explorerSource, this.ioFile, this.dirPath, this.filename,
+      this.storageListeners);
 
   bool get exists => ioFile.existsSync();
+
+  String get path => ioFile.path;
 
   Future<String> get({String? streamId}) async {
     if (!exists) {
       throw StorageDatabaseException("The file ($filename) not exists yet.");
     }
 
-    String data = await ioFile.readAsString();
+    String data = await ioFile.read();
     if (streamId != null &&
         storageListeners.hasStreamId(_fileShortPath, streamId)) {
       storageListeners.getDate(_fileShortPath, streamId);
@@ -53,7 +45,7 @@ class ExplorerFile {
         storageListeners.hasStreamId(_fileShortPath, streamId)) {
       storageListeners.getDate(_fileShortPath, streamId);
     }
-    return await ioFile.readAsBytes();
+    return await ioFile.readBytes();
   }
 
   Future<T?> getJson<T>({String? streamId}) async {
@@ -105,7 +97,7 @@ class ExplorerFile {
       data = "$currentData$appendSplit$data";
     }
 
-    ioFile = await ioFile.writeAsString(data);
+    ioFile = await ioFile.write(data);
   }
 
   Future setJson(
@@ -161,7 +153,7 @@ class ExplorerFile {
     FileMode mode = FileMode.write,
     bool flush = false,
   }) async {
-    ioFile = await ioFile.writeAsBytes(bytes);
+    ioFile = await ioFile.writeBytes(bytes);
     if (log) {
       for (var streamId in storageListeners.getPathStreamIds(_fileShortPath)) {
         if (storageListeners.hasStreamId(_fileShortPath, streamId)) {
@@ -179,7 +171,7 @@ class ExplorerFile {
   }
 
   Future delete({bool log = true}) async {
-    await ioFile.delete(recursive: true);
+    await ioFile.delete();
     if (log) {
       for (var streamId in storageListeners.getPathStreamIds(_fileShortPath)) {
         if (storageListeners.hasStreamId(_fileShortPath, streamId)) {

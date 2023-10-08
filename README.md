@@ -15,7 +15,7 @@ import 'package:storage_database/storage_database.dart';
 ```dart
 // You have to give source class extended by 'StorageDatabaseSource'
 // Default source is 'DefaultStorageSource' class
-StorageDatabase storage = await StorageDatabase.getInstance(); 
+StorageDatabase storage = await StorageDatabase.getInstance();
 // In this example you should to create source class extended with 'StorageDatabaseSource'
 StorageDatabase storageEx2 = StorageDatabase(await MyStorageSourceClass.getInstance());
 ```
@@ -77,7 +77,7 @@ await storage.collection("collection-1")
 await storage.collection("collection-1")
              .set("any new data but some type"); // c-2
 
-// Map data : 
+// Map data :
 await storage.collection("collection-2") // c-3
              .collection("subColId")
              .set({'item 1': 'data 1', 'item 2': 'data 2'}); // sc-1
@@ -89,7 +89,7 @@ await storage.collection("collection-2")
              .set({'item 4': 'data 4'}, keep = false); // sc-3
 
 // List data :
-await storage.collection("collection-3") 
+await storage.collection("collection-3")
              .collection("subColId")
              .set(["item 1", "item 2"]); // sc-4
 await storage.collection("collection-3")
@@ -115,7 +115,7 @@ storage.collection("collection-2").collection("subColId").get()
 storage.collection("collection-2").collection("subColId").get()
 // d-3 => {'item 4': 'data 4'}
 
-//// List: 
+//// List:
 storage.collection("collection-3").collection("subColId").get()
 // d-4 => ['item 1', 'item 2']
 storage.collection("collection-3").collection("subColId").get()
@@ -672,6 +672,7 @@ class MessageMigration extends LaravelEchoMigration {
     }
   }
   ```
+
 #### You should connect events like that to model
 
 ```php
@@ -697,6 +698,7 @@ class Message extends Model {
 ```
 
 #### You must to return all messages when channel subscribed like that:
+
 ```php
 Broadcast::channel('messages', function ($user) {
     foreach (App\Models\Message::all() as $message) {
@@ -710,6 +712,6 @@ Broadcast::channel('messages', function ($user) {
 
 GitHub Profile: <https://github.com/AbdoPrDZ>
 
-<!-- WhatsApp + Telegram (+213778185797) -->
+WhatsApp + Telegram (+213778185797)
 
 Facebook Account: <https://www.facebook.com/profile.php?id=100008024286034>

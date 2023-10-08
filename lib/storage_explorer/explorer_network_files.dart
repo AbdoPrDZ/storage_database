@@ -142,9 +142,9 @@ class ExplorerNetworkImage extends StatefulWidget {
 
 class _ExplorerNetworkImageState extends State<ExplorerNetworkImage> {
   Future<File?> getImage() async {
-    return (await widget.explorerNetworkFiles
-            .file(widget.url, headers: widget.headers))
-        ?.ioFile;
+    ExplorerFile? file = await widget.explorerNetworkFiles
+        .file(widget.url, headers: widget.headers);
+    return file != null ? File(file.path) : null;
   }
 
   @override

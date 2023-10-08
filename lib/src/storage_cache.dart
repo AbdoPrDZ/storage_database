@@ -1,39 +1,37 @@
 class StorageCache<T> {
-  T data, expiredData;
-  Future<T> Function<T>() source;
-  Function() onLoad, onExpire;
-  Duration expireDuration;
+  T? data;
+  final T? expiredData;
+  final Future<T?> Function() source;
+  final Function()? onLoad, onExpire;
+  final Duration expireDuration;
 
   StorageCache({
     required this.data,
-    required this.expiredData,
+    this.expiredData,
     required this.source,
-    required this.onLoad,
-    required this.onExpire,
-    required this.expireDuration,
-  }) {
-    loadData();
-  }
+    this.onLoad,
+    this.onExpire,
+    this.expireDuration = const Duration(seconds: 2),
+  });
 
   bool hasData = false;
 
   loadData() async {
     data = await source();
     hasData = true;
-    onLoad();
+    onLoad?.call();
     initExpire();
   }
 
-  initExpire() => Future.delayed(expireDuration).then((value) {
-        expireData();
-      });
+  initExpire() => Future.delayed(expireDuration).then((value) => expireData());
 
   expireData() {
     data = expiredData;
     hasData = false;
+    onExpire?.call();
   }
 
-  Future<T> getData() async {
+  Future<T?> getData() async {
     if (!hasData) await loadData();
     return data;
   }

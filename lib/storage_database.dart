@@ -1,3 +1,5 @@
+import 'package:storage_database/src/encrypted_storage_source.dart';
+
 import 'src/default_storage_source.dart';
 import 'src/storage_database_source.dart';
 import 'src/storage_listeners.dart';
@@ -26,11 +28,22 @@ class StorageDatabase {
 
   StorageDatabase(this.source);
 
-  static Future<StorageDatabase> getInstance({
-    StorageDatabaseSource? source,
+  static Future<StorageDatabase> getInstance() async =>
+      StorageDatabase(await DefaultStorageSource.instance);
+
+  static Future<StorageDatabase> getInstanceEncrypted(
+    String sourcePath,
+    String sourcePassword, {
+    String iv = "dz.abdo_pr.flutter.packages.sd23",
+    String sourceFileName = "source.sd",
   }) async =>
       StorageDatabase(
-        source ?? await DefaultStorageSource.instance,
+        await EncryptedStorageSource.getInstance(
+          sourcePath,
+          sourcePassword,
+          iv: iv,
+          sourceFileName: sourceFileName,
+        ),
       );
 
   StorageExplorer? explorer;
