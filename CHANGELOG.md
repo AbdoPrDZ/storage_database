@@ -173,3 +173,7 @@
 ## 0.0.10+2
 
 - Upgrade dependencies.
+
+## 0.0.10+3
+
+- Make it stable.

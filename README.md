@@ -15,7 +15,7 @@ import 'package:storage_database/storage_database.dart';
 ```dart
 // You have to give source class extended by 'StorageDatabaseSource'
 // Default source is 'DefaultStorageSource' class
-StorageDatabase storage = await StorageDatabase.getInstance(); 
+StorageDatabase storage = await StorageDatabase.getInstance();
 // In this example you should to create source class extended with 'StorageDatabaseSource'
 StorageDatabase storageEx2 = StorageDatabase(await MyStorageSourceClass.getInstance());
 ```
@@ -77,7 +77,7 @@ await storage.collection("collection-1")
 await storage.collection("collection-1")
              .set("any new data but some type"); // c-2
 
-// Map data : 
+// Map data :
 await storage.collection("collection-2") // c-3
              .collection("subColId")
              .set({'item 1': 'data 1', 'item 2': 'data 2'}); // sc-1
@@ -89,7 +89,7 @@ await storage.collection("collection-2")
              .set({'item 4': 'data 4'}, keep = false); // sc-3
 
 // List data :
-await storage.collection("collection-3") 
+await storage.collection("collection-3")
              .collection("subColId")
              .set(["item 1", "item 2"]); // sc-4
 await storage.collection("collection-3")
@@ -107,7 +107,7 @@ await storage.collection("collection-1").get(); // c-1 => 'any data && any type'
 await storage.collection("collection-1").get(); // c-2 => 'any data but some type'
 await storage.collection("collection-2").get(); // c-3 => {"subColId": {'item 1': 'data 1', 'item 2': 'data 2'}}
 
-//// Map:
+// // Map:
 storage.collection("collection-2").collection("subColId").get()
 // d-1 => {'item 1': 'data 1', 'item 2': 'data 2'}
 storage.collection("collection-2").collection("subColId").get()
@@ -115,7 +115,7 @@ storage.collection("collection-2").collection("subColId").get()
 storage.collection("collection-2").collection("subColId").get()
 // d-3 => {'item 4': 'data 4'}
 
-//// List: 
+// // List:
 storage.collection("collection-3").collection("subColId").get()
 // d-4 => ['item 1', 'item 2']
 storage.collection("collection-3").collection("subColId").get()
@@ -192,7 +192,7 @@ StorageDatabase storageDatabase = await StorageDatabase.getInstance(); // you ne
 
 Directory localIODirectory = await getApplicationDocumentsDirectory() // this function from path_provider package
 StorageExplorer storageExplorer = StorageExplorer(storageDatabase, localIODirectory);
-//or
+// or
 StorageExplorer storageExplorer = StorageExplorer.getInstance(storageDatabase, customPath: "your/custom/path");
 
 // 2: initializing from StorageDatabase Class
@@ -250,7 +250,7 @@ await bytesFile.setBytes(bytes);
 // json: setting Json data
 await jsonFile.set({"key": "val"}); // Map
 await jsonFile.set(["item 1", "item 2"]); // List
-//// setMode (only with Map and List data, default mode is <append>)
+// // setMode (only with Map and List data, default mode is <append>)
 await jsonFile.set({"other key": "other val"}, setMode: SetMode.append); // this mode for append values
 // when get => {"key": "val", "other key": "other val"}
 await jsonFile.set({"key": "val"}, setMode: SetMode.remove); // this mode for remove values
@@ -319,7 +319,7 @@ This feature downloads the file from the Internet, then stores it where the file
 await storageDatabase.explorer!.initNetWorkFiles();
 
 // call it like that
-ExplorerFile file = await storageDatabase.explorer!.networkFiles!.networkFile('http://your.url.file');
+ExplorerFile file = await storageDatabase.explorer!.networkFiles!.networkFile('http:// your.url.file');
 // now you can use ExplorerFile features
 ```
 
@@ -327,7 +327,7 @@ The feature contains a ready-made widget, especially for images, where it displa
 
 ```dart
 await storageDatabase.explorer!.networkFiles!.networkImage(
-  'http://your.image.url',
+  'http:// your.image.url',
   width: 100,
   heigh: 100,
   borderRadius: 8,
@@ -337,7 +337,7 @@ await storageDatabase.explorer!.networkFiles!.networkImage(
 
 ## StorageAPI
 
-This feature used for api requests and responses, and it has the feature of storing requests in an offline state, to be re-request it again later on online.
+This feature used for api requests and responses.
 
 ### Importing
 
@@ -354,18 +354,13 @@ StorageDatabase storageDatabase = await StorageDatabase.getInstance(); // you ne
 StorageAPI storageApi = StorageExplorer(
   storageDatabase: storageDatabase,
   tokenSource: () => 'api-token',
-  apiUrl: 'http://your.api.url',
-  // requests cache removed for now
-  //cacheOnOffline: true, // for store requests on offline
-  //onReRequestResponse: (response) => print(response.value),
+  apiUrl: 'http:// your.api.url',
 );
 
 // 2: initializing from StorageDatabase Class
 await storageDatabase.initAPI(
   tokenSource: () async => 'api-token',
-  apiUrl: 'http://your.api.url',
-  cacheOnOffline: true, // for store requests on offline
-  onReRequestResponse: (response) => print(response.value),
+  apiUrl: 'http:// your.api.url',
 );
 // for use it
 storageDatabase.storageAPI!.<FunctionName> // <FunctionName>: name of function you want to use
@@ -380,7 +375,7 @@ APIResponse response = storageAPI.request<TypeOfResponseValue>(
   log: true, // print on console request steps
   data: {"key": "value"}, // request data
   auth: true, // to send request with auth token
-  onNoConnection: (reqId) => print('field to request $reqId'), // this requestId used for re-request later
+  errorsField: 'errors', // errors field
 );
 
 // to re-request
@@ -410,14 +405,15 @@ TypeOfValue value = response.value;
 
 // Note: your api response data must be like that
 {
-  "success": true, //or false
+  "success": true, // or false
   "message": "your message",
   "value": {"key1": "val1", "key2": ["val1"]}, // excepted any type this just example
 }
+// response.value => {"key1": "val1", "key2": ["val1"]}
 
 // you can use this also
 {
-  "success": true, //or false
+  "success": true, // or false
   "message": "your message",
   "key1": "val1",
 }
@@ -425,7 +421,7 @@ TypeOfValue value = response.value;
 
 // or this
 {
-  "success": true, //or false
+  "success": true, // or false
   "message": "your message",
   "key1": "val1",
   "key2": ["val1"],
@@ -433,7 +429,7 @@ TypeOfValue value = response.value;
 // response.value => {"key1": "val1", "key2": ["val1"]}
 ```
 
-## Laravel Echo (Beta)
+## Laravel Echo
 
 This feature used to laravel echo connection, and you listen to Laravel Models.
 
@@ -455,7 +451,7 @@ storageDatabase.initPusherLaravelEcho(<connector parameters>, <LaravelEchoMigrat
 
 ```
 
-#### Note: Please read [laravel_echo_null](https://pub.dev/packages/laravel_echo_null) for more information if you use connector to initializing
+#### Note: Please read [laravel_echo_null](https:// pub.dev/packages/laravel_echo_null) for more information if you use connector to initializing
 
 ### Working with migrations
 
@@ -672,6 +668,7 @@ class MessageMigration extends LaravelEchoMigration {
     }
   }
   ```
+
 #### You should connect events like that to model
 
 ```php
@@ -697,6 +694,7 @@ class Message extends Model {
 ```
 
 #### You must to return all messages when channel subscribed like that:
+
 ```php
 Broadcast::channel('messages', function ($user) {
     foreach (App\Models\Message::all() as $message) {
@@ -708,8 +706,8 @@ Broadcast::channel('messages', function ($user) {
 
 # Contact Us
 
-GitHub Profile: <https://github.com/AbdoPrDZ>
+GitHub Profile: <https:// github.com/AbdoPrDZ>
 
-<!-- WhatsApp + Telegram (+213778185797) -->
+WhatsApp + Telegram (+213778185797)
 
-Facebook Account: <https://www.facebook.com/profile.php?id=100008024286034>
+Facebook Account: <https:// www.facebook.com/profile.php?id=100008024286034>
