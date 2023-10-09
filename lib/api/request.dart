@@ -21,7 +21,6 @@ class APIRequest {
     List<http.MultipartFile> files = const [],
     Function(int bytes, int totalBytes)? onFilesUpload,
     bool log = false,
-    Function? onNoConnection,
     Map<String, String> headers = const {},
     bool appendHeader = true,
     String errorsField = 'errors',
@@ -89,7 +88,6 @@ class APIRequest {
         errorsField: errorsField,
       );
     } on SocketException {
-      if (onNoConnection != null) onNoConnection();
       if (log) dev.log("[StorageDatabaseAPI] reqError: No Internet Connection");
       return APIResponse<T>(false, "No Internet Connection", statusCode);
     } catch (e) {

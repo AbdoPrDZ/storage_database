@@ -24,8 +24,11 @@ class StorageExplorer {
     this.storageListeners,
     this.localDirectory,
   ) {
-    storageDatabase.onClear
-        .add(() => _initLocalDirectory(storageListeners, explorerSource));
+    storageDatabase.onClear(() => _initLocalDirectory(
+          storageListeners,
+          explorerSource,
+          path: localDirectory.ioDirectory.path,
+        ));
   }
 
   static Future<ExplorerDirectory> _initLocalDirectory(

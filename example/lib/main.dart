@@ -18,7 +18,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Storage Database Example',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
@@ -328,7 +328,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) => Scaffold(
         appBar: AppBar(
-          title: const Text('StorageDatabase Test'),
+          title: const Text('StorageDatabase Example'),
         ),
         body: SingleChildScrollView(
           child: Padding(

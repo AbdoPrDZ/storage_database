@@ -20,11 +20,10 @@ export 'laravel_echo/laravel_echo.dart';
 class StorageDatabase {
   final StorageDatabaseSource source;
 
-  List<Function> onClear = [];
-
-  StorageListeners storageListeners = StorageListeners();
-
   StorageDatabase(this.source);
+
+  final List<Function> _onClear = [];
+  final StorageListeners storageListeners = StorageListeners();
 
   static Future<StorageDatabase> getInstance({
     StorageDatabaseSource? source,
@@ -38,16 +37,11 @@ class StorageDatabase {
       explorer = await StorageExplorer.getInstance(this, path: path);
 
   StorageAPI? storageAPI;
-  initAPI({
-    required String apiUrl,
-    Map<String, String> headers = const {},
-    // Function(APIResponse response)? onReRequestResponse,
-  }) =>
+  initAPI({required String apiUrl, Map<String, String> headers = const {}}) =>
       storageAPI = StorageAPI(
         storageDatabase: this,
         apiUrl: apiUrl,
         headers: headers,
-        // onReRequestResponse: onReRequestResponse,
       );
 
   LaravelEcho? laravelEcho;
@@ -63,7 +57,7 @@ class StorageDatabase {
     bool autoConnect = true,
     Map<dynamic, dynamic> moreOptions = const {},
   }) {
-    if (laravelEcho != null) laravelEcho!.disconnect();
+    laravelEcho?.disconnect();
     laravelEcho = LaravelEcho.socket(
       this,
       host,
@@ -95,7 +89,7 @@ class StorageDatabase {
     bool autoConnect = true,
     String? nameSpace,
   }) {
-    if (laravelEcho != null) laravelEcho!.disconnect();
+    laravelEcho?.disconnect();
     laravelEcho = LaravelEcho.pusher(
       this,
       appKey,
@@ -123,6 +117,8 @@ class StorageDatabase {
   Future<bool> checkCollectionIdExists(String collectionId) =>
       source.containsKey(collectionId);
 
+  void onClear(Function func) => _onClear.add(func);
+
   Future clear({
     bool clearExplorer = true,
     bool clearNetworkFiles = true,
@@ -138,7 +134,7 @@ class StorageDatabase {
 
     await source.clear();
 
-    for (Function onClearFunc in onClear) {
+    for (Function onClearFunc in _onClear) {
       onClearFunc();
     }
   }
