@@ -174,6 +174,10 @@
 
 - Upgrade dependencies.
 
-## 0.0.10+3
+## 1.0.0
 
 - Make it stable.
+
+## 1.0.1
+
+- Fix some bugs.

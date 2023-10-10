@@ -53,12 +53,6 @@ class StorageCollection {
               ? []
               : null;
 
-      if (parent != null) {
-        await parent!.set({collectionId: initialData});
-      } else {
-        await storageDatabase.source.setData(collectionId, initialData);
-      }
-
       return initialData;
     } else {
       dynamic collectionData = (parent != null
