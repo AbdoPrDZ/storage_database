@@ -101,10 +101,10 @@ class StorageAPI {
   //   }
   // }
 
-  Future clear() async {
-    storageDatabase.onClear.add(() async {
-      await storageDatabase.collection('api').set({});
-    });
-    await storageDatabase.collection('api').delete();
-  }
+  // Future clear() async {
+  //   storageDatabase.onClear.add(() async {
+  //     await storageDatabase.collection('api').set({});
+  //   });
+  //   await storageDatabase.collection('api').delete();
+  // }
 }

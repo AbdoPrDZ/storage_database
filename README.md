@@ -355,17 +355,12 @@ StorageAPI storageApi = StorageExplorer(
   storageDatabase: storageDatabase,
   tokenSource: () => 'api-token',
   apiUrl: 'http://your.api.url',
-  // requests cache removed for now
-  //cacheOnOffline: true, // for store requests on offline
-  //onReRequestResponse: (response) => print(response.value),
 );
 
 // 2: initializing from StorageDatabase Class
 await storageDatabase.initAPI(
   tokenSource: () async => 'api-token',
   apiUrl: 'http://your.api.url',
-  cacheOnOffline: true, // for store requests on offline
-  onReRequestResponse: (response) => print(response.value),
 );
 // for use it
 storageDatabase.storageAPI!.<FunctionName> // <FunctionName>: name of function you want to use
@@ -380,19 +375,7 @@ APIResponse response = storageAPI.request<TypeOfResponseValue>(
   log: true, // print on console request steps
   data: {"key": "value"}, // request data
   auth: true, // to send request with auth token
-  onNoConnection: (reqId) => print('field to request $reqId'), // this requestId used for re-request later
 );
-
-// to re-request
-storageAPI.resendRequest(reqId);
-// to re-request multi requests ids
-storageAPI.resendRequests(
-  [requestIds], // when is empty automatically is re-request all ids stored
-  onResponse: (response) => print(response.message),
-);
-
-// to clear all request ids stored
-await storageAPI.clear();
 ```
 
 ### Working with APIResponse
@@ -452,7 +435,6 @@ storageDatabase.initLaravelEcho(connector, <LaravelEchoMigration>[]);
 storageDatabase.initSocketLaravelEcho(<connector parameters>, <LaravelEchoMigration>[]);
 
 storageDatabase.initPusherLaravelEcho(<connector parameters>, <LaravelEchoMigration>[]);
-
 ```
 
 #### Note: Please read [laravel_echo_null](https://pub.dev/packages/laravel_echo_null) for more information if you use connector to initializing

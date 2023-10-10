@@ -11,7 +11,7 @@ import 'laravel_echo/laravel_echo.dart';
 export 'storage_collection.dart';
 
 export 'src/storage_database_source.dart';
-export 'src/storage_database_values.dart';
+export 'src/values.dart';
 
 export 'storage_explorer/storage_explorer.dart';
 
@@ -139,7 +139,6 @@ class StorageDatabase {
   Future clear({
     bool clearExplorer = true,
     bool clearNetworkFiles = true,
-    bool clearAPI = true,
   }) async {
     if (clearExplorer && explorer != null) await explorer!.clear();
     if (clearNetworkFiles &&
@@ -147,7 +146,6 @@ class StorageDatabase {
         explorer!.networkFiles != null) {
       await explorer!.networkFiles!.clear();
     }
-    if (clearAPI && storageAPI != null) await storageAPI!.clear();
 
     await source.clear();
 

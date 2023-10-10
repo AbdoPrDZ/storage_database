@@ -6,7 +6,7 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import '../src/storage_database_exception.dart';
-import '../src/storage_database_values.dart';
+import '../src/values.dart';
 import '../src/storage_listeners.dart';
 import 'src/explorer_source.dart';
 import 'src/file_manager.dart';

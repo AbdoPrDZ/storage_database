@@ -3,7 +3,7 @@ import 'dart:developer';
 import 'package:flutter/foundation.dart';
 import 'package:laravel_echo_null/laravel_echo_null.dart';
 
-import '../src/storage_database_values.dart';
+import '../src/values.dart';
 import '../storage_collection.dart';
 
 abstract class LaravelEchoMigration extends StorageCollection {

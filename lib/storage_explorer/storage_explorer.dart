@@ -4,13 +4,13 @@ import 'package:path_provider/path_provider.dart';
 import '../src/storage_listeners.dart';
 import '../storage_database.dart';
 import 'explorer_network_files.dart';
-import 'src/default_explorer_source.dart';
 import 'src/directory_manager.dart';
 import 'src/explorer_source.dart';
 import 'src/file_manager.dart';
 
-export './explorer_directory.dart';
-export './explorer_file.dart';
+export 'explorer_directory.dart';
+export 'explorer_file.dart';
+export 'src/default_explorer_source.dart';
 
 class StorageExplorer {
   final StorageDatabase storageDatabase;
@@ -23,10 +23,7 @@ class StorageExplorer {
     this.explorerSource,
     this.storageListeners,
     this.localDirectory,
-  ) {
-    storageDatabase.onClear
-        .add(() => _initLocalDirectory(storageListeners, explorerSource));
-  }
+  );
 
   static Future<ExplorerDirectory> _initLocalDirectory(
     StorageListeners storageListeners,
@@ -39,6 +36,7 @@ class StorageExplorer {
     );
     String localDirName = basename(localIODirectory.path);
     if (!localIODirectory.existsSync()) localIODirectory.createSync();
+
     return ExplorerDirectory(
       source,
       localIODirectory,
@@ -60,6 +58,13 @@ class StorageExplorer {
       source,
       path: path,
     );
+
+    storageDatabase.onClear.add(() => _initLocalDirectory(
+          storageListeners,
+          source!,
+          path: localDirectory.path,
+        ));
+
     return StorageExplorer(
       storageDatabase,
       source,
@@ -112,7 +117,6 @@ class StorageExplorer {
   }
 
   ExplorerFile file(String filename) {
-    // File ioFile = File("${localDirectory.ioDirectory.path}\\$filename");
     FileManager ioFile =
         explorerSource.file("${localDirectory.ioDirectory.path}\\$filename");
     if (!ioFile.existsSync()) {

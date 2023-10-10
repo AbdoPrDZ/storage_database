@@ -24,6 +24,8 @@ class ExplorerDirectory {
     this.storageListeners,
   );
 
+  String get path => ioDirectory.path;
+
   List<ExplorerDirectoryItem> get({String? streamId}) {
     if (!ioDirectory.existsSync()) ioDirectory.createSync();
     List<DirectoryItemManager> ioFiles = ioDirectory.listSync();
