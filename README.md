@@ -706,8 +706,8 @@ Broadcast::channel('messages', function ($user) {
 
 # Contact Us
 
-GitHub Profile: <https:// github.com/AbdoPrDZ>
+GitHub Profile: <https://www.github.com/AbdoPrDZ>
 
-WhatsApp + Telegram (+213778185797)
+WhatsApp + Telegram: +213778185797
 
-Facebook Account: <https:// www.facebook.com/profile.php?id=100008024286034>
+Facebook Account: <https://www.facebook.com/AbdoPrDZ>

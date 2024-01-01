@@ -37,7 +37,7 @@ class APIRequest {
       Uri uri = Uri.parse(url);
       if (files.isNotEmpty) {
         http.MultipartRequest request = MultipartRequest(
-          type.type,
+          '$type',
           Uri.parse(url),
           onProgress: onFilesUpload,
         );
@@ -51,25 +51,25 @@ class APIRequest {
         responseBody = await res.stream.bytesToString();
       } else {
         http.Response response;
-        if (type == RequestType.post) {
+        if (type.isPost) {
           response = await http.post(
             uri,
             headers: headers,
             body: jsonEncode(data),
           );
-        } else if (type == RequestType.put) {
+        } else if (type.isPut) {
           response = await http.put(
             uri,
             headers: headers,
             body: jsonEncode(data),
           );
-        } else if (type == RequestType.patch) {
+        } else if (type.isPatch) {
           response = await http.patch(
             uri,
             headers: headers,
             body: jsonEncode(data),
           );
-        } else if (type == RequestType.delete) {
+        } else if (type.isDelete) {
           response = await http.delete(
             uri,
             headers: headers,
@@ -96,25 +96,29 @@ class APIRequest {
   }
 }
 
-class RequestType {
-  final String type;
-  const RequestType(this.type);
+enum RequestType {
+  get,
+  post,
+  put,
+  patch,
+  delete;
 
-  static const RequestType get = RequestType('GET');
-  static const RequestType post = RequestType('POST');
-  static const RequestType put = RequestType('PUT');
-  static const RequestType patch = RequestType('PATCH');
-  static const RequestType delete = RequestType('DELETE');
+  @override
+  String toString() => all[this]!;
 
-  static Map<String, RequestType> values = {
-    get.type: get,
-    post.type: post,
-    put.type: put,
-    patch.type: patch,
-    delete.type: delete,
+  bool get isGet => this == get;
+  bool get isPost => this == post;
+  bool get isPut => this == put;
+  bool get isPatch => this == patch;
+  bool get isDelete => this == delete;
+
+  static Map<RequestType, String> all = {
+    get: 'GET',
+    post: 'POST',
+    put: 'PUT',
+    patch: 'PATCH',
+    delete: 'DELETE',
   };
-
-  static RequestType? fromString(String type) => values[type];
 }
 
 class MultipartRequest extends http.MultipartRequest {

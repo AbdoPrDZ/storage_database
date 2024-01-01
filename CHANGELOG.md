@@ -181,3 +181,8 @@
 ## 1.0.1
 
 - Fix some bugs.
+
+## 1.0.2
+
+- Fix StorageAPI RequestType.
+- Upgrade flutter sdk, and other dependencies.
