@@ -18,8 +18,8 @@ class _HomePageState extends State<HomePage> {
     storageDatabase = await StorageDatabase.getInstance();
     await storageDatabase.initExplorer();
     await storageDatabase.clear();
-    chatsFile = storageDatabase.explorer!.file("chats.json");
-    camFile = storageDatabase.explorer!.file("camp.png");
+    chatsFile = storageDatabase.explorer.file("chats.json");
+    camFile = storageDatabase.explorer.file("camp.png");
     await addChat();
     return true;
   }

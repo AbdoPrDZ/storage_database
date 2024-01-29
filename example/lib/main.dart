@@ -68,7 +68,7 @@ class _MyHomePageState extends State<MyHomePage> {
     if (storageDatabase == null) {
       snackbar("You need to init StorageDatabase first");
       return;
-    } else if (storageDatabase!.explorer != null) {
+    } else if (storageDatabase!.storageExplorerHasInitialized) {
       snackbar('StorageExplorer already initialized');
       return;
     }
@@ -84,14 +84,14 @@ class _MyHomePageState extends State<MyHomePage> {
     if (storageDatabase == null) {
       snackbar("You need to init StorageDatabase first");
       return;
-    } else if (storageDatabase!.explorer == null) {
+    } else if (!storageDatabase!.storageExplorerHasInitialized) {
       snackbar('You need to init StorageExplorer first');
       return;
-    } else if (storageDatabase!.explorer!.networkFiles != null) {
+    } else if (storageDatabase!.explorer.networkFilesHasInitialized) {
       snackbar('NetworkFiles already initialized');
       return;
     }
-    await storageDatabase!.explorer!.initNetWorkFiles();
+    await storageDatabase!.explorer.initNetWorkFiles();
     await storageDatabase!.clear();
     snackbar('NetworkFiles initializing successfully');
   }
@@ -103,10 +103,10 @@ class _MyHomePageState extends State<MyHomePage> {
     if (storageDatabase == null) {
       snackbar("You need to init StorageDatabase first");
       return;
-    } else if (storageDatabase!.explorer == null) {
+    } else if (!storageDatabase!.storageExplorerHasInitialized) {
       snackbar('You need to init StorageExplorer first');
       return;
-    } else if (storageDatabase!.explorer!.networkFiles == null) {
+    } else if (!storageDatabase!.explorer.networkFilesHasInitialized) {
       snackbar('You need to init NetworkFiles first');
       return;
     } else if (imageUrlController.text.isEmpty) {
@@ -117,7 +117,7 @@ class _MyHomePageState extends State<MyHomePage> {
       networkImage = null;
     });
     setState(() {
-      networkImage = storageDatabase!.explorer!.networkFiles!.networkImage(
+      networkImage = storageDatabase!.explorer.networkFiles.networkImage(
         imageUrlController.text,
         height: 300,
         headers: {
@@ -202,7 +202,7 @@ class _MyHomePageState extends State<MyHomePage> {
     if (storageDatabase == null) {
       snackbar("You need to init StorageDatabase first");
       return;
-    } else if (storageDatabase!.storageAPI == null) {
+    } else if (!storageDatabase!.storageAPIHasInitialized) {
       snackbar('You need to init StorageAPI first');
       return;
     } else if (imagePath == null) {
@@ -214,7 +214,7 @@ class _MyHomePageState extends State<MyHomePage> {
     }
     bytes = 0;
     totalBytes = 1;
-    await storageDatabase!.storageAPI!.request(
+    await storageDatabase!.storageAPI.request(
       targetController.text,
       RequestType.post,
       files: [
@@ -239,14 +239,14 @@ class _MyHomePageState extends State<MyHomePage> {
     if (storageDatabase == null) {
       snackbar("You need to init StorageDatabase first");
       return;
-    } else if (storageDatabase!.explorer == null) {
+    } else if (!storageDatabase!.storageExplorerHasInitialized) {
       snackbar('You need to init StorageExplorer first');
       return;
     } else if (dirPathController.text.isEmpty) {
       snackbar('Please enter directory Path');
       return;
     }
-    storageDatabase!.explorer!.directory(dirPathController.text);
+    storageDatabase!.explorer.directory(dirPathController.text);
     snackbar('Directory created successfully');
   }
 
@@ -294,27 +294,27 @@ class _MyHomePageState extends State<MyHomePage> {
         enableLogging: true,
       );
     }
-    storageDatabase!.laravelEcho?.connect();
-    storageDatabase!.laravelEcho?.connector.onConnect((data) {
+    storageDatabase!.laravelEcho.connect();
+    storageDatabase!.laravelEcho.connector.onConnect((data) {
       setState(() => laravelEchoConnected = true);
       log('socket connected');
     });
-    storageDatabase!.laravelEcho?.connector.onDisconnect((data) {
+    storageDatabase!.laravelEcho.connector.onDisconnect((data) {
       setState(() => laravelEchoConnected = false);
       log('socket disconnected');
     });
-    storageDatabase!.laravelEcho?.connector.onConnectError((err) {
+    storageDatabase!.laravelEcho.connector.onConnectError((err) {
       setState(() => laravelEchoConnected = false);
       log('socketConnectError: $err');
     });
-    storageDatabase!.laravelEcho!.connector.onError((err) {
+    storageDatabase!.laravelEcho.connector.onError((err) {
       log('socketError: $err');
     });
     snackbar('Laravel echo connected successfully');
   }
 
   getLaravelEchoChannels() {
-    storageDatabase!.laravelEcho!.connector.channels.forEach((name, channel) {
+    storageDatabase!.laravelEcho.connector.channels.forEach((name, channel) {
       channel = channel as SocketIoChannel;
       log(' -- channel: $name');
       for (var event in channel.events.keys) {
@@ -460,7 +460,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                   ElevatedButton(
                     onPressed: laravelEchoConnected
-                        ? storageDatabase!.laravelEcho!.disconnect
+                        ? storageDatabase!.laravelEcho.disconnect
                         : connectLaravelEcho,
                     style: ButtonStyle(
                       backgroundColor: MaterialStateProperty.all(
@@ -510,7 +510,7 @@ class MessageMigration extends LaravelEchoMigration {
   String get itemName => 'message';
 
   @override
-  Channel get channel => storageDatabase.laravelEcho!.private('messages');
+  Channel get channel => storageDatabase.laravelEcho.private('messages');
 
   @override
   Map<EventsType, String> get eventsNames => {
@@ -523,7 +523,7 @@ class MessageMigration extends LaravelEchoMigration {
   setup() {
     super.setup();
     channel.listen('channel_subscribe_success', (Map messages) {
-      print('messages: $messages');
+      log('messages: $messages');
       set(messages, keepData: false);
     });
   }

@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:storage_database/src/storage_database_exception.dart';
 
 import '../src/storage_listeners.dart';
 import '../storage_database.dart';
@@ -71,12 +72,23 @@ class StorageExplorer {
     );
   }
 
-  ExplorerNetworkFiles? networkFiles;
+  ExplorerNetworkFiles? _networkFiles;
   initNetWorkFiles({ExplorerDirectory? cacheDirectory}) {
-    networkFiles = ExplorerNetworkFiles(
+    _networkFiles = ExplorerNetworkFiles(
       this,
       cacheDirectory ?? directory('network-files'),
     );
+  }
+
+  bool get networkFilesHasInitialized => _networkFiles != null;
+
+  ExplorerNetworkFiles get networkFiles {
+    if (!networkFilesHasInitialized) {
+      throw const StorageDatabaseException(
+        'ExplorerNetworkFiles has not initialized yet',
+      );
+    }
+    return _networkFiles!;
   }
 
   ExplorerDirectory directory(String dirName, {bool log = true}) {

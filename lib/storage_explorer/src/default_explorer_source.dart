@@ -16,13 +16,13 @@ class DefaultExplorerSource extends ExplorerSource {
   File fileSync(String path) => File(path);
 
   @override
-  onDirCreate(String path) => null;
+  onDirCreate(String dir) => null;
 
   @override
-  onDirDelete(String path) => null;
+  onDirDelete(String dir) => null;
 
   @override
-  onDirUpdate(String path) => null;
+  onDirUpdate(String dir) => null;
 
   @override
   onFileCreate(String path) => null;

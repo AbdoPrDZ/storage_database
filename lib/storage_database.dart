@@ -1,3 +1,5 @@
+import 'package:storage_database/src/storage_database_exception.dart';
+
 import 'src/default_storage_source.dart';
 import 'src/storage_database_source.dart';
 import 'src/storage_listeners.dart';
@@ -32,21 +34,54 @@ class StorageDatabase {
         source ?? await DefaultStorageSource.instance,
       );
 
-  StorageExplorer? explorer;
+  StorageExplorer? _explorer;
   Future initExplorer({String? path}) async =>
-      explorer = await StorageExplorer.getInstance(this, path: path);
+      _explorer = await StorageExplorer.getInstance(this, path: path);
 
-  StorageAPI? storageAPI;
+  bool get storageExplorerHasInitialized => _explorer != null;
+
+  StorageExplorer get explorer {
+    if (!storageExplorerHasInitialized) {
+      throw const StorageDatabaseException(
+        'StorageExplorer service has not initialized yet',
+      );
+    }
+    return _explorer!;
+  }
+
+  StorageAPI? _storageAPI;
   initAPI({required String apiUrl, Map<String, String> headers = const {}}) =>
-      storageAPI = StorageAPI(
+      _storageAPI = StorageAPI(
         storageDatabase: this,
         apiUrl: apiUrl,
         headers: headers,
       );
 
-  LaravelEcho? laravelEcho;
+  bool get storageAPIHasInitialized => _storageAPI != null;
+
+  StorageAPI get storageAPI {
+    if (!storageAPIHasInitialized) {
+      throw const StorageDatabaseException(
+        'StorageAPI service has not initialized yet',
+      );
+    }
+    return _storageAPI!;
+  }
+
+  LaravelEcho? _laravelEcho;
   initLaravelEcho(Connector connector, List<LaravelEchoMigration> migrations) =>
-      laravelEcho = LaravelEcho(this, connector, migrations);
+      _laravelEcho = LaravelEcho(this, connector, migrations);
+
+  bool get laravelEchoHasInitialized => _laravelEcho != null;
+
+  LaravelEcho get laravelEcho {
+    if (!laravelEchoHasInitialized) {
+      throw const StorageDatabaseException(
+        'LaravelEcho service has not initialized yet',
+      );
+    }
+    return _laravelEcho!;
+  }
 
   initSocketLaravelEcho(
     String host,
@@ -57,8 +92,8 @@ class StorageDatabase {
     bool autoConnect = true,
     Map<dynamic, dynamic> moreOptions = const {},
   }) {
-    laravelEcho?.disconnect();
-    laravelEcho = LaravelEcho.socket(
+    _laravelEcho?.disconnect();
+    _laravelEcho = LaravelEcho.socket(
       this,
       host,
       migrations,
@@ -89,8 +124,8 @@ class StorageDatabase {
     bool autoConnect = true,
     String? nameSpace,
   }) {
-    laravelEcho?.disconnect();
-    laravelEcho = LaravelEcho.pusher(
+    _laravelEcho?.disconnect();
+    _laravelEcho = LaravelEcho.pusher(
       this,
       appKey,
       migrations,
@@ -124,13 +159,13 @@ class StorageDatabase {
     bool clearNetworkFiles = true,
     bool clearAPI = true,
   }) async {
-    if (clearExplorer && explorer != null) await explorer!.clear();
+    if (clearExplorer && _explorer != null) await explorer.clear();
     if (clearNetworkFiles &&
-        explorer != null &&
-        explorer!.networkFiles != null) {
-      await explorer!.networkFiles!.clear();
+        _explorer != null &&
+        explorer.networkFilesHasInitialized) {
+      await explorer.networkFiles.clear();
     }
-    if (clearAPI && storageAPI != null) await storageAPI!.clear();
+    if (clearAPI && _storageAPI != null) await storageAPI.clear();
 
     await source.clear();
 

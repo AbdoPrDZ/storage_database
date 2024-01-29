@@ -186,3 +186,8 @@
 
 - Fix StorageAPI RequestType.
 - Upgrade flutter sdk, and other dependencies.
+
+## 1.0.3
+
+- Clean the code.
+- Upgrade flutter sdk, and other dependencies.
