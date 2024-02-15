@@ -191,3 +191,7 @@
 
 - Clean the code.
 - Upgrade flutter sdk, and other dependencies.
+
+## 1.0.4
+
+- Upgrade laravel_echo_null version to 0.0.5+9
