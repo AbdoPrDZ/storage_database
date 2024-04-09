@@ -351,19 +351,28 @@ import 'package:storage_database/api/api.dart';
 // 1: normal initializing
 StorageDatabase storageDatabase = await StorageDatabase.getInstance(); // you need to init storageDatabase first
 
-StorageAPI storageApi = StorageExplorer(
-  storageDatabase: storageDatabase,
-  tokenSource: () => 'api-token',
+StorageAPI storageAPI = StorageExplorer(
   apiUrl: 'http:// your.api.url',
+  getHeaders: (url) => {
+    'Accept': 'application/json',
+    'Content-Type': 'application/json; charset=UTF-8',
+    'Authorization': 'Bearer <-your-token->',
+  },
 );
+// for use it
+storageAPI!.<FunctionName> // <FunctionName>: name of function you want to use (request, get, post, put, patch, delete)
 
 // 2: initializing from StorageDatabase Class
 await storageDatabase.initAPI(
-  tokenSource: () async => 'api-token',
   apiUrl: 'http:// your.api.url',
+  getHeaders: (url) => {
+    'Accept': 'application/json',
+    'Content-Type': 'application/json; charset=UTF-8',
+    'Authorization': 'Bearer <-your-token->',
+  },
 );
 // for use it
-storageDatabase.storageAPI!.<FunctionName> // <FunctionName>: name of function you want to use
+storageDatabase.storageAPI!.<FunctionName> // <FunctionName>: name of function you want to use (request, get, post, put, patch, delete)
 ```
 
 ### Working with APIRequest
@@ -378,16 +387,6 @@ APIResponse response = storageAPI.request<TypeOfResponseValue>(
   errorsField: 'errors', // errors field
 );
 
-// to re-request
-storageAPI.resendRequest(reqId);
-// to re-request multi requests ids
-storageAPI.resendRequests(
-  [requestIds], // when is empty automatically is re-request all ids stored
-  onResponse: (response) => print(response.message),
-);
-
-// to clear all request ids stored
-await storageAPI.clear();
 ```
 
 ### Working with APIResponse
