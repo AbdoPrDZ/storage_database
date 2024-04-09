@@ -7,25 +7,28 @@ import 'package:http/http.dart' as http;
 
 import '../storage_database.dart';
 
-class APIRequest {
-  final String apiUrl;
+class APIRequest<T> {
+  final String url;
+  final RequestType type;
   final Map<String, String> headers;
+  final Map<String, dynamic>? data;
+  final List<http.MultipartFile> files;
+  final Function(int bytes, int totalBytes)? onFilesUpload;
+  final bool log;
+  final String errorsField;
 
-  APIRequest(this.apiUrl, this.headers);
+  const APIRequest(
+    this.url, {
+    required this.type,
+    required this.headers,
+    required this.data,
+    required this.files,
+    required this.onFilesUpload,
+    required this.log,
+    required this.errorsField,
+  });
 
-  Future<APIResponse<T>> send<T>(
-    String target,
-    RequestType type, {
-    Map<String, dynamic>? data,
-    List<http.MultipartFile> files = const [],
-    Function(int bytes, int totalBytes)? onFilesUpload,
-    bool log = false,
-    Map<String, String> headers = const {},
-    bool appendHeader = true,
-    String errorsField = 'errors',
-  }) async {
-    if (appendHeader) headers = {...headers, ...this.headers};
-    String url = '$apiUrl/$target';
+  Future<APIResponse<T>> send() async {
     if (log) {
       dev.log("[StorageDatabaseAPI] reqUrl: $url");
       dev.log("[StorageDatabaseAPI] reqHeaders: $headers");
@@ -94,113 +97,103 @@ class APIRequest {
     }
   }
 
-  Future<APIResponse<T>> get<T>(
-    String target, {
+  factory APIRequest.get(
+    String url, {
     Map<String, dynamic>? data,
     List<http.MultipartFile> files = const [],
     Function(int bytes, int totalBytes)? onFilesUpload,
     bool log = false,
     Map<String, String> headers = const {},
-    bool appendHeader = true,
     String errorsField = 'errors',
   }) =>
-      send(
-        target,
-        RequestType.post,
+      APIRequest(
+        url,
+        type: RequestType.get,
         data: data,
         files: files,
         onFilesUpload: onFilesUpload,
         log: log,
         headers: headers,
-        appendHeader: appendHeader,
         errorsField: errorsField,
       );
 
-  Future<APIResponse<T>> post<T>(
-    String target, {
+  factory APIRequest.post(
+    String url, {
     Map<String, dynamic>? data,
     List<http.MultipartFile> files = const [],
     Function(int bytes, int totalBytes)? onFilesUpload,
     bool log = false,
     Map<String, String> headers = const {},
-    bool appendHeader = true,
     String errorsField = 'errors',
   }) =>
-      send(
-        target,
-        RequestType.post,
+      APIRequest(
+        url,
+        type: RequestType.post,
         data: data,
         files: files,
         onFilesUpload: onFilesUpload,
         log: log,
         headers: headers,
-        appendHeader: appendHeader,
         errorsField: errorsField,
       );
 
-  Future<APIResponse<T>> put<T>(
-    String target, {
+  factory APIRequest.put(
+    String url, {
     Map<String, dynamic>? data,
     List<http.MultipartFile> files = const [],
     Function(int bytes, int totalBytes)? onFilesUpload,
     bool log = false,
     Map<String, String> headers = const {},
-    bool appendHeader = true,
     String errorsField = 'errors',
   }) =>
-      send(
-        target,
-        RequestType.put,
+      APIRequest(
+        url,
+        type: RequestType.put,
         data: data,
         files: files,
         onFilesUpload: onFilesUpload,
         log: log,
         headers: headers,
-        appendHeader: appendHeader,
         errorsField: errorsField,
       );
 
-  Future<APIResponse<T>> patch<T>(
-    String target, {
+  factory APIRequest.patch(
+    String url, {
     Map<String, dynamic>? data,
     List<http.MultipartFile> files = const [],
     Function(int bytes, int totalBytes)? onFilesUpload,
     bool log = false,
     Map<String, String> headers = const {},
-    bool appendHeader = true,
     String errorsField = 'errors',
   }) =>
-      send(
-        target,
-        RequestType.patch,
+      APIRequest(
+        url,
+        type: RequestType.patch,
         data: data,
         files: files,
         onFilesUpload: onFilesUpload,
         log: log,
         headers: headers,
-        appendHeader: appendHeader,
         errorsField: errorsField,
       );
 
-  Future<APIResponse<T>> delete<T>(
-    String target, {
+  factory APIRequest.delete(
+    String url, {
     Map<String, dynamic>? data,
     List<http.MultipartFile> files = const [],
     Function(int bytes, int totalBytes)? onFilesUpload,
     bool log = false,
     Map<String, String> headers = const {},
-    bool appendHeader = true,
     String errorsField = 'errors',
   }) =>
-      send(
-        target,
-        RequestType.delete,
+      APIRequest(
+        url,
+        type: RequestType.delete,
         data: data,
         files: files,
         onFilesUpload: onFilesUpload,
         log: log,
         headers: headers,
-        appendHeader: appendHeader,
         errorsField: errorsField,
       );
 }

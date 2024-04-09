@@ -49,10 +49,16 @@ class StorageDatabase {
   }
 
   StorageAPI? _storageAPI;
-  initAPI({required String apiUrl, Map<String, String> headers = const {}}) =>
+  initAPI(
+          {required String apiUrl,
+          Map<String, String> Function(String url)? getHeaders}) =>
       _storageAPI = StorageAPI(
         apiUrl: apiUrl,
-        headers: headers,
+        getHeaders: getHeaders ??
+            (url) => {
+                  "Accept": "application/json",
+                  'Content-Type': 'application/json; charset=UTF-8',
+                },
       );
 
   bool get storageAPIHasInitialized => _storageAPI != null;
