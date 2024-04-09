@@ -201,3 +201,4 @@
 - Upgrade sdk version.
 - Upgrade dependencies versions.
 - Make some changes in StorageAPI.
+- Update README file.
