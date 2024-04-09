@@ -195,3 +195,9 @@
 ## 1.0.4
 
 - Upgrade laravel_echo_null version to 0.0.5+9
+
+## 1.0.5
+
+- Upgrade sdk version.
+- Upgrade dependencies versions.
+- Make some changes in StorageAPI.
