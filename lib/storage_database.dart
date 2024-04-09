@@ -1,6 +1,5 @@
-import 'package:storage_database/src/storage_database_exception.dart';
-
 import 'src/default_storage_source.dart';
+import 'src/storage_database_exception.dart';
 import 'src/storage_database_source.dart';
 import 'src/storage_listeners.dart';
 import 'storage_explorer/storage_explorer.dart';
@@ -52,7 +51,6 @@ class StorageDatabase {
   StorageAPI? _storageAPI;
   initAPI({required String apiUrl, Map<String, String> headers = const {}}) =>
       _storageAPI = StorageAPI(
-        storageDatabase: this,
         apiUrl: apiUrl,
         headers: headers,
       );
@@ -165,7 +163,6 @@ class StorageDatabase {
         explorer.networkFilesHasInitialized) {
       await explorer.networkFiles.clear();
     }
-    if (clearAPI && _storageAPI != null) await storageAPI.clear();
 
     await source.clear();
 

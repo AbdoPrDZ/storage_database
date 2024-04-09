@@ -6,11 +6,9 @@ export './request.dart';
 export './response.dart';
 
 class StorageAPI {
-  final StorageDatabase storageDatabase;
   final String apiUrl;
 
   StorageAPI({
-    required this.storageDatabase,
     required this.apiUrl,
     Map<String, String> headers = const {
       'Content-Type': 'application/json; charset=UTF-8',
@@ -29,7 +27,7 @@ class StorageAPI {
     bool appendHeader = true,
     String errorsField = 'errors',
   }) =>
-      APIRequest(storageDatabase, apiUrl, headers).send(
+      APIRequest(apiUrl, headers).send(
         target,
         type,
         data: data,
@@ -40,11 +38,4 @@ class StorageAPI {
         appendHeader: appendHeader,
         errorsField: errorsField,
       );
-
-  Future clear() async {
-    storageDatabase.onClear(
-      () => storageDatabase.collection('api').set({}),
-    );
-    await storageDatabase.collection('api').delete();
-  }
 }

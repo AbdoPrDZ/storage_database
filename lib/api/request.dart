@@ -8,11 +8,10 @@ import 'package:http/http.dart' as http;
 import '../storage_database.dart';
 
 class APIRequest {
-  final StorageDatabase storageDatabase;
   final String apiUrl;
   final Map<String, String> headers;
 
-  APIRequest(this.storageDatabase, this.apiUrl, this.headers);
+  APIRequest(this.apiUrl, this.headers);
 
   Future<APIResponse<T>> send<T>(
     String target,
@@ -94,6 +93,116 @@ class APIRequest {
       return APIResponse<T>(false, 'ExceptionError: $e', statusCode);
     }
   }
+
+  Future<APIResponse<T>> get<T>(
+    String target, {
+    Map<String, dynamic>? data,
+    List<http.MultipartFile> files = const [],
+    Function(int bytes, int totalBytes)? onFilesUpload,
+    bool log = false,
+    Map<String, String> headers = const {},
+    bool appendHeader = true,
+    String errorsField = 'errors',
+  }) =>
+      send(
+        target,
+        RequestType.post,
+        data: data,
+        files: files,
+        onFilesUpload: onFilesUpload,
+        log: log,
+        headers: headers,
+        appendHeader: appendHeader,
+        errorsField: errorsField,
+      );
+
+  Future<APIResponse<T>> post<T>(
+    String target, {
+    Map<String, dynamic>? data,
+    List<http.MultipartFile> files = const [],
+    Function(int bytes, int totalBytes)? onFilesUpload,
+    bool log = false,
+    Map<String, String> headers = const {},
+    bool appendHeader = true,
+    String errorsField = 'errors',
+  }) =>
+      send(
+        target,
+        RequestType.post,
+        data: data,
+        files: files,
+        onFilesUpload: onFilesUpload,
+        log: log,
+        headers: headers,
+        appendHeader: appendHeader,
+        errorsField: errorsField,
+      );
+
+  Future<APIResponse<T>> put<T>(
+    String target, {
+    Map<String, dynamic>? data,
+    List<http.MultipartFile> files = const [],
+    Function(int bytes, int totalBytes)? onFilesUpload,
+    bool log = false,
+    Map<String, String> headers = const {},
+    bool appendHeader = true,
+    String errorsField = 'errors',
+  }) =>
+      send(
+        target,
+        RequestType.put,
+        data: data,
+        files: files,
+        onFilesUpload: onFilesUpload,
+        log: log,
+        headers: headers,
+        appendHeader: appendHeader,
+        errorsField: errorsField,
+      );
+
+  Future<APIResponse<T>> patch<T>(
+    String target, {
+    Map<String, dynamic>? data,
+    List<http.MultipartFile> files = const [],
+    Function(int bytes, int totalBytes)? onFilesUpload,
+    bool log = false,
+    Map<String, String> headers = const {},
+    bool appendHeader = true,
+    String errorsField = 'errors',
+  }) =>
+      send(
+        target,
+        RequestType.patch,
+        data: data,
+        files: files,
+        onFilesUpload: onFilesUpload,
+        log: log,
+        headers: headers,
+        appendHeader: appendHeader,
+        errorsField: errorsField,
+      );
+
+  Future<APIResponse<T>> delete<T>(
+    String target, {
+    Map<String, dynamic>? data,
+    List<http.MultipartFile> files = const [],
+    Function(int bytes, int totalBytes)? onFilesUpload,
+    bool log = false,
+    Map<String, String> headers = const {},
+    bool appendHeader = true,
+    String errorsField = 'errors',
+  }) =>
+      send(
+        target,
+        RequestType.delete,
+        data: data,
+        files: files,
+        onFilesUpload: onFilesUpload,
+        log: log,
+        headers: headers,
+        appendHeader: appendHeader,
+        errorsField: errorsField,
+      );
 }
 
 enum RequestType {
