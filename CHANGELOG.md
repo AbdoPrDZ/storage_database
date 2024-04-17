@@ -202,3 +202,7 @@
 - Upgrade dependencies versions.
 - Make some changes in StorageAPI.
 - Update README file.
+
+## 1.0.5+1
+
+- Upgrade the laravel_echo_null version.
