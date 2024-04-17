@@ -363,7 +363,7 @@ StorageAPI storageAPI = StorageExplorer(
 storageAPI!.<FunctionName> // <FunctionName>: name of function you want to use (request, get, post, put, patch, delete)
 
 // 2: initializing from StorageDatabase Class
-await storageDatabase.initAPI(
+storageDatabase.initAPI(
   apiUrl: 'http:// your.api.url',
   getHeaders: (url) => {
     'Accept': 'application/json',

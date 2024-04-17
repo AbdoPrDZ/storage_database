@@ -30,7 +30,7 @@ class APIRequest<T> {
 
   Future<APIResponse<T>> send() async {
     if (log) {
-      dev.log("[StorageDatabaseAPI] reqUrl: $url");
+      dev.log("[StorageDatabaseAPI] reqUrl: $type - $url");
       dev.log("[StorageDatabaseAPI] reqHeaders: $headers");
     }
     String responseBody = '';

@@ -145,7 +145,7 @@ class _MyHomePageState extends State<MyHomePage> {
       snackbar("Api Url required");
       return;
     }
-    await storageDatabase!.initAPI(apiUrl: apiUrlController.text);
+    storageDatabase!.initAPI(apiUrl: apiUrlController.text);
     snackbar('StorageExplorer initializing successfully');
   }
 

@@ -49,9 +49,10 @@ class StorageDatabase {
   }
 
   StorageAPI? _storageAPI;
-  initAPI(
-          {required String apiUrl,
-          Map<String, String> Function(String url)? getHeaders}) =>
+  void initAPI({
+    required String apiUrl,
+    Map<String, String> Function(String url)? getHeaders,
+  }) =>
       _storageAPI = StorageAPI(
         apiUrl: apiUrl,
         getHeaders: getHeaders ??
@@ -161,7 +162,6 @@ class StorageDatabase {
   Future clear({
     bool clearExplorer = true,
     bool clearNetworkFiles = true,
-    bool clearAPI = true,
   }) async {
     if (clearExplorer && _explorer != null) await explorer.clear();
     if (clearNetworkFiles &&
