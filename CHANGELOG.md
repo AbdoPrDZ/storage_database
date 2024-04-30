@@ -210,3 +210,7 @@
 ## 1.0.5+2
 
 - Clean the code.
+
+## 1.0.5+3
+
+- Fix some bugs.
