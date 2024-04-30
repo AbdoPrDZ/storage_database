@@ -206,3 +206,7 @@
 ## 1.0.5+1
 
 - Upgrade the laravel_echo_null version.
+
+## 1.0.5+2
+
+- Clean the code.
