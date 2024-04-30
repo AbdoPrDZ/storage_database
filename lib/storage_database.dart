@@ -49,6 +49,7 @@ class StorageDatabase {
   void initAPI({
     required String apiUrl,
     Map<String, String> Function(String url)? getHeaders,
+    bool log = false,
   }) =>
       _storageAPI = StorageAPI(
         apiUrl: apiUrl,
@@ -57,6 +58,7 @@ class StorageDatabase {
                   "Accept": "application/json",
                   'Content-Type': 'application/json; charset=UTF-8',
                 },
+        log: log,
       );
 
   bool get storageAPIIsInitialized => _storageAPI != null;

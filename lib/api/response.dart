@@ -64,7 +64,7 @@ class APIResponse<T> {
         statusCode,
         errors: responseData.containsKey(errorsField)
             ? decodeErrors?.call(responseData[errorsField]) ??
-                Map<String, String>.from(responseData[errorsField])
+                Map<String, String>.from(responseData[errorsField]!)
             : {},
         body: responseData,
         value: value as T,
