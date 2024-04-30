@@ -63,7 +63,7 @@ abstract class LaravelEchoMigration extends StorageCollection {
     try {
       await deleteItem(id.toString());
     } catch (e) {
-      log('MigrationError[$migrationName]: Cant delete item $id.\n error: "$e"');
+      log('[StorageDatabase.LaravelEcho.MigrationError$migrationName]: Cant delete item $id.\n error: "$e"');
     }
   }
 }

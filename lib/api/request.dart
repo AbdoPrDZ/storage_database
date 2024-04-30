@@ -16,43 +16,53 @@ class APIRequest<T> {
   final Function(int bytes, int totalBytes)? onFilesUpload;
   final bool log;
   final String errorsField;
+  final Encoding? encoding;
 
   const APIRequest(
     this.url, {
-    required this.type,
-    required this.headers,
-    required this.data,
-    required this.files,
-    required this.onFilesUpload,
-    required this.log,
-    required this.errorsField,
+    this.type = RequestType.get,
+    this.headers = const {},
+    this.data,
+    this.files = const [],
+    this.onFilesUpload,
+    this.log = false,
+    this.errorsField = 'errors',
+    this.encoding,
   });
 
   Future<APIResponse<T>> send() async {
     if (log) {
-      dev.log("[StorageDatabaseAPI] reqUrl: $type - $url");
-      dev.log("[StorageDatabaseAPI] reqHeaders: $headers");
+      dev.log("[StorageDatabase.StorageAPI] reqUrl: $type - $url");
+      dev.log("[StorageDatabase.StorageAPI] reqHeaders: $headers");
+      dev.log("[StorageDatabase.StorageAPI] reqData: ${jsonEncode(data)}");
+      dev.log("[StorageDatabase.StorageAPI] reqFiles: ${files.length} file");
     }
+
     String responseBody = '';
+
     int statusCode = 400;
+
     try {
       Uri uri = Uri.parse(url);
+
       if (files.isNotEmpty) {
         http.MultipartRequest request = MultipartRequest(
           '$type',
           Uri.parse(url),
-          onProgress: onFilesUpload,
+          onFilesUpload,
         );
         request.files.addAll(files);
         request.fields.addAll({
           for (String key in (data ?? {}).keys) key: data![key].toString(),
         });
         request.headers.addAll(headers);
+
         http.StreamedResponse res = await request.send();
         statusCode = res.statusCode;
         responseBody = await res.stream.bytesToString();
       } else {
         http.Response response;
+
         if (type.isPost) {
           response = await http.post(
             uri,
@@ -70,6 +80,7 @@ class APIRequest<T> {
             uri,
             headers: headers,
             body: jsonEncode(data),
+            encoding: encoding,
           );
         } else if (type.isDelete) {
           response = await http.delete(
@@ -80,18 +91,25 @@ class APIRequest<T> {
         } else {
           response = await http.get(uri, headers: headers);
         }
+
         responseBody = response.body;
         statusCode = response.statusCode;
       }
-      return APIResponse.fromResponse(
+
+      return APIResponse.fromResponse<T>(
         responseBody,
         statusCode,
         log: log,
         errorsField: errorsField,
       );
     } on SocketException {
-      if (log) dev.log("[StorageDatabaseAPI] reqError: No Internet Connection");
-      return APIResponse<T>(false, "No Internet Connection", statusCode);
+      if (log) {
+        dev.log(
+          "[StorageDatabase.StorageAPI] reqError: No Internet Connection",
+        );
+      }
+
+      return APIResponse<T>(false, "No Internet Connection", 503);
     } catch (e) {
       return APIResponse<T>(false, 'ExceptionError: $e', statusCode);
     }
@@ -224,17 +242,14 @@ enum RequestType {
 }
 
 class MultipartRequest extends http.MultipartRequest {
-  final void Function(int bytes, int totalBytes)? onProgress;
+  final Function(int bytes, int totalBytes)? onProgress;
 
-  MultipartRequest(
-    String method,
-    Uri url, {
-    this.onProgress,
-  }) : super(method, url);
+  MultipartRequest(super.method, super.url, this.onProgress);
 
   @override
   http.ByteStream finalize() {
     final byteStream = super.finalize();
+
     if (onProgress == null) return byteStream;
 
     final total = contentLength;
@@ -243,13 +258,13 @@ class MultipartRequest extends http.MultipartRequest {
     final t = StreamTransformer.fromHandlers(
       handleData: (List<int> data, EventSink<List<int>> sink) {
         bytes += data.length;
+
         if (onProgress != null) onProgress!(bytes, total);
-        if (total >= bytes) {
-          sink.add(data);
-        }
+
+        if (total >= bytes) sink.add(data);
       },
     );
-    final stream = byteStream.transform(t);
-    return http.ByteStream(stream);
+
+    return http.ByteStream(byteStream.transform(t));
   }
 }

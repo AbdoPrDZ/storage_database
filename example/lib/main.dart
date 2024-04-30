@@ -68,7 +68,7 @@ class _MyHomePageState extends State<MyHomePage> {
     if (storageDatabase == null) {
       snackbar("You need to init StorageDatabase first");
       return;
-    } else if (storageDatabase!.storageExplorerHasInitialized) {
+    } else if (storageDatabase!.storageExplorerIsInitialized) {
       snackbar('StorageExplorer already initialized');
       return;
     }
@@ -84,10 +84,10 @@ class _MyHomePageState extends State<MyHomePage> {
     if (storageDatabase == null) {
       snackbar("You need to init StorageDatabase first");
       return;
-    } else if (!storageDatabase!.storageExplorerHasInitialized) {
+    } else if (!storageDatabase!.storageExplorerIsInitialized) {
       snackbar('You need to init StorageExplorer first');
       return;
-    } else if (storageDatabase!.explorer.networkFilesHasInitialized) {
+    } else if (storageDatabase!.explorer.networkFilesIsInitialized) {
       snackbar('NetworkFiles already initialized');
       return;
     }
@@ -103,10 +103,10 @@ class _MyHomePageState extends State<MyHomePage> {
     if (storageDatabase == null) {
       snackbar("You need to init StorageDatabase first");
       return;
-    } else if (!storageDatabase!.storageExplorerHasInitialized) {
+    } else if (!storageDatabase!.storageExplorerIsInitialized) {
       snackbar('You need to init StorageExplorer first');
       return;
-    } else if (!storageDatabase!.explorer.networkFilesHasInitialized) {
+    } else if (!storageDatabase!.explorer.networkFilesIsInitialized) {
       snackbar('You need to init NetworkFiles first');
       return;
     } else if (imageUrlController.text.isEmpty) {
@@ -202,7 +202,7 @@ class _MyHomePageState extends State<MyHomePage> {
     if (storageDatabase == null) {
       snackbar("You need to init StorageDatabase first");
       return;
-    } else if (!storageDatabase!.storageAPIHasInitialized) {
+    } else if (!storageDatabase!.storageAPIIsInitialized) {
       snackbar('You need to init StorageAPI first');
       return;
     } else if (imagePath == null) {
@@ -239,7 +239,7 @@ class _MyHomePageState extends State<MyHomePage> {
     if (storageDatabase == null) {
       snackbar("You need to init StorageDatabase first");
       return;
-    } else if (!storageDatabase!.storageExplorerHasInitialized) {
+    } else if (!storageDatabase!.storageExplorerIsInitialized) {
       snackbar('You need to init StorageExplorer first');
       return;
     } else if (dirPathController.text.isEmpty) {

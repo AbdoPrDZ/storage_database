@@ -11,7 +11,7 @@ class StorageListeners {
       return listenersData.containsKey(path) &&
           listenersData[path].containsKey(streamId);
     } catch (e) {
-      log("has stream id: $e");
+      log("[StorageDatabase.StorageListener.hasStreamId]: $e");
       return false;
     }
   }

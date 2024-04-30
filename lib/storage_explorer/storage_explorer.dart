@@ -80,10 +80,10 @@ class StorageExplorer {
     );
   }
 
-  bool get networkFilesHasInitialized => _networkFiles != null;
+  bool get networkFilesIsInitialized => _networkFiles != null;
 
   ExplorerNetworkFiles get networkFiles {
-    if (!networkFilesHasInitialized) {
+    if (!networkFilesIsInitialized) {
       throw const StorageDatabaseException(
         'ExplorerNetworkFiles has not initialized yet',
       );

@@ -26,21 +26,18 @@ class StorageDatabase {
   final List<Function> _onClear = [];
   final StorageListeners storageListeners = StorageListeners();
 
-  static Future<StorageDatabase> getInstance({
-    StorageDatabaseSource? source,
-  }) async =>
-      StorageDatabase(
-        source ?? await DefaultStorageSource.instance,
+  static Future<StorageDatabase> getInstance() async => StorageDatabase(
+        await DefaultStorageSource.instance,
       );
 
   StorageExplorer? _explorer;
   Future initExplorer({String? path}) async =>
       _explorer = await StorageExplorer.getInstance(this, path: path);
 
-  bool get storageExplorerHasInitialized => _explorer != null;
+  bool get storageExplorerIsInitialized => _explorer != null;
 
   StorageExplorer get explorer {
-    if (!storageExplorerHasInitialized) {
+    if (!storageExplorerIsInitialized) {
       throw const StorageDatabaseException(
         'StorageExplorer service has not initialized yet',
       );
@@ -62,10 +59,10 @@ class StorageDatabase {
                 },
       );
 
-  bool get storageAPIHasInitialized => _storageAPI != null;
+  bool get storageAPIIsInitialized => _storageAPI != null;
 
   StorageAPI get storageAPI {
-    if (!storageAPIHasInitialized) {
+    if (!storageAPIIsInitialized) {
       throw const StorageDatabaseException(
         'StorageAPI service has not initialized yet',
       );
@@ -74,13 +71,16 @@ class StorageDatabase {
   }
 
   LaravelEcho? _laravelEcho;
-  initLaravelEcho(Connector connector, List<LaravelEchoMigration> migrations) =>
+  void initLaravelEcho(
+    Connector connector,
+    List<LaravelEchoMigration> migrations,
+  ) =>
       _laravelEcho = LaravelEcho(this, connector, migrations);
 
-  bool get laravelEchoHasInitialized => _laravelEcho != null;
+  bool get laravelEchoIsInitialized => _laravelEcho != null;
 
   LaravelEcho get laravelEcho {
-    if (!laravelEchoHasInitialized) {
+    if (!laravelEchoIsInitialized) {
       throw const StorageDatabaseException(
         'LaravelEcho service has not initialized yet',
       );
@@ -88,7 +88,7 @@ class StorageDatabase {
     return _laravelEcho!;
   }
 
-  initSocketLaravelEcho(
+  void initSocketLaravelEcho(
     String host,
     List<LaravelEchoMigration> migrations, {
     Map<String, String>? authHeaders,
@@ -109,7 +109,7 @@ class StorageDatabase {
     );
   }
 
-  initPusherLaravelEcho(
+  void initPusherLaravelEcho(
     String appKey,
     List<LaravelEchoMigration> migrations, {
     required String authEndPoint,
@@ -166,7 +166,7 @@ class StorageDatabase {
     if (clearExplorer && _explorer != null) await explorer.clear();
     if (clearNetworkFiles &&
         _explorer != null &&
-        explorer.networkFilesHasInitialized) {
+        explorer.networkFilesIsInitialized) {
       await explorer.networkFiles.clear();
     }
 

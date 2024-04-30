@@ -23,25 +23,16 @@ class APIResponse<T> {
     int statusCode, {
     bool log = true,
     String errorsField = 'errors',
+    Map<String, String> Function(Map errors)? decodeErrors,
   }) {
-    if (log) dev.log("response body: $response");
     try {
       Map responseData = jsonDecode(response);
-      if (statusCode == 200) {
-        if (responseData.containsKey(errorsField)) {
-          Map<String, String> errors = {};
-          for (String name in (responseData[errorsField] as Map).keys) {
-            try {
-              errors[name] =
-                  (responseData[errorsField][name] as List).join(', ');
-            } catch (e) {
-              errors[name] = responseData[errorsField][name].toString();
-            }
-          }
-          responseData[errorsField] = errors;
-        }
-      } else {
+
+      if (!responseData.containsKey('message')) {
         switch (statusCode) {
+          case 200:
+            responseData["message"] = "No response message";
+            break;
           case 400:
             responseData["message"] = "Error[$statusCode]: Bad request";
             break;
@@ -54,47 +45,40 @@ class APIResponse<T> {
                 "response failed with status: $statusCode";
         }
       }
-      Map values = {};
-      for (var key in responseData.keys) {
-        if (key != "success" && key != "message") {
-          values[key] = responseData[key];
-        }
-      }
-      if (values.isEmpty) {
-        return APIResponse<T>(
-          responseData["success"] ?? false,
-          responseData["message"] ?? "",
-          statusCode,
-          errors: responseData[errorsField],
-          body: responseData,
-        );
-      } else if (values.length == 1) {
-        return APIResponse(
-          responseData["success"] ?? false,
-          responseData["message"] ?? "",
-          statusCode,
-          errors: responseData[errorsField],
-          body: responseData,
-          value: values[values.keys.first],
-        );
-      } else {
-        return APIResponse(
-          responseData["success"] ?? false,
-          responseData["message"] ?? "",
-          statusCode,
-          errors: responseData[errorsField],
-          body: responseData,
-          value: values as T,
-        );
-      }
+
+      Map values = {
+        for (var key in responseData.keys)
+          if (!["success", "message", errorsField].contains(key))
+            key: responseData[key]
+      };
+
+      final value = values.length == 1
+          ? values[values.keys.first]
+          : values.isNotEmpty
+              ? values
+              : null;
+
+      return APIResponse<T>(
+        responseData["success"] ?? false,
+        responseData["message"] ?? 'No response message',
+        statusCode,
+        errors: responseData.containsKey(errorsField)
+            ? decodeErrors?.call(responseData[errorsField]) ??
+                Map<String, String>.from(responseData[errorsField])
+            : {},
+        body: responseData,
+        value: value as T,
+      );
     } catch (e) {
       String strBody = response.toString();
       String body = strBody.substring(
         0,
-        strBody.length < 10 ? strBody.length : 10,
+        strBody.length < 50 ? strBody.length : 50,
       );
-      dev.log("ERROR:$e");
-      dev.log("body: $body");
+
+      dev.log("[StorageDatabase.StorageAPI.Response] - ERROR: $e");
+      dev.log("[StorageDatabase.StorageAPI.Response] - response-body: $body");
+
       return APIResponse(
         false,
         "body: $body...",

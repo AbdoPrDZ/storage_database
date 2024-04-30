@@ -68,7 +68,7 @@ class ExplorerFile {
         return null;
       }
     } catch (e) {
-      dev.log("DecodeError: $e");
+      dev.log("[StorageDatabase.StorageExplorer.ExplorerFile.getJson]: $e");
       throw StorageDatabaseException("Can't decode file ($filename) content.");
     }
   }

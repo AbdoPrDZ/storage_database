@@ -73,7 +73,8 @@ class StorageCollection {
           currentType = collectionData.runtimeType == data.runtimeType;
         }
       } catch (e) {
-        dev.log("collection check type: $e");
+        dev.log(
+            "[StorageDatabase.StorageCollection] - collection check type: $e");
         throw StorageDatabaseException("Collection Check Type Error: $e");
       }
 
