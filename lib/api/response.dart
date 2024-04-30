@@ -52,20 +52,29 @@ class APIResponse<T> {
             key: responseData[key]
       };
 
+      Map<String, String> errors = responseData.containsKey(errorsField)
+          ? decodeErrors?.call(responseData[errorsField]) ??
+              Map<String, String>.from(responseData[errorsField]!)
+          : {};
+
       final value = values.length == 1
           ? values[values.keys.first]
           : values.isNotEmpty
               ? values
               : null;
 
+      dev.log(
+        "[StorageDatabase.StorageAPI.Response] - reqErrors: ${jsonEncode(errors)}",
+      );
+      dev.log(
+        "[StorageDatabase.StorageAPI.Response] - reqValue: ${jsonEncode(value)}",
+      );
+
       return APIResponse<T>(
         responseData["success"] ?? false,
         responseData["message"] ?? 'No response message',
         statusCode,
-        errors: responseData.containsKey(errorsField)
-            ? decodeErrors?.call(responseData[errorsField]) ??
-                Map<String, String>.from(responseData[errorsField]!)
-            : {},
+        errors: errors,
         body: responseData,
         value: value as T,
       );
@@ -76,8 +85,8 @@ class APIResponse<T> {
         strBody.length < 50 ? strBody.length : 50,
       );
 
-      dev.log("[StorageDatabase.StorageAPI.Response] - ERROR: $e");
-      dev.log("[StorageDatabase.StorageAPI.Response] - response-body: $body");
+      dev.log("[StorageDatabase.StorageAPI.Response] - reqErr: $e");
+      dev.log("[StorageDatabase.StorageAPI.Response] - resBody: $body");
 
       return APIResponse(
         false,

@@ -214,3 +214,7 @@
 ## 1.0.5+3
 
 - Fix some bugs.
+
+## 1.0.5+4
+
+- Edit log messages.
