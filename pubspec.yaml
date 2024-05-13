@@ -1,6 +1,6 @@
 name: storage_database
 description: A quick and simple offline StorageDatabase package for flutter
-version: 1.0.5+4
+version: 1.0.6
 homepage: https://github.com/AbdoPrDZ/storage_database.git
 
 environment:
