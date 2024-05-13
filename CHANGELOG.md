@@ -218,3 +218,8 @@
 ## 1.0.5+4
 
 - Edit log messages.
+
+## 1.0.6
+
+- Upgrade flutter sdk.
+- Upgrade dependencies versions.
