@@ -223,3 +223,8 @@
 
 - Upgrade flutter sdk.
 - Upgrade dependencies versions.
+
+## 1.0.6+1
+
+- Upgrade flutter sdk.
+- Upgrade dependencies versions.

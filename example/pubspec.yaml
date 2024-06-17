@@ -11,10 +11,10 @@ dependencies:
     sdk: flutter
   storage_database:
     path: ../
-  cupertino_icons: ^1.0.2
+  cupertino_icons: ^1.0.8
   http: ^1.2.1
-  file_picker: ^8.0.3
-  pusher_client_fixed: ^0.0.4
+  file_picker: ^8.0.5
+  pusher_client_fixed: ^0.0.4+1
   socket_io_client: ^2.0.3+1
 
 dev_dependencies:
