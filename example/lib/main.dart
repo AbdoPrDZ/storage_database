@@ -16,15 +16,13 @@ class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Storage Database Example',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: const MyHomePage(),
-    );
-  }
+  Widget build(BuildContext context) => MaterialApp(
+        title: 'Storage Database Example',
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
+        ),
+        home: const MyHomePage(),
+      );
 }
 
 class MyHomePage extends StatefulWidget {
@@ -53,13 +51,17 @@ class _MyHomePageState extends State<MyHomePage> {
       snackbar('StorageDatabase already initialized');
       return;
     }
+
     storageDatabase = await StorageDatabase.getInstance();
+
     await storageDatabase!.collection('messages').set({});
     storageDatabase!
         .collection('messages')
         .stream()
         .listen((data) => setState(() => messages = data));
+
     setState(() {});
+
     snackbar('StorageDatabase initializing successfully');
   }
 
@@ -72,11 +74,13 @@ class _MyHomePageState extends State<MyHomePage> {
       snackbar('StorageExplorer already initialized');
       return;
     }
+
     await storageDatabase!.initExplorer(
       path: explorerPathController.text.isNotEmpty
           ? explorerPathController.text
           : null,
     );
+
     snackbar('StorageExplorer initializing successfully');
   }
 
@@ -91,8 +95,10 @@ class _MyHomePageState extends State<MyHomePage> {
       snackbar('NetworkFiles already initialized');
       return;
     }
+
     await storageDatabase!.explorer.initNetWorkFiles();
     await storageDatabase!.clear();
+
     snackbar('NetworkFiles initializing successfully');
   }
 
@@ -113,9 +119,11 @@ class _MyHomePageState extends State<MyHomePage> {
       snackbar('Image Url has been required');
       return;
     }
+
     setState(() {
       networkImage = null;
     });
+
     setState(() {
       networkImage = storageDatabase!.explorer.networkFiles.networkImage(
         imageUrlController.text,
@@ -128,8 +136,10 @@ class _MyHomePageState extends State<MyHomePage> {
         log: true,
       );
     });
+
     log('$networkImage');
     log("'Authorization': ${tokenController.text}");
+
     snackbar('Successfully getting image');
   }
 
@@ -145,7 +155,9 @@ class _MyHomePageState extends State<MyHomePage> {
       snackbar("Api Url required");
       return;
     }
+
     storageDatabase!.initAPI(apiUrl: apiUrlController.text);
+
     snackbar('StorageExplorer initializing successfully');
   }
 
@@ -162,10 +174,13 @@ class _MyHomePageState extends State<MyHomePage> {
       snackbar("Collection Data required");
       return;
     }
+
     await storageDatabase!
         .collection(collectionController.text)
         .set(collectionDataController.text);
+
     log(await storageDatabase!.collection(collectionController.text).get());
+
     snackbar('StorageCollection created successfully');
   }
 
@@ -186,12 +201,17 @@ class _MyHomePageState extends State<MyHomePage> {
   String? imagePath;
   choseImage() async {
     setState(() {});
+
     FilePickerResult? result = await FilePicker.platform.pickFiles(
       allowedExtensions: ['png', 'jpg', 'jpeg', 'ico', 'gif', 'bmp'],
     );
+
     imagePath = result?.files.single.path!;
+
     setState(() {});
+
     log('$imagePath');
+
     if (imagePath != null) snackbar('Successfully chose image');
   }
 
@@ -212,8 +232,10 @@ class _MyHomePageState extends State<MyHomePage> {
       snackbar('Target has been required');
       return;
     }
+
     bytes = 0;
     totalBytes = 1;
+
     await storageDatabase!.storageAPI.request(
       targetController.text,
       RequestType.post,
@@ -226,11 +248,14 @@ class _MyHomePageState extends State<MyHomePage> {
       log: true,
       onFilesUpload: (bytes, totalBytes) {
         log("progress: ${bytes / totalBytes * 100}%");
+
         this.bytes = bytes;
         this.totalBytes = totalBytes;
+
         setState(() {});
       },
     );
+
     snackbar('Successfully uploading file');
   }
 
@@ -279,6 +304,7 @@ class _MyHomePageState extends State<MyHomePage> {
       const String hostEndPoint = "localhost";
       const String hostAuthEndPoint = "http://$hostEndPoint/broadcasting/auth";
       const int port = 6001;
+
       storageDatabase!.initPusherLaravelEcho(
         key,
         [MessageMigration(storageDatabase!, 'messages')],
@@ -294,6 +320,7 @@ class _MyHomePageState extends State<MyHomePage> {
         enableLogging: true,
       );
     }
+
     storageDatabase!.laravelEcho.connect();
     storageDatabase!.laravelEcho.connector.onConnect((data) {
       setState(() => laravelEchoConnected = true);
@@ -310,6 +337,7 @@ class _MyHomePageState extends State<MyHomePage> {
     storageDatabase!.laravelEcho.connector.onError((err) {
       log('socketError: $err');
     });
+
     snackbar('Laravel echo connected successfully');
   }
 

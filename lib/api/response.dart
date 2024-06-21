@@ -63,12 +63,14 @@ class APIResponse<T> {
               ? values
               : null;
 
-      dev.log(
-        "[StorageDatabase.StorageAPI.Response] - reqErrors: ${jsonEncode(errors)}",
-      );
-      dev.log(
-        "[StorageDatabase.StorageAPI.Response] - reqValue: ${jsonEncode(value)}",
-      );
+      if (log) {
+        dev.log(
+          "[StorageDatabase.StorageAPI.Response] - reqErrors: ${jsonEncode(errors)}",
+        );
+        dev.log(
+          "[StorageDatabase.StorageAPI.Response] - reqValue: ${jsonEncode(value)}",
+        );
+      }
 
       return APIResponse<T>(
         responseData["success"] ?? false,
@@ -85,8 +87,10 @@ class APIResponse<T> {
         strBody.length < 50 ? strBody.length : 50,
       );
 
-      dev.log("[StorageDatabase.StorageAPI.Response] - reqErr: $e");
-      dev.log("[StorageDatabase.StorageAPI.Response] - resBody: $body");
+      if (log) {
+        dev.log("[StorageDatabase.StorageAPI.Response] - reqErr: $e");
+        dev.log("[StorageDatabase.StorageAPI.Response] - resBody: $body");
+      }
 
       return APIResponse(
         false,

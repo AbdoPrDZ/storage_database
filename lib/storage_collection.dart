@@ -74,7 +74,8 @@ class StorageCollection {
         }
       } catch (e) {
         dev.log(
-            "[StorageDatabase.StorageCollection] - collection check type: $e");
+          "[StorageDatabase.StorageCollection] - collection check type: $e",
+        );
         throw StorageDatabaseException("Collection Check Type Error: $e");
       }
 

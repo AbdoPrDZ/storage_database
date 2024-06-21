@@ -28,17 +28,21 @@ class ExplorerNetworkFiles {
   }) async {
     String encodedUrl = encodeUrl(url);
     ExplorerFile file = networkDirFiles.file(encodedUrl);
+
     if (log) {
       dev.log('[StorageExplorer.NetworkFile] reqUrl: $url');
       dev.log('[StorageExplorer.NetworkFile] reqEncodedUrl: $encodedUrl');
     }
+
     if (!file.exists || refresh) {
       if (log) dev.log('[StorageExplorer.NetworkFile] reqHeaders: $headers');
+
       Uint8List? fileData = await downloadFile(
         Uri.parse(url),
         log: log,
         headers: headers,
       );
+
       if (fileData != null) {
         await file.setBytes(fileData);
       } else if (!file.exists && !getOldOnError) {
@@ -54,15 +58,19 @@ class ExplorerNetworkFiles {
     bool log = false,
   }) async {
     http.Response response = (await http.get(uri, headers: headers));
+
     if (response.statusCode == 200) {
-      dev.log("[StorageExplorer.NetworkFile] success");
+      if (log) dev.log("[StorageExplorer.NetworkFile] success");
+
       return response.bodyBytes;
     } else {
       if (log) {
         dev.log(
-            "[StorageExplorer.NetworkFile] resCode: ${response.statusCode}");
+          "[StorageExplorer.NetworkFile] resCode: ${response.statusCode}",
+        );
         dev.log("[StorageExplorer.NetworkFile] resBody: ${response.body}");
       }
+
       return null;
     }
   }
@@ -126,9 +134,9 @@ class ExplorerNetworkImage extends StatefulWidget {
     this.height,
     this.borderRadius,
     this.fit = BoxFit.cover,
-    this.baseColor = const Color.fromARGB(255, 168, 168, 168),
-    this.highlightColor = const Color.fromARGB(255, 236, 236, 236),
-    this.errorIconColor = const Color.fromARGB(255, 236, 236, 236),
+    this.baseColor = const Color(0xFFA8A8A8),
+    this.highlightColor = const Color(0xFFECECEC),
+    this.errorIconColor = const Color(0xFFECECEC),
     this.backgroundColor = Colors.transparent,
     this.borderColor,
     this.margin,
@@ -141,18 +149,14 @@ class ExplorerNetworkImage extends StatefulWidget {
 }
 
 class _ExplorerNetworkImageState extends State<ExplorerNetworkImage> {
-  Future<File?> getImage() async {
-    return (await widget.explorerNetworkFiles
-            .file(widget.url, headers: widget.headers))
-        ?.ioFile;
-  }
+  Future<File?> getImage() async => (await widget.explorerNetworkFiles
+          .file(widget.url, headers: widget.headers))
+      ?.ioFile;
 
   @override
-  Widget build(BuildContext context) {
-    return FutureBuilder<File?>(
-      future: getImage(),
-      builder: (context, snapshot) {
-        return Container(
+  Widget build(BuildContext context) => FutureBuilder<File?>(
+        future: getImage(),
+        builder: (context, snapshot) => Container(
           width: widget.width,
           height: widget.height,
           margin: widget.margin,
@@ -195,8 +199,6 @@ class _ExplorerNetworkImageState extends State<ExplorerNetworkImage> {
                               : 50,
                         )
                       : null,
-        );
-      },
-    );
-  }
+        ),
+      );
 }
