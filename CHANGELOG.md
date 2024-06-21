@@ -228,3 +228,7 @@
 
 - Upgrade flutter sdk.
 - Upgrade dependencies versions.
+
+## 1.0.6+2
+
+- Clean the code.
