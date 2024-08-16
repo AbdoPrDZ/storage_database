@@ -1,5 +1,7 @@
 // CLients
-import 'package:pusher_client_fixed/pusher_client_fixed.dart';
+import 'dart:typed_data';
+
+import 'package:pusher_client_socket/pusher_client_socket.dart';
 import 'package:socket_io_client/socket_io_client.dart';
 
 import '../storage_database.dart';
@@ -58,7 +60,10 @@ class LaravelEcho<ClientType, ChannelType>
       'Content-Type': 'application/json'
     },
     String? cluster,
-    required String host,
+    Protocol protocol = Protocol.ws,
+    String? host,
+    Map<String, dynamic> Function(Uint8List, Map<String, dynamic>)?
+        channelDecryption,
     int wsPort = 80,
     int wssPort = 443,
     bool encrypted = true,
@@ -77,7 +82,9 @@ class LaravelEcho<ClientType, ChannelType>
           authEndPoint: authEndPoint,
           authHeaders: authHeaders,
           cluster: cluster,
+          protocol: protocol,
           host: host,
+          channelDecryption: channelDecryption,
           wsPort: wsPort,
           wssPort: wssPort,
           encrypted: encrypted,

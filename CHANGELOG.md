@@ -232,3 +232,9 @@
 ## 1.0.6+2
 
 - Clean the code.
+
+## 1.0.7
+
+- Upgrade flutter sdk.
+- Upgrade dependencies versions.
+- Replace `pusher_client_fixed` package with `pusher_client_socket`.
