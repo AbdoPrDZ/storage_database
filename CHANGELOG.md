@@ -243,3 +243,7 @@
 
 - Upgrade `laravel_echo_null` package to ^0.0.7+1.
 - Upgrade `pusher_client_socket` package to ^0.0.2.
+
+## 1.0.7+2
+
+- Upgrade `laravel_echo_null` package to ^0.0.8.

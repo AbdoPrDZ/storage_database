@@ -38,6 +38,8 @@ class LaravelEcho<ClientType, ChannelType>
     String? nameSpace,
     bool autoConnect = true,
     Map moreOptions = const {},
+    Map<String, dynamic> Function(String, Map<dynamic, dynamic>)?
+        channelDecryption,
   }) =>
       LaravelEcho<Socket, SocketIoChannel>(
         storageDatabase,
@@ -47,6 +49,7 @@ class LaravelEcho<ClientType, ChannelType>
           namespace: nameSpace,
           autoConnect: autoConnect,
           moreOptions: moreOptions,
+          channelDecryption: channelDecryption,
         ),
         migrations,
       );
