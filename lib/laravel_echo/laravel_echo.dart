@@ -60,7 +60,6 @@ class LaravelEcho<ClientType, ChannelType>
       'Content-Type': 'application/json'
     },
     String? cluster,
-    Protocol protocol = Protocol.ws,
     String? host,
     Map<String, dynamic> Function(Uint8List, Map<String, dynamic>)?
         channelDecryption,
@@ -70,7 +69,7 @@ class LaravelEcho<ClientType, ChannelType>
     int activityTimeout = 120000,
     int pongTimeout = 30000,
     int maxReconnectionAttempts = 6,
-    int maxReconnectGapInSeconds = 30,
+    Duration reconnectGap = const Duration(seconds: 2),
     bool enableLogging = true,
     bool autoConnect = true,
     String? nameSpace,
@@ -82,7 +81,6 @@ class LaravelEcho<ClientType, ChannelType>
           authEndPoint: authEndPoint,
           authHeaders: authHeaders,
           cluster: cluster,
-          protocol: protocol,
           host: host,
           channelDecryption: channelDecryption,
           wsPort: wsPort,
@@ -91,7 +89,7 @@ class LaravelEcho<ClientType, ChannelType>
           activityTimeout: activityTimeout,
           pongTimeout: pongTimeout,
           maxReconnectionAttempts: maxReconnectionAttempts,
-          maxReconnectGapInSeconds: maxReconnectGapInSeconds,
+          reconnectGap: reconnectGap,
           enableLogging: enableLogging,
           autoConnect: autoConnect,
           nameSpace: nameSpace,

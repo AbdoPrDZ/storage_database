@@ -238,3 +238,8 @@
 - Upgrade flutter sdk.
 - Upgrade dependencies versions.
 - Replace `pusher_client_fixed` package with `pusher_client_socket`.
+
+## 1.0.7+1
+
+- Upgrade `laravel_echo_null` package to ^0.0.7+1.
+- Upgrade `pusher_client_socket` package to ^0.0.2.
