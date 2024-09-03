@@ -247,3 +247,7 @@
 ## 1.0.7+2
 
 - Upgrade `laravel_echo_null` package to ^0.0.8.
+
+## 1.0.7+3
+
+- Upgrade flutter sdk.
