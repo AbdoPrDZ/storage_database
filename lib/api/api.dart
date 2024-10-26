@@ -44,6 +44,7 @@ class StorageAPI {
           ? {...(getHeaders?.call(url) ?? {}), ...headers}
           : headers,
       errorsField: errorsField,
+      decodeErrors: decodeErrors,
       encoding: encoding,
     ).send();
   }
@@ -57,6 +58,7 @@ class StorageAPI {
     Map<String, String> headers = const {},
     bool appendHeader = true,
     String errorsField = 'errors',
+    Map<String, String> Function(Map errors)? decodeErrors,
     Encoding? encoding,
   }) =>
       request<T>(
@@ -68,6 +70,7 @@ class StorageAPI {
         log: log,
         headers: headers,
         errorsField: errorsField,
+        decodeErrors: decodeErrors,
         encoding: encoding,
       );
 
@@ -80,6 +83,7 @@ class StorageAPI {
     Map<String, String> headers = const {},
     bool appendHeader = true,
     String errorsField = 'errors',
+    Map<String, String> Function(Map errors)? decodeErrors,
     Encoding? encoding,
   }) =>
       request<T>(
@@ -91,6 +95,7 @@ class StorageAPI {
         log: log,
         headers: headers,
         errorsField: errorsField,
+        decodeErrors: decodeErrors,
         encoding: encoding,
       );
 
@@ -103,6 +108,7 @@ class StorageAPI {
     Map<String, String> headers = const {},
     bool appendHeader = true,
     String errorsField = 'errors',
+    Map<String, String> Function(Map errors)? decodeErrors,
     Encoding? encoding,
   }) =>
       request<T>(
@@ -114,6 +120,7 @@ class StorageAPI {
         log: log,
         headers: headers,
         errorsField: errorsField,
+        decodeErrors: decodeErrors,
         encoding: encoding,
       );
 
@@ -126,6 +133,7 @@ class StorageAPI {
     Map<String, String> headers = const {},
     bool appendHeader = true,
     String errorsField = 'errors',
+    Map<String, String> Function(Map errors)? decodeErrors,
     Encoding? encoding,
   }) =>
       request<T>(
@@ -137,6 +145,7 @@ class StorageAPI {
         log: log,
         headers: headers,
         errorsField: errorsField,
+        decodeErrors: decodeErrors,
         encoding: encoding,
       );
 
@@ -149,6 +158,7 @@ class StorageAPI {
     Map<String, String> headers = const {},
     bool appendHeader = true,
     String errorsField = 'errors',
+    Map<String, String> Function(Map errors)? decodeErrors,
     Encoding? encoding,
   }) =>
       request<T>(
@@ -160,6 +170,7 @@ class StorageAPI {
         log: log,
         headers: headers,
         errorsField: errorsField,
+        decodeErrors: decodeErrors,
         encoding: encoding,
       );
 }

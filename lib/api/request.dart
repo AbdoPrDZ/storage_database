@@ -16,6 +16,7 @@ class APIRequest<T> {
   final Function(int bytes, int totalBytes)? onFilesUpload;
   final bool log;
   final String errorsField;
+  final Map<String, String> Function(Map errors)? decodeErrors;
   final Encoding? encoding;
 
   const APIRequest(
@@ -27,6 +28,7 @@ class APIRequest<T> {
     this.onFilesUpload,
     this.log = false,
     this.errorsField = 'errors',
+    this.decodeErrors,
     this.encoding,
   });
 

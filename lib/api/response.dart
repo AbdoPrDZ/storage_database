@@ -73,7 +73,7 @@ class APIResponse<T> {
       }
 
       return APIResponse<T>(
-        responseData["success"] ?? false,
+        responseData["success"] ?? statusCode == 200,
         responseData["message"] ?? 'No response message',
         statusCode,
         errors: errors,
