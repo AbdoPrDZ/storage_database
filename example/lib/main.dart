@@ -8,9 +8,7 @@ import 'package:http/http.dart' as http;
 
 import 'package:storage_database/storage_database.dart';
 
-Future<void> main() async {
-  runApp(const MyApp());
-}
+void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -275,9 +273,7 @@ class _MyHomePageState extends State<MyHomePage> {
     snackbar('Directory created successfully');
   }
 
-  TextEditingController echoTokenController = TextEditingController(
-    text: '2|9xjc76eOWsJ459sws1W5yl47VoJ8UjFOtkltjPNGf0752ef7',
-  );
+  TextEditingController echoTokenController = TextEditingController();
   String broadcaster = 'socket.io';
   bool laravelEchoConnected = false;
   Map messages = {};
@@ -298,16 +294,17 @@ class _MyHomePageState extends State<MyHomePage> {
         },
       );
     } else if (broadcaster == 'pusher') {
-      // const String appId = "1321495";
-      const String key = "037c47e0cbdc81fb7144";
-      const String cluster = "mt1";
-      const String hostEndPoint = "localhost";
+      const String key = "PUSHER_KEY";
+      const String cluster = 'PUSHER_CLUSTER';
+      const String hostEndPoint = "PUSHER_HOST";
       const String hostAuthEndPoint = "http://$hostEndPoint/broadcasting/auth";
       const int port = 6001;
 
       storageDatabase!.initPusherLaravelEcho(
         key,
-        [MessageMigration(storageDatabase!, 'messages')],
+        [
+          MessageMigration(storageDatabase!, 'messages'),
+        ],
         host: hostEndPoint,
         wsPort: port,
         cluster: cluster,
@@ -321,7 +318,6 @@ class _MyHomePageState extends State<MyHomePage> {
       );
     }
 
-    storageDatabase!.laravelEcho.connect();
     storageDatabase!.laravelEcho.connector.onConnect((data) {
       setState(() => laravelEchoConnected = true);
       log('socket connected');
@@ -337,6 +333,7 @@ class _MyHomePageState extends State<MyHomePage> {
     storageDatabase!.laravelEcho.connector.onError((err) {
       log('socketError: $err');
     });
+    storageDatabase!.laravelEcho.connect();
 
     snackbar('Laravel echo connected successfully');
   }

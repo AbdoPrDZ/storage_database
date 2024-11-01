@@ -260,3 +260,7 @@
 
 - Upgrade flutter sdk.
 - Make some changes.
+
+## 1.0.7+6
+
+- Upgrade `laravel_echo_mull` package.
