@@ -121,7 +121,7 @@ class StorageDatabase {
       'Content-Type': 'application/json'
     },
     String? cluster,
-    required String host,
+    String? host,
     int wsPort = 80,
     int wssPort = 443,
     bool encrypted = true,
@@ -161,7 +161,7 @@ class StorageDatabase {
   StorageCollection collection(String collectionId) =>
       StorageCollection(this, collectionId);
 
-  Future<bool> checkCollectionIdExists(String collectionId) =>
+  Future<bool> hasCollectionId(String collectionId) =>
       source.containsKey(collectionId);
 
   void onClear(Function func) => _onClear.add(func);

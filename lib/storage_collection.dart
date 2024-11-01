@@ -44,9 +44,7 @@ class StorageCollection {
   }
 
   Future<dynamic> _checkType(var data) async {
-    if ((parent != null && !await parent!.hasCollectionId(collectionId)) ||
-        (parent == null &&
-            !await storageDatabase.checkCollectionIdExists(collectionId))) {
+    if (!await exists) {
       var initialData = _isMap(data)
           ? {}
           : _isList(data)
@@ -128,10 +126,16 @@ class StorageCollection {
     }
   }
 
+  Future<bool> get exists {
+    if (parent != null) {
+      return parent!.hasCollectionId(collectionId);
+    } else {
+      return storageDatabase.hasCollectionId(collectionId);
+    }
+  }
+
   Future<dynamic> get({String? streamId}) async {
-    if ((parent != null && !await parent!.hasCollectionId(collectionId)) ||
-        (parent == null &&
-            !await storageDatabase.checkCollectionIdExists(collectionId))) {
+    if (!await exists) {
       throw StorageDatabaseException(
         "This collection ($collectionId) has not yet been created",
       );
@@ -146,6 +150,22 @@ class StorageCollection {
     }
 
     return collectionData;
+  }
+
+  Future<dynamic> getItem(dynamic docId) async {
+    final data = await get();
+    if (_isMap(data)) {
+      return Map.from(data)[docId];
+    } else if (_isList(data)) {
+      if (docId is! int) {
+        throw const StorageDatabaseException("docId must be integer");
+      }
+      return List.from(data)[docId];
+    } else {
+      throw StorageDatabaseException(
+        "This Collection ($collectionId) does not support collections",
+      );
+    }
   }
 
   String get path => collectionId;
