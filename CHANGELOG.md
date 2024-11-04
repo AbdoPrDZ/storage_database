@@ -272,3 +272,7 @@
 ## 1.0.7+8
 
 - Upgrade `laravel_echo_mull` package.
+
+## 1.0.7+9
+
+- Upgrade `laravel_echo_mull` package.
