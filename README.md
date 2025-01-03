@@ -15,7 +15,8 @@ import 'package:storage_database/storage_database.dart';
 ```dart
 // You have to give source class extended by 'StorageDatabaseSource'
 // Default source is 'DefaultStorageSource' class
-StorageDatabase storage = await StorageDatabase.getInstance();
+await StorageDatabase.initInstance();
+StorageDatabase storage = StorageDatabase.instance;
 // In this example you should to create source class extended with 'StorageDatabaseSource'
 StorageDatabase storageEx2 = StorageDatabase(await MyStorageSourceClass.getInstance());
 ```
@@ -188,12 +189,14 @@ import 'package:storage_database/storage_explorer/storage_explorer.dart';
 
 ```dart
 // 1: normal initializing
-StorageDatabase storageDatabase = await StorageDatabase.getInstance(); // you need to init storageDatabase first
+await StorageDatabase.initInstance(); // you need to init storageDatabase first
+StorageDatabase storageDatabase = StorageDatabase.instance; // you need to init storageDatabase first
 
 Directory localIODirectory = await getApplicationDocumentsDirectory() // this function from path_provider package
 StorageExplorer storageExplorer = StorageExplorer(storageDatabase, localIODirectory);
 // or
-StorageExplorer storageExplorer = StorageExplorer.getInstance(storageDatabase, customPath: "your/custom/path");
+await StorageExplorer.initInstance(storageDatabase, customPath: "your/custom/path");
+StorageExplorer storageExplorer = StorageExplorer.instance;
 
 // 2: initializing from StorageDatabase Class
 await storageDatabase.initExplorer();
@@ -349,7 +352,8 @@ import 'package:storage_database/api/api.dart';
 
 ```dart
 // 1: normal initializing
-StorageDatabase storageDatabase = await StorageDatabase.getInstance(); // you need to init storageDatabase first
+await StorageDatabase.intInstance(); // you need to init storageDatabase first
+StorageDatabase storageDatabase = StorageDatabase.instance;
 
 StorageAPI storageAPI = StorageExplorer(
   apiUrl: 'http:// your.api.url',

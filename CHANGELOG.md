@@ -276,3 +276,9 @@
 ## 1.0.7+9
 
 - Upgrade `laravel_echo_mull` package.
+
+## 2.0.0
+
+- Upgrade flutter sdk.
+- Upgrade packages versions.
+- Add `StorageModel` feature.

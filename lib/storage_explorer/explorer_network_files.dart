@@ -8,15 +8,33 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shimmer/shimmer.dart';
 
+import '../src/storage_database_exception.dart';
 import 'storage_explorer.dart';
 
 class ExplorerNetworkFiles {
   final StorageExplorer storageExplorer;
   final ExplorerDirectory networkDirFiles;
 
-  ExplorerNetworkFiles(this.storageExplorer, this.networkDirFiles);
+  ExplorerNetworkFiles(this.storageExplorer, this.networkDirFiles) {
+    _instance = this;
+  }
+
+  static ExplorerNetworkFiles? _instance;
+
+  static ExplorerNetworkFiles get instance {
+    if (_instance == null) {
+      throw const StorageDatabaseException(
+        'ExplorerNetworkFiles instance has not initialized yet',
+      );
+    }
+
+    return _instance!;
+  }
+
+  static bool get hasInstance => _instance != null;
 
   String encodeUrl(String url) => utf8.fuse(base64).encode(url);
+
   String decodeUrl(String code) => utf8.fuse(base64).decode(code);
 
   Future<ExplorerFile?> file(
@@ -123,7 +141,7 @@ class ExplorerNetworkImage extends StatefulWidget {
   final bool setItInDecoration;
 
   const ExplorerNetworkImage({
-    Key? key,
+    super.key,
     required this.url,
     required this.explorerNetworkFiles,
     this.headers = const {},
@@ -142,7 +160,7 @@ class ExplorerNetworkImage extends StatefulWidget {
     this.margin,
     this.padding,
     this.setItInDecoration = true,
-  }) : super(key: key);
+  });
 
   @override
   createState() => _ExplorerNetworkImageState();

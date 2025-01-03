@@ -2,8 +2,8 @@ import 'dart:io';
 
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:storage_database/src/storage_database_exception.dart';
 
+import '../src/storage_database_exception.dart';
 import '../src/storage_listeners.dart';
 import '../storage_database.dart';
 import 'explorer_network_files.dart';
@@ -30,7 +30,23 @@ class StorageExplorer {
           explorerSource,
           path: localDirectory.ioDirectory.path,
         ));
+
+    _instance = this;
   }
+
+  static StorageExplorer? _instance;
+
+  static StorageExplorer get instance {
+    if (_instance == null) {
+      throw const StorageDatabaseException(
+        'StorageExplorer instance has not initialized yet',
+      );
+    }
+
+    return _instance!;
+  }
+
+  static bool get hasInstance => _instance != null;
 
   static Future<ExplorerDirectory> _initLocalDirectory(
     StorageListeners storageListeners,
@@ -52,19 +68,20 @@ class StorageExplorer {
     );
   }
 
-  static Future<StorageExplorer> getInstance(
+  static Future<void> initInstance(
     StorageDatabase storageDatabase, {
-    ExplorerSource? source,
+    ExplorerSource source = const DefaultExplorerSource(),
     String? path,
   }) async {
     StorageListeners storageListeners = StorageListeners();
-    source = source ?? DefaultExplorerSource();
+
     ExplorerDirectory localDirectory = await _initLocalDirectory(
       storageListeners,
       source,
       path: path,
     );
-    return StorageExplorer(
+
+    _instance = StorageExplorer(
       storageDatabase,
       source,
       storageListeners,
@@ -72,31 +89,19 @@ class StorageExplorer {
     );
   }
 
-  ExplorerNetworkFiles? _networkFiles;
-  initNetWorkFiles({ExplorerDirectory? cacheDirectory}) {
-    _networkFiles = ExplorerNetworkFiles(
-      this,
-      cacheDirectory ?? directory('network-files'),
-    );
-  }
+  ExplorerNetworkFiles get networkFiles => ExplorerNetworkFiles.instance;
 
-  bool get networkFilesIsInitialized => _networkFiles != null;
-
-  ExplorerNetworkFiles get networkFiles {
-    if (!networkFilesIsInitialized) {
-      throw const StorageDatabaseException(
-        'ExplorerNetworkFiles has not initialized yet',
+  ExplorerNetworkFiles initNetWorkFiles({ExplorerDirectory? cacheDirectory}) =>
+      ExplorerNetworkFiles(
+        this,
+        cacheDirectory ?? directory('network-files'),
       );
-    }
-    return _networkFiles!;
-  }
 
   ExplorerDirectory directory(String dirName, {bool log = true}) {
     List<String> dirNames =
         dirName.contains("/") ? dirName.split("/") : [dirName];
     dirNames = [for (String name in dirNames) name.replaceAll('\\', '/')];
 
-    // Directory nIODirectory = Directory(
     Directory nIODirectory = explorerSource.dirSync(
       "${localDirectory.ioDirectory.path}/${dirNames[0]}",
     );
@@ -127,7 +132,6 @@ class StorageExplorer {
   }
 
   ExplorerFile file(String filename) {
-    // File ioFile = File("${localDirectory.ioDirectory.path}\\$filename");
     File ioFile = explorerSource
         .fileSync("${localDirectory.ioDirectory.path}\\$filename");
     if (!ioFile.existsSync()) {

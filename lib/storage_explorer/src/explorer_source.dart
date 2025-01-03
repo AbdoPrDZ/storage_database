@@ -1,6 +1,8 @@
 import 'dart:io';
 
 abstract class ExplorerSource {
+  const ExplorerSource();
+
   Future<Directory> dir(String path);
   Future<File> file(String path);
   Directory dirSync(String path);

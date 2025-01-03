@@ -6,7 +6,7 @@ import 'storage_database_source.dart';
 class DefaultStorageSource extends StorageDatabaseSource {
   final SharedPreferences storage;
 
-  DefaultStorageSource(this.storage);
+  const DefaultStorageSource(this.storage);
 
   static Future<DefaultStorageSource> get instance async =>
       DefaultStorageSource(await SharedPreferences.getInstance());
@@ -18,6 +18,7 @@ class DefaultStorageSource extends StorageDatabaseSource {
   @override
   Future<dynamic> getData(String id) async {
     String? data = storage.getString(id);
+
     if (data != null) {
       return jsonDecode(data);
     } else {

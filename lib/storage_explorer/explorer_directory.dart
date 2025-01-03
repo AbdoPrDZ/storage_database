@@ -28,7 +28,6 @@ class ExplorerDirectory {
     List<FileSystemEntity> ioFiles = ioDirectory.listSync();
     List<ExplorerDirectoryItem> items = [];
     for (FileSystemEntity item in ioFiles) {
-      // String itemName = item.path.split("\\").last;
       String itemName = basename(item.path);
       bool isDirectory = item.runtimeType.toString().contains("Directory");
       if (isDirectory) {
@@ -48,12 +47,10 @@ class ExplorerDirectory {
   }
 
   bool hasFile(String filename) =>
-      // File("${ioDirectory.path}/$filename").existsSync();
       explorerSource.fileSync("${ioDirectory.path}/$filename").existsSync();
 
   ExplorerFile file(String filename) => ExplorerFile(
         explorerSource,
-        // File("${ioDirectory.path}/$filename"),
         explorerSource.fileSync("${ioDirectory.path}/$filename"),
         shortPath,
         filename,
@@ -65,7 +62,6 @@ class ExplorerDirectory {
         dirName.contains("/") ? dirName.split("/") : [dirName];
     dirNames = [for (String name in dirNames) name.replaceAll('\\', '/')];
 
-    // Directory nioDirectory = Directory("${ioDirectory.path}/${dirNames[0]}");
     Directory nioDirectory =
         explorerSource.dirSync("${ioDirectory.path}/${dirNames[0]}");
     if (!nioDirectory.existsSync()) nioDirectory.createSync();

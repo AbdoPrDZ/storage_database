@@ -2,9 +2,9 @@ import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
 import 'package:laravel_echo_null/laravel_echo_null.dart';
-import 'package:storage_database/storage_collection.dart';
 
 import '../src/storage_database_values.dart';
+import '../storage_collection.dart';
 
 abstract class LaravelEchoMigration extends StorageCollection {
   LaravelEchoMigration(super.storageDatabase, super.collectionId);

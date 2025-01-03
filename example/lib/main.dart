@@ -7,8 +7,28 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:storage_database/storage_database.dart';
+import 'package:storage_database/storage_explorer/explorer_network_files.dart';
 
 void main() => runApp(const MyApp());
+
+class UserModel extends StorageModel {
+  final String name;
+
+  const UserModel({
+    super.id,
+    required this.name,
+  });
+
+  factory UserModel.fromMap(Map map) => UserModel(
+        id: map['id'],
+        name: map['name'],
+      );
+
+  @override
+  Map toMap() => {
+        'name': name,
+      };
+}
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -33,7 +53,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   StorageDatabase? storageDatabase;
 
-  snackbar(String message) {
+  void snackbar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       content: Text(message),
       backgroundColor: Colors.black,
@@ -44,13 +64,20 @@ class _MyHomePageState extends State<MyHomePage> {
     ));
   }
 
-  initStorageDatabase() async {
+  void initStorageDatabase() async {
     if (storageDatabase != null) {
       snackbar('StorageDatabase already initialized');
       return;
     }
 
-    storageDatabase = await StorageDatabase.getInstance();
+    await StorageDatabase.initInstance();
+    storageDatabase = StorageDatabase.instance;
+    await storageDatabase!.clear();
+
+    StorageModelRegister.register<UserModel>(
+      (data) => UserModel.fromMap(data),
+      'users',
+    );
 
     await storageDatabase!.collection('messages').set({});
     storageDatabase!
@@ -64,11 +91,11 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   TextEditingController explorerPathController = TextEditingController();
-  initStorageExplorer() async {
+  void initStorageExplorer() async {
     if (storageDatabase == null) {
       snackbar("You need to init StorageDatabase first");
       return;
-    } else if (storageDatabase!.storageExplorerIsInitialized) {
+    } else if (StorageExplorer.hasInstance) {
       snackbar('StorageExplorer already initialized');
       return;
     }
@@ -82,19 +109,19 @@ class _MyHomePageState extends State<MyHomePage> {
     snackbar('StorageExplorer initializing successfully');
   }
 
-  initNetworkFiles() async {
+  void initNetworkFiles() async {
     if (storageDatabase == null) {
       snackbar("You need to init StorageDatabase first");
       return;
-    } else if (!storageDatabase!.storageExplorerIsInitialized) {
+    } else if (!StorageExplorer.hasInstance) {
       snackbar('You need to init StorageExplorer first');
       return;
-    } else if (storageDatabase!.explorer.networkFilesIsInitialized) {
+    } else if (ExplorerNetworkFiles.hasInstance) {
       snackbar('NetworkFiles already initialized');
       return;
     }
 
-    await storageDatabase!.explorer.initNetWorkFiles();
+    storageDatabase!.explorer.initNetWorkFiles();
     await storageDatabase!.clear();
 
     snackbar('NetworkFiles initializing successfully');
@@ -103,14 +130,14 @@ class _MyHomePageState extends State<MyHomePage> {
   TextEditingController imageUrlController = TextEditingController();
   TextEditingController tokenController = TextEditingController();
   Widget? networkImage;
-  getNetworkImage() {
+  void getNetworkImage() {
     if (storageDatabase == null) {
       snackbar("You need to init StorageDatabase first");
       return;
-    } else if (!storageDatabase!.storageExplorerIsInitialized) {
+    } else if (!StorageExplorer.hasInstance) {
       snackbar('You need to init StorageExplorer first');
       return;
-    } else if (!storageDatabase!.explorer.networkFilesIsInitialized) {
+    } else if (!ExplorerNetworkFiles.hasInstance) {
       snackbar('You need to init NetworkFiles first');
       return;
     } else if (imageUrlController.text.isEmpty) {
@@ -123,7 +150,7 @@ class _MyHomePageState extends State<MyHomePage> {
     });
 
     setState(() {
-      networkImage = storageDatabase!.explorer.networkFiles.networkImage(
+      networkImage = ExplorerNetworkFiles.instance.networkImage(
         imageUrlController.text,
         height: 300,
         headers: {
@@ -145,7 +172,7 @@ class _MyHomePageState extends State<MyHomePage> {
     text: 'http://localhost/api',
   );
 
-  initStorageAPI() async {
+  void initStorageAPI() async {
     if (storageDatabase == null) {
       snackbar("You need to init StorageDatabase first");
       return;
@@ -161,7 +188,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   TextEditingController collectionController = TextEditingController();
   TextEditingController collectionDataController = TextEditingController();
-  createCollection() async {
+  void createCollection() async {
     if (storageDatabase == null) {
       snackbar("You need to init StorageDatabase first");
       return;
@@ -173,16 +200,61 @@ class _MyHomePageState extends State<MyHomePage> {
       return;
     }
 
-    await storageDatabase!
-        .collection(collectionController.text)
-        .set(collectionDataController.text);
+    dynamic data = collectionDataController.text;
 
-    log(await storageDatabase!.collection(collectionController.text).get());
+    try {
+      data = jsonDecode(data);
+    } catch (e) {
+      log('Error: $e');
+    }
+
+    await storageDatabase!.collection(collectionController.text).set(data);
+
+    final collectionData =
+        await storageDatabase!.collection(collectionController.text).get();
+
+    log(collectionData.toString());
 
     snackbar('StorageCollection created successfully');
   }
 
-  getCollectionData() async {
+  void createUserCollection() async {
+    if (storageDatabase == null) {
+      snackbar("You need to init StorageDatabase first");
+      return;
+    }
+
+    // await storageDatabase!.collection("user").set(
+    //       UserModel(
+    //         id: '1',
+    //         name: 'John Doe',
+    //         // type: 'user',
+    //       ),
+    //     );
+
+    // UserModel user = await storageDatabase!.collection("user").getAsModel();
+
+    // log(user.toString());
+
+    final newUser = UserModel(
+      name: 'Abdo Pr',
+    );
+
+    snackbar(newUser.toString());
+
+    await newUser.save();
+
+    snackbar((await storageDatabase!.collection('users').get()).toString());
+
+    final user = await StorageModel.find<UserModel>('1');
+    snackbar(user.toString());
+
+    snackbar((await StorageModel.all<UserModel>()).toString());
+
+    snackbar('User StorageCollection created successfully');
+  }
+
+  void getCollectionData() async {
     if (storageDatabase == null) {
       snackbar("You need to init StorageDatabase first");
       return;
@@ -197,7 +269,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   String? imagePath;
-  choseImage() async {
+  void choseImage() async {
     setState(() {});
 
     FilePickerResult? result = await FilePicker.platform.pickFiles(
@@ -216,7 +288,7 @@ class _MyHomePageState extends State<MyHomePage> {
   TextEditingController targetController = TextEditingController();
   int bytes = 0;
   int totalBytes = 1;
-  uploadImage() async {
+  void uploadImage() async {
     if (storageDatabase == null) {
       snackbar("You need to init StorageDatabase first");
       return;
@@ -258,11 +330,11 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   TextEditingController dirPathController = TextEditingController();
-  createDir() async {
+  void createDir() async {
     if (storageDatabase == null) {
       snackbar("You need to init StorageDatabase first");
       return;
-    } else if (!storageDatabase!.storageExplorerIsInitialized) {
+    } else if (!StorageExplorer.hasInstance) {
       snackbar('You need to init StorageExplorer first');
       return;
     } else if (dirPathController.text.isEmpty) {
@@ -277,7 +349,7 @@ class _MyHomePageState extends State<MyHomePage> {
   String broadcaster = 'socket.io';
   bool laravelEchoConnected = false;
   Map messages = {};
-  connectLaravelEcho() {
+  void connectLaravelEcho() {
     if (storageDatabase == null) {
       snackbar("You need to init StorageDatabase first");
       return;
@@ -338,7 +410,7 @@ class _MyHomePageState extends State<MyHomePage> {
     snackbar('Laravel echo connected successfully');
   }
 
-  getLaravelEchoChannels() {
+  void getLaravelEchoChannels() {
     storageDatabase!.laravelEcho.connector.channels.forEach((name, channel) {
       channel = channel as SocketIoChannel;
       log(' -- channel: $name');
@@ -397,6 +469,10 @@ class _MyHomePageState extends State<MyHomePage> {
                   ElevatedButton(
                     onPressed: createCollection,
                     child: const Text('Create Collection'),
+                  ),
+                  ElevatedButton(
+                    onPressed: createUserCollection,
+                    child: const Text('Create User Collection'),
                   ),
                   const Divider(),
                   ElevatedButton(
@@ -488,7 +564,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         ? storageDatabase!.laravelEcho.disconnect
                         : connectLaravelEcho,
                     style: ButtonStyle(
-                      backgroundColor: MaterialStateProperty.all(
+                      backgroundColor: WidgetStateProperty.all(
                         laravelEchoConnected ? Colors.green : Colors.red,
                       ),
                     ),

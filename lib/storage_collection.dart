@@ -3,8 +3,11 @@ import 'dart:developer' as dev;
 import 'dart:math';
 
 import './storage_database.dart';
+import 'src/extensions/object.extension.dart';
 import 'src/storage_database_exception.dart';
 import 'src/storage_listeners.dart';
+
+export 'src/storage_database_model.dart';
 
 class StorageCollection {
   final StorageDatabase storageDatabase;
@@ -14,40 +17,25 @@ class StorageCollection {
   StorageCollection(this.storageDatabase, this.collectionId, {this.parent}) {
     if (collectionId.contains("/")) {
       List<String> items = collectionId.split("/");
+
       parent = StorageCollection(storageDatabase, items[0], parent: parent);
+
       for (int i = 1; i < items.length - 1; i++) {
         parent!.set({}, log: false);
         parent = parent!.collection(items[i]);
       }
+
       collectionId = items.last;
     }
   }
 
   StorageListeners get storageListeners => storageDatabase.storageListeners;
 
-  bool _isMap(dynamic data) {
-    try {
-      Map.from(data);
-      return true;
-    } catch (e) {
-      return false;
-    }
-  }
-
-  bool _isList(var data) {
-    try {
-      List.from(data);
-      return true;
-    } catch (e) {
-      return false;
-    }
-  }
-
   Future<dynamic> _checkType(var data) async {
     if (!await exists) {
-      var initialData = _isMap(data)
+      var initialData = data is Map
           ? {}
-          : _isList(data)
+          : data is List
               ? []
               : null;
 
@@ -61,10 +49,10 @@ class StorageCollection {
       try {
         if (collectionData == null) {
           currentType = true;
-        } else if (_isMap(data)) {
+        } else if (data is Map) {
           Map.from(collectionData);
           currentType = true;
-        } else if (_isList(data)) {
+        } else if (data is List) {
           List.from(collectionData);
           currentType = true;
         } else {
@@ -87,24 +75,34 @@ class StorageCollection {
     }
   }
 
-  Future set(var data, {bool log = true, bool keepData = true}) async {
+  Future set(dynamic data, {bool log = true, bool keepData = true}) async {
+    dynamic newData;
+
+    if (data is StorageModel) {
+      newData = data.map;
+    } else if (data is List<StorageModel>) {
+      newData = [for (var item in data) item.map];
+    } else {
+      newData = data;
+    }
+
     dynamic collectionData;
     if (!keepData) {
-      collectionData = data;
+      collectionData = newData;
     } else {
-      collectionData = await _checkType(data);
-      if (_isMap(data)) {
+      collectionData = await _checkType(newData);
+      if (newData is Map) {
         collectionData ??= {};
-        for (var key in data.keys) {
-          collectionData[key] = data[key];
+        for (var key in newData.keys) {
+          collectionData[key] = newData[key];
         }
-      } else if (_isList(data)) {
+      } else if (newData is List) {
         collectionData ??= [];
-        for (var item in data) {
+        for (var item in newData) {
           if (!collectionData.contains(item)) collectionData.add(item);
         }
       } else {
-        collectionData = data;
+        collectionData = newData;
       }
     }
 
@@ -154,13 +152,49 @@ class StorageCollection {
 
   Future<dynamic> getItem(dynamic docId) async {
     final data = await get();
-    if (_isMap(data)) {
-      return Map.from(data)[docId];
-    } else if (_isList(data)) {
+    if (data is Map) {
+      return data[docId];
+    } else if (data is List) {
       if (docId is! int) {
         throw const StorageDatabaseException("docId must be integer");
       }
-      return List.from(data)[docId];
+      return data[docId];
+    } else {
+      throw StorageDatabaseException(
+        "This Collection ($collectionId) does not support collections",
+      );
+    }
+  }
+
+  Future<dynamic> getItemWhere(bool Function(dynamic) where) async {
+    final data = await get();
+    if (data is Map) {
+      return data.entries.firstWhere((entry) => where(entry.value));
+    } else if (data is List) {
+      return data.firstWhere(where);
+    } else {
+      throw StorageDatabaseException(
+        "This Collection ($collectionId) does not support collections",
+      );
+    }
+  }
+
+  Future<MT> getAsModel<MT extends StorageModel>({
+    String? streamId,
+  }) async {
+    Object data = await get(streamId: streamId);
+    return data.toModel<MT>();
+  }
+
+  Future<List<MT>> getAsModels<MT extends StorageModel>({
+    String? streamId,
+  }) async {
+    final data = await get(streamId: streamId);
+
+    if (data is Map) {
+      return [for (Object item in data.values) item.toModel<MT>()];
+    } else if (data is List) {
+      return [for (Object item in data) item.toModel<MT>()];
     } else {
       throw StorageDatabaseException(
         "This Collection ($collectionId) does not support collections",
@@ -170,18 +204,20 @@ class StorageCollection {
 
   String get path => collectionId;
 
-  Future<bool> hasCollectionId(dynamic docId) async {
+  Future<bool> hasCollectionId(dynamic collectionId) async {
     final data = await get();
-    if (_isMap(data)) {
-      return Map.from(data).containsKey(docId);
-    } else if (_isList(data)) {
-      if (docId is! int) {
-        throw const StorageDatabaseException("docId must be integer");
+
+    if (data is Map) {
+      return data.containsKey(collectionId);
+    } else if (data is List) {
+      if (collectionId is! int) {
+        throw const StorageDatabaseException("collectionId must be integer");
       }
-      return List.from(data).length <= docId;
+
+      return data.length <= collectionId;
     } else {
       throw StorageDatabaseException(
-        "This Collection ($collectionId) does not support collections",
+        "This Collection ($this.collectionId) does not support collections",
       );
     }
   }
@@ -208,6 +244,26 @@ class StorageCollection {
     }
   }
 
+  Stream<MT> streamAsModel<MT extends StorageModel>([
+    delayCheck = const Duration(milliseconds: 50),
+  ]) =>
+      stream(delayCheck: delayCheck).asyncExpand<MT>((data) async* {
+        if (data != null) yield data.toModel<MT>();
+      });
+
+  Stream<List<MT>> streamAsModels<MT extends StorageModel>([
+    delayCheck = const Duration(milliseconds: 50),
+  ]) =>
+      stream(delayCheck: delayCheck).asyncExpand<List<MT>>((data) async* {
+        if (data != null) {
+          if (data is Map) {
+            yield [for (Object item in data.values) item.toModel<MT>()];
+          } else if (data is List) {
+            yield [for (Object item in data) item.toModel<MT>()];
+          }
+        }
+      });
+
   Future<bool> delete({bool log = true}) async {
     bool res = parent != null
         ? await parent!.deleteItem(collectionId)
@@ -227,14 +283,14 @@ class StorageCollection {
   Future<bool> deleteItem(itemId, {bool log = true}) async {
     var collectionData = await get();
 
-    if (_isMap(collectionData)) {
-      if ((collectionData as Map).containsKey(itemId)) {
+    if (collectionData is Map) {
+      if (collectionData.containsKey(itemId)) {
         collectionData.remove(itemId);
       } else {
         throw const StorageDatabaseException('Undefined item id');
       }
-    } else if (_isList(collectionData)) {
-      if (itemId >= 0 && (collectionData as List).length >= itemId) {
+    } else if (collectionData is List) {
+      if (itemId >= 0 && collectionData.length >= itemId) {
         collectionData.removeAt(itemId);
       } else {
         throw const StorageDatabaseException('Undefined item id');
@@ -267,9 +323,9 @@ class StorageCollection {
   Map<dynamic, StorageCollection> getMapCollections(var data) {
     List docsIds;
 
-    if (_isMap(data)) {
+    if (data is Map) {
       docsIds = data.keys.toList();
-    } else if (_isList(data)) {
+    } else if (data is List) {
       docsIds = [for (int i = 0; i < data.length; i++) i];
     } else {
       throw StorageDatabaseException(
@@ -279,7 +335,7 @@ class StorageCollection {
 
     Map<dynamic, StorageCollection> collections = {};
 
-    for (dynamic collectionId in docsIds) {
+    for (final collectionId in docsIds) {
       collections[collectionId] = StorageCollection(
         storageDatabase,
         collectionId,

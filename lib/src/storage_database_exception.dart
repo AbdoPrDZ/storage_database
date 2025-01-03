@@ -9,5 +9,5 @@ abstract class StorageDatabaseError implements Exception {
 }
 
 class StorageDatabaseException extends StorageDatabaseError {
-  const StorageDatabaseException([String? message]) : super(message);
+  const StorageDatabaseException([super.message]);
 }

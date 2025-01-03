@@ -1,27 +1,27 @@
 name: storage_database
 description: A quick and simple offline StorageDatabase package for flutter
-version: 1.0.7+9
+version: 2.0.0
 homepage: https://github.com/AbdoPrDZ/storage_database.git
 
 environment:
-  sdk: ^3.5.4
+  sdk: ^3.6.0
   flutter: ">=1.17.0"
 
 dependencies:
   flutter:
     sdk: flutter
   http: ^1.2.2
-  laravel_echo_null: ^0.0.8+8
+  laravel_echo_null: ^0.0.9
   path: ^1.9.0
-  path_provider: ^2.1.4
-  shared_preferences: ^2.3.2
+  path_provider: ^2.1.5
+  shared_preferences: ^2.3.4
   shimmer: ^3.0.0
-  pusher_client_socket: ^0.0.2+7
-  socket_io_client: ^3.0.0
+  pusher_client_socket: ^0.0.3
+  socket_io_client: ^3.0.2
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^4.0.0
+  flutter_lints: ^5.0.0
 
 flutter: null

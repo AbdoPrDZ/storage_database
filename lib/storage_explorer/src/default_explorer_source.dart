@@ -3,6 +3,8 @@ import 'dart:io';
 import 'explorer_source.dart';
 
 class DefaultExplorerSource extends ExplorerSource {
+  const DefaultExplorerSource();
+
   @override
   Future<Directory> dir(String path) async => dirSync(path);
 

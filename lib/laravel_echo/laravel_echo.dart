@@ -15,7 +15,11 @@ class LaravelEcho<ClientType, ChannelType>
 
   List<LaravelEchoMigration> migrations;
 
-  LaravelEcho(this.storageDatabase, super.connector, this.migrations) {
+  LaravelEcho(
+    this.storageDatabase,
+    super.connector, {
+    this.migrations = const [],
+  }) {
     connector.onConnect((data) => _setupMigrations());
   }
 
@@ -51,7 +55,7 @@ class LaravelEcho<ClientType, ChannelType>
           moreOptions: moreOptions,
           channelDecryption: channelDecryption,
         ),
-        migrations,
+        migrations: migrations,
       );
 
   static LaravelEcho<PusherClient, PusherChannel> pusher(
@@ -97,7 +101,7 @@ class LaravelEcho<ClientType, ChannelType>
           autoConnect: autoConnect,
           nameSpace: nameSpace,
         ),
-        migrations,
+        migrations: migrations,
       );
 
   @override

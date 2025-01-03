@@ -4,12 +4,14 @@ import 'src/default_storage_source.dart';
 import 'src/storage_database_exception.dart';
 import 'src/storage_database_source.dart';
 import 'src/storage_listeners.dart';
+import 'storage_explorer/explorer_network_files.dart';
 import 'storage_explorer/storage_explorer.dart';
 import 'storage_collection.dart';
 import 'api/api.dart';
 import 'laravel_echo/laravel_echo.dart';
 
 export 'storage_collection.dart';
+export 'src/storage_database_model.dart';
 
 export 'src/storage_database_source.dart';
 export 'src/storage_database_values.dart';
@@ -23,29 +25,39 @@ export 'laravel_echo/laravel_echo.dart';
 class StorageDatabase {
   final StorageDatabaseSource source;
 
-  StorageDatabase(this.source);
+  StorageDatabase(this.source) {
+    _instance = this;
+  }
 
   final List<Function> _onClear = [];
   final StorageListeners storageListeners = StorageListeners();
 
-  static Future<StorageDatabase> getInstance() async => StorageDatabase(
-        await DefaultStorageSource.instance,
-      );
+  static StorageDatabase? _instance;
 
-  StorageExplorer? _explorer;
-  Future initExplorer({String? path}) async =>
-      _explorer = await StorageExplorer.getInstance(this, path: path);
-
-  bool get storageExplorerIsInitialized => _explorer != null;
-
-  StorageExplorer get explorer {
-    if (!storageExplorerIsInitialized) {
+  static StorageDatabase get instance {
+    if (_instance == null) {
       throw const StorageDatabaseException(
-        'StorageExplorer service has not initialized yet',
+        'StorageDatabase instance has not initialized yet',
       );
     }
-    return _explorer!;
+
+    return _instance!;
   }
+
+  static Future<void> initInstance({bool overide = false}) async {
+    if (_instance != null && !overide) {
+      throw const StorageDatabaseException(
+        'StorageDatabase instance has not initialized yet',
+      );
+    }
+
+    _instance = StorageDatabase(await DefaultStorageSource.instance);
+  }
+
+  Future initExplorer({String? path}) =>
+      StorageExplorer.initInstance(this, path: path);
+
+  StorageExplorer get explorer => StorageExplorer.instance;
 
   StorageAPI? _storageAPI;
   void initAPI({
@@ -71,15 +83,16 @@ class StorageDatabase {
         'StorageAPI service has not initialized yet',
       );
     }
+
     return _storageAPI!;
   }
 
   LaravelEcho? _laravelEcho;
   void initLaravelEcho(
-    Connector connector,
-    List<LaravelEchoMigration> migrations,
-  ) =>
-      _laravelEcho = LaravelEcho(this, connector, migrations);
+    Connector connector, {
+    List<LaravelEchoMigration> migrations = const [],
+  }) =>
+      _laravelEcho = LaravelEcho(this, connector, migrations: migrations);
 
   bool get laravelEchoIsInitialized => _laravelEcho != null;
 
@@ -161,7 +174,7 @@ class StorageDatabase {
   StorageCollection collection(String collectionId) =>
       StorageCollection(this, collectionId);
 
-  Future<bool> hasCollectionId(String collectionId) =>
+  Future<bool> hasCollectionId(dynamic collectionId) =>
       source.containsKey(collectionId);
 
   void onClear(Function func) => _onClear.add(func);
@@ -170,11 +183,11 @@ class StorageDatabase {
     bool clearExplorer = true,
     bool clearNetworkFiles = true,
   }) async {
-    if (clearExplorer && _explorer != null) await explorer.clear();
+    if (clearExplorer && StorageExplorer.hasInstance) await explorer.clear();
     if (clearNetworkFiles &&
-        _explorer != null &&
-        explorer.networkFilesIsInitialized) {
-      await explorer.networkFiles.clear();
+        StorageExplorer.hasInstance &&
+        ExplorerNetworkFiles.hasInstance) {
+      await ExplorerNetworkFiles.instance.clear();
     }
 
     await source.clear();
