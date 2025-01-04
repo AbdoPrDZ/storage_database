@@ -1,8 +1,10 @@
 import '../storage_database.dart';
-import 'extensions/list.extension.dart';
 import 'storage_database_exception.dart';
 
 export 'storage_database_model_register.dart';
+export 'extensions/list.extension.dart';
+export 'extensions/map.extension.dart';
+export 'extensions/object.extension.dart';
 
 abstract class StorageModel {
   final String? id;

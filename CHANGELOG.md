@@ -287,3 +287,9 @@
 
 - Update `StorageModel` structure.
 - Add `StorageModelRegister`.
+
+## 2.0.2
+
+- Export extensions.
+- Update `StorageModelRegister`.
+- Update `StorageDatabase`.

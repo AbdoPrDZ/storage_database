@@ -15,11 +15,22 @@ class StorageModelRegister {
   static void register<MT extends StorageModel>(
     StorageModel Function(dynamic data) encoder, [
     String? collectionId,
+    Type? type,
   ]) =>
-      _encoders[MT.toString()] = StorageModelRegister(
+      _encoders[(type ?? MT).toString()] = StorageModelRegister(
         encoder: encoder,
         collectionId: collectionId,
       );
+
+  static void registerAll(Map<Type, StorageModelRegister> models) {
+    for (Type type in models.keys) {
+      final item = models[type]!;
+      register(item.encoder, item.collectionId, type);
+    }
+  }
+
+  static StorageModelRegister? get<MT extends StorageModel>() =>
+      _encoders["$MT"];
 
   static MT encode<MT extends StorageModel>(dynamic data) {
     if (!_encoders.containsKey("$MT")) {

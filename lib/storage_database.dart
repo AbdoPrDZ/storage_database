@@ -177,6 +177,15 @@ class StorageDatabase {
   Future<bool> hasCollectionId(dynamic collectionId) =>
       source.containsKey(collectionId);
 
+  void registerModel<MT extends StorageModel>(
+    StorageModel Function(dynamic data) encoder, [
+    String? collectionId,
+  ]) =>
+      StorageModelRegister.register<MT>(encoder, collectionId);
+
+  void registerModels(Map<Type, StorageModelRegister> models) =>
+      StorageModelRegister.registerAll(models);
+
   void onClear(Function func) => _onClear.add(func);
 
   Future clear({
