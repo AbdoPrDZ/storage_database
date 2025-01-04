@@ -282,3 +282,8 @@
 - Upgrade flutter sdk.
 - Upgrade packages versions.
 - Add `StorageModel` feature.
+
+## 2.0.1
+
+- Update `StorageModel` structure.
+- Add `StorageModelRegister`.

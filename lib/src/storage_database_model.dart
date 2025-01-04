@@ -2,6 +2,8 @@ import '../storage_database.dart';
 import 'extensions/list.extension.dart';
 import 'storage_database_exception.dart';
 
+export 'storage_database_model_register.dart';
+
 abstract class StorageModel {
   final String? id;
 
@@ -15,14 +17,6 @@ abstract class StorageModel {
 
   String? get path =>
       collectionId != null && id != null ? '$collectionId/$id' : null;
-
-  DateTime? get createdAt => map['created_at'] != null
-      ? DateTime.parse(map['created_at'] as String)
-      : null;
-
-  DateTime? get updatedAt => map['updated_at'] != null
-      ? DateTime.parse(map['updated_at'] as String)
-      : null;
 
   Map get map => {'id': id, ...toMap()};
 
@@ -214,38 +208,4 @@ abstract class StorageModel {
     String key,
   ) =>
       deleteWhere<MT>((element) => element[key] == value);
-}
-
-class StorageModelRegister {
-  final StorageModel Function(dynamic data) encoder;
-  final String? collectionId;
-
-  const StorageModelRegister({
-    required this.encoder,
-    this.collectionId,
-  });
-
-  static final Map<String, StorageModelRegister> _encoders = {};
-
-  static void register<MT extends StorageModel>(
-    StorageModel Function(dynamic data) encoder, [
-    String? collectionId,
-  ]) =>
-      _encoders[MT.toString()] = StorageModelRegister(
-        encoder: encoder,
-        collectionId: collectionId,
-      );
-
-  static MT encode<MT extends StorageModel>(dynamic data) {
-    if (!_encoders.containsKey("$MT")) {
-      throw StorageDatabaseException(
-        'No encoder found for type: $MT',
-      );
-    }
-
-    return _encoders["$MT"]!.encoder(data) as MT;
-  }
-
-  static String? getCollectionId<MT extends StorageModel>([Type? type]) =>
-      _encoders["${type ?? MT}"]?.collectionId;
 }
