@@ -32,11 +32,15 @@ class ExplorerDirectory {
       bool isDirectory = item.runtimeType.toString().contains("Directory");
       if (isDirectory) {
         items.add(
-          ExplorerDirectoryItem(itemName, directory(itemName), this),
+          ExplorerDirectoryItem<ExplorerDirectory>(
+            itemName,
+            directory(itemName),
+            this,
+          ),
         );
       } else {
         items.add(
-          ExplorerDirectoryItem(itemName, file(itemName), this),
+          ExplorerDirectoryItem<ExplorerFile>(itemName, file(itemName), this),
         );
       }
     }
@@ -50,20 +54,21 @@ class ExplorerDirectory {
       explorerSource.fileSync("${ioDirectory.path}/$filename").existsSync();
 
   ExplorerFile file(String filename) => ExplorerFile(
-        explorerSource,
-        explorerSource.fileSync("${ioDirectory.path}/$filename"),
-        shortPath,
-        filename,
-        storageListeners,
-      );
+    explorerSource,
+    explorerSource.fileSync("${ioDirectory.path}/$filename"),
+    shortPath,
+    filename,
+    storageListeners,
+  );
 
   ExplorerDirectory directory(String dirName, {String? streamId}) {
     List<String> dirNames =
         dirName.contains("/") ? dirName.split("/") : [dirName];
     dirNames = [for (String name in dirNames) name.replaceAll('\\', '/')];
 
-    Directory nioDirectory =
-        explorerSource.dirSync("${ioDirectory.path}/${dirNames[0]}");
+    Directory nioDirectory = explorerSource.dirSync(
+      "${ioDirectory.path}/${dirNames[0]}",
+    );
     if (!nioDirectory.existsSync()) nioDirectory.createSync();
 
     if (streamId != null && storageListeners.hasStreamId(shortPath, streamId)) {
@@ -85,9 +90,9 @@ class ExplorerDirectory {
     return explorerDirectory;
   }
 
-  Future delete({bool log = true}) async {
+  Future delete({bool stream = true}) async {
     await ioDirectory.delete(recursive: true);
-    if (log) {
+    if (stream) {
       for (String streamId in storageListeners.getPathStreamIds(shortPath)) {
         if (storageListeners.hasStreamId(shortPath, streamId)) {
           storageListeners.setDate(shortPath, streamId);
@@ -97,11 +102,12 @@ class ExplorerDirectory {
   }
 
   String get _randomStreamId => String.fromCharCodes(
-        List.generate(8, (index) => Random().nextInt(33) + 89),
-      );
+    List.generate(8, (index) => Random().nextInt(33) + 89),
+  );
 
-  Stream<List<ExplorerDirectoryItem>> stream(
-      {delayCheck = const Duration(milliseconds: 50)}) async* {
+  Stream<List<ExplorerDirectoryItem>> stream({
+    delayCheck = const Duration(milliseconds: 50),
+  }) async* {
     String streamId = _randomStreamId;
     storageListeners.initStream(shortPath, streamId);
     while (true) {

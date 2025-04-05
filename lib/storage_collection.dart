@@ -3,7 +3,6 @@ import 'dart:developer' as dev;
 import 'dart:math';
 
 import './storage_database.dart';
-import 'src/extensions/object.extension.dart';
 import 'src/storage_database_exception.dart';
 import 'src/storage_listeners.dart';
 
@@ -21,7 +20,7 @@ class StorageCollection {
       parent = StorageCollection(storageDatabase, items[0], parent: parent);
 
       for (int i = 1; i < items.length - 1; i++) {
-        parent!.set({}, log: false);
+        parent!.set({}, stream: false);
         parent = parent!.collection(items[i]);
       }
 
@@ -29,21 +28,26 @@ class StorageCollection {
     }
   }
 
+  bool _cacheLoaded = false;
+  dynamic _cache;
+
   StorageListeners get storageListeners => storageDatabase.storageListeners;
 
   Future<dynamic> _checkType(var data) async {
     if (!await exists) {
-      var initialData = data is Map
-          ? {}
-          : data is List
+      var initialData =
+          data is Map
+              ? {}
+              : data is List
               ? []
               : null;
 
       return initialData;
     } else {
-      dynamic collectionData = (parent != null
-          ? (await parent!.get())[collectionId]
-          : await storageDatabase.source.getData(collectionId));
+      dynamic collectionData =
+          (parent != null
+              ? (await parent!.get())[collectionId]
+              : await storageDatabase.source.getData(collectionId));
 
       bool currentType = false;
       try {
@@ -75,7 +79,33 @@ class StorageCollection {
     }
   }
 
-  Future set(dynamic data, {bool log = true, bool keepData = true}) async {
+  dynamic _decodeRefs(dynamic data) {
+    if (data is Map) {
+      for (var key in data.keys) {
+        data[key] = _decodeRefs(data[key]);
+      }
+    } else if (data is List) {
+      for (int i = 0; i < data.length; i++) {
+        data[i] = _decodeRefs(data[i]);
+      }
+    } else if (data is StorageCollection) {
+      data = "ref:${data.path}";
+    } else if (data is StorageModel) {
+      if (data.collectionId == null ||
+          data.collectionId?.isEmpty == true ||
+          data.collectionId == collectionId ||
+          data.id == null ||
+          data.id?.isEmpty == true) {
+        data = data.map;
+      } else {
+        data = "ref:${data.path}";
+      }
+    }
+
+    return data;
+  }
+
+  Future set(dynamic data, {bool stream = true, bool keepData = true}) async {
     dynamic newData;
 
     if (data is StorageModel) {
@@ -106,7 +136,7 @@ class StorageCollection {
       }
     }
 
-    if (log) {
+    if (stream) {
       for (var streamId in storageListeners.getPathStreamIds(path)) {
         if (storageListeners.hasStreamId(path, streamId)) {
           storageListeners.setDate(path, streamId);
@@ -114,14 +144,16 @@ class StorageCollection {
       }
     }
 
+    collectionData = _decodeRefs(collectionData);
+
     if (parent != null) {
       await parent!.set({collectionId: collectionData});
     } else {
-      await storageDatabase.source.setData(
-        collectionId,
-        collectionData,
-      );
+      await storageDatabase.source.setData(collectionId, collectionData);
     }
+
+    _cache = collectionData;
+    _cacheLoaded = true;
   }
 
   Future<bool> get exists {
@@ -132,6 +164,25 @@ class StorageCollection {
     }
   }
 
+  Future<dynamic> _encodeRefs(dynamic data) async {
+    if (data is Map) {
+      for (var key in data.keys) {
+        data[key] = await _encodeRefs(data[key]);
+      }
+    } else if (data is List) {
+      for (int i = 0; i < data.length; i++) {
+        data[i] = await _encodeRefs(data[i]);
+      }
+    } else if (data is String && data.startsWith("ref:")) {
+      String refId = data.substring(4);
+      StorageCollection collection = storageDatabase.collection(refId);
+      await collection.get();
+      data = collection;
+    }
+
+    return data;
+  }
+
   Future<dynamic> get({String? streamId}) async {
     if (!await exists) {
       throw StorageDatabaseException(
@@ -139,35 +190,95 @@ class StorageCollection {
       );
     }
 
-    dynamic collectionData = (parent != null
-        ? (await parent!.get())[collectionId]
-        : await storageDatabase.source.getData(collectionId));
+    dynamic collectionData =
+        (parent != null
+            ? (await parent!.get())[collectionId]
+            : await storageDatabase.source.getData(collectionId));
 
     if (streamId != null && storageListeners.hasStreamId(path, streamId)) {
       storageListeners.getDate(path, streamId);
     }
 
+    collectionData = await _encodeRefs(collectionData);
+    _cache = collectionData;
+    _cacheLoaded = true;
+
     return collectionData;
   }
 
-  Future<dynamic> getItem(dynamic docId) async {
+  dynamic getSync({String? streamId}) {
+    if (!_cacheLoaded) {
+      throw StorageDatabaseException(
+        "Cache is not loaded. Call get() method first.",
+      );
+    }
+
+    if (streamId != null && storageListeners.hasStreamId(path, streamId)) {
+      storageListeners.getDate(path, streamId);
+    }
+
+    return _cache;
+  }
+
+  Future<dynamic> getItem(dynamic docId, {String? streamId}) async {
     final data = await get();
+
+    dynamic item;
+
+    if (streamId != null && storageListeners.hasStreamId(path, streamId)) {
+      storageListeners.getDate(path, streamId);
+    }
+
     if (data is Map) {
-      return data[docId];
+      item = data[docId];
     } else if (data is List) {
       if (docId is! int) {
         throw const StorageDatabaseException("docId must be integer");
       }
-      return data[docId];
+      item = data[docId];
     } else {
       throw StorageDatabaseException(
         "This Collection ($collectionId) does not support collections",
       );
     }
+
+    return item;
   }
 
-  Future<dynamic> getItemWhere(bool Function(dynamic) where) async {
-    final data = await get();
+  dynamic getItemSync(dynamic docId, {String? streamId}) {
+    if (!_cacheLoaded) {
+      throw StorageDatabaseException(
+        "Cache is not loaded. Call get() method first.",
+      );
+    }
+
+    dynamic item;
+
+    if (_cache is Map) {
+      item = _cache[docId];
+    } else if (_cache is List) {
+      if (docId is! int) {
+        throw const StorageDatabaseException("docId must be integer");
+      }
+      item = _cache[docId];
+    } else {
+      throw StorageDatabaseException(
+        "This Collection ($collectionId) does not support collections",
+      );
+    }
+
+    if (streamId != null && storageListeners.hasStreamId(path, streamId)) {
+      storageListeners.getDate(path, streamId);
+    }
+
+    return item;
+  }
+
+  Future<dynamic> getItemWhere(
+    bool Function(dynamic) where, {
+    String? streamId,
+  }) async {
+    final data = await get(streamId: streamId);
     if (data is Map) {
       return data.entries.firstWhere((entry) => where(entry.value));
     } else if (data is List) {
@@ -179,11 +290,54 @@ class StorageCollection {
     }
   }
 
-  Future<MT> getAsModel<MT extends StorageModel>({
-    String? streamId,
-  }) async {
+  dynamic getItemWhereSync(bool Function(dynamic) where, {String? streamId}) {
+    if (!_cacheLoaded) {
+      throw StorageDatabaseException(
+        "Cache is not loaded. Call get() method first.",
+      );
+    }
+
+    dynamic item;
+
+    if (_cache is Map) {
+      item = _cache.entries.firstWhere((entry) => where(entry.value));
+    } else if (_cache is List) {
+      item = _cache.firstWhere(where);
+    } else {
+      throw StorageDatabaseException(
+        "This Collection ($collectionId) does not support collections",
+      );
+    }
+
+    if (streamId != null && storageListeners.hasStreamId(path, streamId)) {
+      storageListeners.getDate(path, streamId);
+    }
+
+    return item;
+  }
+
+  Future<MT> getAsModel<MT extends StorageModel>({String? streamId}) async {
     Object data = await get(streamId: streamId);
+
+    if (streamId != null && storageListeners.hasStreamId(path, streamId)) {
+      storageListeners.getDate(path, streamId);
+    }
+
     return data.toModel<MT>();
+  }
+
+  MT getAsModelSync<MT extends StorageModel>({String? streamId}) {
+    if (!_cacheLoaded) {
+      throw StorageDatabaseException(
+        "Cache is not loaded. Call get() method first.",
+      );
+    }
+
+    if (streamId != null && storageListeners.hasStreamId(path, streamId)) {
+      storageListeners.getDate(path, streamId);
+    }
+
+    return _cache.toModel<MT>();
   }
 
   Future<List<MT>> getAsModels<MT extends StorageModel>({
@@ -191,10 +345,12 @@ class StorageCollection {
   }) async {
     final data = await get(streamId: streamId);
 
-    if (data is Map) {
-      return [for (Object item in data.values) item.toModel<MT>()];
-    } else if (data is List) {
-      return [for (Object item in data) item.toModel<MT>()];
+    if (data is Map || data is List) {
+      if (streamId != null && storageListeners.hasStreamId(path, streamId)) {
+        storageListeners.getDate(path, streamId);
+      }
+
+      return data.toListModel<MT>();
     } else {
       throw StorageDatabaseException(
         "This Collection ($collectionId) does not support collections",
@@ -202,7 +358,27 @@ class StorageCollection {
     }
   }
 
-  String get path => collectionId;
+  List<MT> getAsModelsSync<MT extends StorageModel>({String? streamId}) {
+    if (!_cacheLoaded) {
+      throw StorageDatabaseException(
+        "Cache is not loaded. Call get() method first.",
+      );
+    }
+
+    if (_cache is Map || _cache is List) {
+      if (streamId != null && storageListeners.hasStreamId(path, streamId)) {
+        storageListeners.getDate(path, streamId);
+      }
+      return _cache.toListModel<MT>();
+    } else {
+      throw StorageDatabaseException(
+        "This Collection ($collectionId) does not support collections",
+      );
+    }
+  }
+
+  String get path =>
+      parent != null ? "${parent!.path}/$collectionId" : collectionId;
 
   Future<bool> hasCollectionId(dynamic collectionId) async {
     final data = await get();
@@ -217,7 +393,7 @@ class StorageCollection {
       return data.length <= collectionId;
     } else {
       throw StorageDatabaseException(
-        "This Collection ($this.collectionId) does not support collections",
+        "This Collection ($collectionId) does not support collections",
       );
     }
   }
@@ -226,7 +402,8 @@ class StorageCollection {
       StorageCollection(storageDatabase, collectionId, parent: this);
 
   String get randomStreamId => String.fromCharCodes(
-      List.generate(8, (index) => Random().nextInt(33) + 89));
+    List.generate(8, (index) => Random().nextInt(33) + 89),
+  );
 
   Stream stream({delayCheck = const Duration(milliseconds: 50)}) async* {
     String streamId = randomStreamId;
@@ -246,30 +423,29 @@ class StorageCollection {
 
   Stream<MT> streamAsModel<MT extends StorageModel>([
     delayCheck = const Duration(milliseconds: 50),
-  ]) =>
-      stream(delayCheck: delayCheck).asyncExpand<MT>((data) async* {
-        if (data != null) yield data.toModel<MT>();
-      });
+  ]) => stream(delayCheck: delayCheck).asyncExpand<MT>((data) async* {
+    if (data != null) yield data.toModel<MT>();
+  });
 
   Stream<List<MT>> streamAsModels<MT extends StorageModel>([
     delayCheck = const Duration(milliseconds: 50),
-  ]) =>
-      stream(delayCheck: delayCheck).asyncExpand<List<MT>>((data) async* {
-        if (data != null) {
-          if (data is Map) {
-            yield [for (Object item in data.values) item.toModel<MT>()];
-          } else if (data is List) {
-            yield [for (Object item in data) item.toModel<MT>()];
-          }
-        }
-      });
+  ]) => stream(delayCheck: delayCheck).asyncExpand<List<MT>>((data) async* {
+    if (data != null) {
+      if (data is Map) {
+        yield [for (Object item in data.values) item.toModel<MT>()];
+      } else if (data is List) {
+        yield [for (Object item in data) item.toModel<MT>()];
+      }
+    }
+  });
 
-  Future<bool> delete({bool log = true}) async {
-    bool res = parent != null
-        ? await parent!.deleteItem(collectionId)
-        : await storageDatabase.source.remove(collectionId);
+  Future<bool> delete({bool stream = true}) async {
+    bool res =
+        parent != null
+            ? await parent!.deleteItem(collectionId)
+            : await storageDatabase.source.remove(collectionId);
 
-    if (log) {
+    if (stream) {
       for (String streamId in storageListeners.getPathStreamIds(path)) {
         if (storageListeners.hasStreamId(path, streamId)) {
           storageListeners.setDate(path, streamId);
@@ -280,7 +456,7 @@ class StorageCollection {
     return res;
   }
 
-  Future<bool> deleteItem(itemId, {bool log = true}) async {
+  Future<bool> deleteItem(itemId, {bool stream = true}) async {
     var collectionData = await get();
 
     if (collectionData is Map) {
@@ -302,7 +478,7 @@ class StorageCollection {
     }
 
     await set(collectionData, keepData: false);
-    if (log) {
+    if (stream) {
       for (String streamId in storageListeners.getPathStreamIds(path)) {
         if (storageListeners.hasStreamId(path, streamId)) {
           storageListeners.setDate(path, streamId);
@@ -345,4 +521,8 @@ class StorageCollection {
 
     return collections;
   }
+
+  @override
+  String toString() =>
+      'col:$path ${_cacheLoaded ? "{${_cache.entries.map((entry) => '${entry.key}: ${entry.value ?? '?'}').join(', ')}}" : "ref:$path"}';
 }

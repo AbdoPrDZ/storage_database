@@ -1,6 +1,9 @@
 import 'dart:typed_data';
 
+import 'package:path_provider/path_provider.dart';
+
 import 'src/default_storage_source.dart';
+import 'src/secure_storage_source.dart';
 import 'src/storage_database_exception.dart';
 import 'src/storage_database_source.dart';
 import 'src/storage_listeners.dart';
@@ -14,7 +17,7 @@ export 'storage_collection.dart';
 export 'src/storage_database_model.dart';
 
 export 'src/storage_database_source.dart';
-export 'src/storage_database_values.dart';
+export 'src/storage_database_types.dart';
 
 export 'storage_explorer/storage_explorer.dart';
 
@@ -34,8 +37,10 @@ class StorageDatabase {
 
   static StorageDatabase? _instance;
 
+  static bool get hasInstance => _instance != null;
+
   static StorageDatabase get instance {
-    if (_instance == null) {
+    if (!hasInstance) {
       throw const StorageDatabaseException(
         'StorageDatabase instance has not initialized yet',
       );
@@ -54,45 +59,57 @@ class StorageDatabase {
     _instance = StorageDatabase(await DefaultStorageSource.instance);
   }
 
+  static Future<void> initSecureInstance(
+    String sourcePassword, {
+    String? sourcePath,
+    String? appIV,
+    bool overide = false,
+  }) async {
+    if (_instance != null && !overide) {
+      throw const StorageDatabaseException(
+        'StorageDatabase instance has not initialized yet',
+      );
+    }
+
+    sourcePath ??=
+        "${(await getApplicationDocumentsDirectory()).path}/storage_database.sdb";
+
+    _instance = StorageDatabase(
+      await SecureStorageSource.instance(
+        sourcePath,
+        sourcePassword,
+        appIV: appIV,
+      ),
+    );
+  }
+
   Future initExplorer({String? path}) =>
       StorageExplorer.initInstance(this, path: path);
 
   StorageExplorer get explorer => StorageExplorer.instance;
 
-  StorageAPI? _storageAPI;
-  void initAPI({
+  StorageAPI initAPI({
     required String apiUrl,
     Map<String, String> Function(String url)? getHeaders,
     bool log = false,
-  }) =>
-      _storageAPI = StorageAPI(
-        apiUrl: apiUrl,
-        getHeaders: getHeaders ??
-            (url) => {
-                  "Accept": "application/json",
-                  'Content-Type': 'application/json; charset=UTF-8',
-                },
-        log: log,
-      );
+  }) => StorageAPI(
+    apiUrl: apiUrl,
+    getHeaders:
+        getHeaders ??
+        (url) => {
+          "Accept": "application/json",
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+    log: log,
+  );
 
-  bool get storageAPIIsInitialized => _storageAPI != null;
-
-  StorageAPI get storageAPI {
-    if (!storageAPIIsInitialized) {
-      throw const StorageDatabaseException(
-        'StorageAPI service has not initialized yet',
-      );
-    }
-
-    return _storageAPI!;
-  }
+  StorageAPI get storageAPI => StorageAPI.instance;
 
   LaravelEcho? _laravelEcho;
   void initLaravelEcho(
     Connector connector, {
     List<LaravelEchoMigration> migrations = const [],
-  }) =>
-      _laravelEcho = LaravelEcho(this, connector, migrations: migrations);
+  }) => _laravelEcho = LaravelEcho(this, connector, migrations: migrations);
 
   bool get laravelEchoIsInitialized => _laravelEcho != null;
 
@@ -131,7 +148,7 @@ class StorageDatabase {
     List<LaravelEchoMigration> migrations, {
     required String authEndPoint,
     Map<String, String> authHeaders = const {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
     },
     String? cluster,
     String? host,
@@ -145,7 +162,7 @@ class StorageDatabase {
     bool enableLogging = true,
     bool autoConnect = true,
     Map<String, dynamic> Function(Uint8List, Map<String, dynamic>)?
-        channelDecryption,
+    channelDecryption,
     String? nameSpace,
   }) {
     _laravelEcho?.disconnect();
@@ -180,8 +197,7 @@ class StorageDatabase {
   void registerModel<MT extends StorageModel>(
     StorageModel Function(dynamic data) encoder, [
     String? collectionId,
-  ]) =>
-      StorageModelRegister.register<MT>(encoder, collectionId);
+  ]) => StorageModelRegister.register<MT>(encoder, collectionId);
 
   void registerModels(Map<Type, StorageModelRegister> models) =>
       StorageModelRegister.registerAll(models);

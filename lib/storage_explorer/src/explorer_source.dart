@@ -8,11 +8,11 @@ abstract class ExplorerSource {
   Directory dirSync(String path);
   File fileSync(String path);
 
-  onDirCreate(String dir);
-  onDirUpdate(String dir);
-  onDirDelete(String dir);
+  void onDirCreate(String dir) {}
+  void onDirUpdate(String dir) {}
+  void onDirDelete(String dir) {}
 
-  onFileCreate(String path);
-  onFileUpdate(String path);
-  onFileDelete(String path);
+  void onFileCreate(String path) {}
+  void onFileUpdate(String path) {}
+  void onFileDelete(String path) {}
 }

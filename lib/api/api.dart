@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
+import '../src/storage_database_exception.dart';
 import '../storage_database.dart';
 
 export './request.dart';
@@ -12,11 +13,23 @@ class StorageAPI {
   final Map<String, String> Function(String url)? getHeaders;
   final bool log;
 
-  const StorageAPI({
-    required this.apiUrl,
-    this.getHeaders,
-    this.log = false,
-  });
+  StorageAPI({required this.apiUrl, this.getHeaders, this.log = false}) {
+    _instance = this;
+  }
+
+  static StorageAPI? _instance;
+
+  static bool get hasInstance => _instance != null;
+
+  static StorageAPI get instance {
+    if (!hasInstance) {
+      throw const StorageDatabaseException(
+        'StorageAPI instance has not initialized yet',
+      );
+    }
+
+    return _instance!;
+  }
 
   Future<APIResponse<T>> request<T>(
     String target,
@@ -40,9 +53,10 @@ class StorageAPI {
       files: files,
       onFilesUpload: onFilesUpload,
       log: log ?? this.log,
-      headers: appendHeader
-          ? {...(getHeaders?.call(url) ?? {}), ...headers}
-          : headers,
+      headers:
+          appendHeader
+              ? {...(getHeaders?.call(url) ?? {}), ...headers}
+              : headers,
       errorsField: errorsField,
       decodeErrors: decodeErrors,
       encoding: encoding,
@@ -60,19 +74,18 @@ class StorageAPI {
     String errorsField = 'errors',
     Map<String, String> Function(Map errors)? decodeErrors,
     Encoding? encoding,
-  }) =>
-      request<T>(
-        target,
-        RequestType.get,
-        data: data,
-        files: files,
-        onFilesUpload: onFilesUpload,
-        log: log,
-        headers: headers,
-        errorsField: errorsField,
-        decodeErrors: decodeErrors,
-        encoding: encoding,
-      );
+  }) => request<T>(
+    target,
+    RequestType.get,
+    data: data,
+    files: files,
+    onFilesUpload: onFilesUpload,
+    log: log,
+    headers: headers,
+    errorsField: errorsField,
+    decodeErrors: decodeErrors,
+    encoding: encoding,
+  );
 
   Future<APIResponse<T>> post<T>(
     String target, {
@@ -85,19 +98,18 @@ class StorageAPI {
     String errorsField = 'errors',
     Map<String, String> Function(Map errors)? decodeErrors,
     Encoding? encoding,
-  }) =>
-      request<T>(
-        target,
-        RequestType.post,
-        data: data,
-        files: files,
-        onFilesUpload: onFilesUpload,
-        log: log,
-        headers: headers,
-        errorsField: errorsField,
-        decodeErrors: decodeErrors,
-        encoding: encoding,
-      );
+  }) => request<T>(
+    target,
+    RequestType.post,
+    data: data,
+    files: files,
+    onFilesUpload: onFilesUpload,
+    log: log,
+    headers: headers,
+    errorsField: errorsField,
+    decodeErrors: decodeErrors,
+    encoding: encoding,
+  );
 
   Future<APIResponse<T>> put<T>(
     String target, {
@@ -110,19 +122,18 @@ class StorageAPI {
     String errorsField = 'errors',
     Map<String, String> Function(Map errors)? decodeErrors,
     Encoding? encoding,
-  }) =>
-      request<T>(
-        target,
-        RequestType.put,
-        data: data,
-        files: files,
-        onFilesUpload: onFilesUpload,
-        log: log,
-        headers: headers,
-        errorsField: errorsField,
-        decodeErrors: decodeErrors,
-        encoding: encoding,
-      );
+  }) => request<T>(
+    target,
+    RequestType.put,
+    data: data,
+    files: files,
+    onFilesUpload: onFilesUpload,
+    log: log,
+    headers: headers,
+    errorsField: errorsField,
+    decodeErrors: decodeErrors,
+    encoding: encoding,
+  );
 
   Future<APIResponse<T>> patch<T>(
     String target, {
@@ -135,19 +146,18 @@ class StorageAPI {
     String errorsField = 'errors',
     Map<String, String> Function(Map errors)? decodeErrors,
     Encoding? encoding,
-  }) =>
-      request<T>(
-        target,
-        RequestType.patch,
-        data: data,
-        files: files,
-        onFilesUpload: onFilesUpload,
-        log: log,
-        headers: headers,
-        errorsField: errorsField,
-        decodeErrors: decodeErrors,
-        encoding: encoding,
-      );
+  }) => request<T>(
+    target,
+    RequestType.patch,
+    data: data,
+    files: files,
+    onFilesUpload: onFilesUpload,
+    log: log,
+    headers: headers,
+    errorsField: errorsField,
+    decodeErrors: decodeErrors,
+    encoding: encoding,
+  );
 
   Future<APIResponse<T>> delete<T>(
     String target, {
@@ -160,17 +170,16 @@ class StorageAPI {
     String errorsField = 'errors',
     Map<String, String> Function(Map errors)? decodeErrors,
     Encoding? encoding,
-  }) =>
-      request<T>(
-        target,
-        RequestType.delete,
-        data: data,
-        files: files,
-        onFilesUpload: onFilesUpload,
-        log: log,
-        headers: headers,
-        errorsField: errorsField,
-        decodeErrors: decodeErrors,
-        encoding: encoding,
-      );
+  }) => request<T>(
+    target,
+    RequestType.delete,
+    data: data,
+    files: files,
+    onFilesUpload: onFilesUpload,
+    log: log,
+    headers: headers,
+    errorsField: errorsField,
+    decodeErrors: decodeErrors,
+    encoding: encoding,
+  );
 }

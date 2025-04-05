@@ -25,11 +25,13 @@ class StorageExplorer {
     this.storageListeners,
     this.localDirectory,
   ) {
-    storageDatabase.onClear(() => _initLocalDirectory(
-          storageListeners,
-          explorerSource,
-          path: localDirectory.ioDirectory.path,
-        ));
+    storageDatabase.onClear(
+      () => _initLocalDirectory(
+        storageListeners,
+        explorerSource,
+        path: localDirectory.ioDirectory.path,
+      ),
+    );
 
     _instance = this;
   }
@@ -92,12 +94,9 @@ class StorageExplorer {
   ExplorerNetworkFiles get networkFiles => ExplorerNetworkFiles.instance;
 
   ExplorerNetworkFiles initNetWorkFiles({ExplorerDirectory? cacheDirectory}) =>
-      ExplorerNetworkFiles(
-        this,
-        cacheDirectory ?? directory('network-files'),
-      );
+      ExplorerNetworkFiles(this, cacheDirectory ?? directory('network-files'));
 
-  ExplorerDirectory directory(String dirName, {bool log = true}) {
+  ExplorerDirectory directory(String dirName, {bool stream = true}) {
     List<String> dirNames =
         dirName.contains("/") ? dirName.split("/") : [dirName];
     dirNames = [for (String name in dirNames) name.replaceAll('\\', '/')];
@@ -107,7 +106,7 @@ class StorageExplorer {
     );
     if (!nIODirectory.existsSync()) nIODirectory.createSync();
 
-    if (log) {
+    if (stream) {
       for (var streamId in storageListeners.getPathStreamIds("explorer")) {
         if (storageListeners.hasStreamId("explorer", streamId)) {
           storageListeners.getDate("explorer", streamId);
@@ -123,27 +122,20 @@ class StorageExplorer {
       storageListeners,
     );
     for (int i = 1; i < dirNames.length; i++) {
-      explorerDirectory = explorerDirectory.directory(
-        dirNames[i],
-      );
+      explorerDirectory = explorerDirectory.directory(dirNames[i]);
     }
 
     return explorerDirectory;
   }
 
   ExplorerFile file(String filename) {
-    File ioFile = explorerSource
-        .fileSync("${localDirectory.ioDirectory.path}\\$filename");
+    File ioFile = explorerSource.fileSync(
+      "${localDirectory.ioDirectory.path}\\$filename",
+    );
     if (!ioFile.existsSync()) {
       ioFile.createSync();
     }
-    return ExplorerFile(
-      explorerSource,
-      ioFile,
-      "",
-      filename,
-      storageListeners,
-    );
+    return ExplorerFile(explorerSource, ioFile, "", filename, storageListeners);
   }
 
   Future clear() async => await localDirectory.clear();

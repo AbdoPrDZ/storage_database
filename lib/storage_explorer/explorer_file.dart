@@ -6,7 +6,7 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import '../src/storage_database_exception.dart';
-import '../src/storage_database_values.dart';
+import '../src/storage_database_types.dart';
 import '../src/storage_listeners.dart';
 import 'src/explorer_source.dart';
 
@@ -75,7 +75,7 @@ class ExplorerFile {
 
   Future set(
     var data, {
-    bool log = true,
+    bool stream = true,
     bool append = false,
     String appendSplit = "\n",
     FileMode mode = FileMode.write,
@@ -86,14 +86,14 @@ class ExplorerFile {
       data = data.toString();
     }
 
-    if (log) {
+    if (stream) {
       for (var streamId in storageListeners.getPathStreamIds(_fileShortPath)) {
         if (storageListeners.hasStreamId(_fileShortPath, streamId)) {
           storageListeners.getDate(_fileShortPath, streamId);
         }
       }
     }
-    if (log) {
+    if (stream) {
       for (var streamId in storageListeners.getPathStreamIds(dirPath)) {
         if (storageListeners.hasStreamId(dirPath, streamId)) {
           storageListeners.getDate(dirPath, streamId);
@@ -110,7 +110,7 @@ class ExplorerFile {
 
   Future setJson(
     dynamic data, {
-    bool log = true,
+    bool stream = true,
     SetMode setMode = SetMode.append,
     FileMode mode = FileMode.write,
     Encoding encoding = utf8,
@@ -148,7 +148,7 @@ class ExplorerFile {
     }
     await set(
       jsonEncode(currentData),
-      log: log,
+      stream: stream,
       mode: mode,
       encoding: encoding,
       flush: flush,
@@ -157,19 +157,19 @@ class ExplorerFile {
 
   Future setBytes(
     Uint8List bytes, {
-    bool log = true,
+    bool stream = true,
     FileMode mode = FileMode.write,
     bool flush = false,
   }) async {
     ioFile = await ioFile.writeAsBytes(bytes);
-    if (log) {
+    if (stream) {
       for (var streamId in storageListeners.getPathStreamIds(_fileShortPath)) {
         if (storageListeners.hasStreamId(_fileShortPath, streamId)) {
           storageListeners.getDate(_fileShortPath, streamId);
         }
       }
     }
-    if (log) {
+    if (stream) {
       for (var streamId in storageListeners.getPathStreamIds(dirPath)) {
         if (storageListeners.hasStreamId(dirPath, streamId)) {
           storageListeners.getDate(dirPath, streamId);
@@ -178,9 +178,9 @@ class ExplorerFile {
     }
   }
 
-  Future delete({bool log = true}) async {
+  Future delete({bool stream = true}) async {
     await ioFile.delete(recursive: true);
-    if (log) {
+    if (stream) {
       for (var streamId in storageListeners.getPathStreamIds(_fileShortPath)) {
         if (storageListeners.hasStreamId(_fileShortPath, streamId)) {
           storageListeners.getDate(_fileShortPath, streamId);
@@ -191,21 +191,21 @@ class ExplorerFile {
 
   String get _fileShortPath => "$dirPath/$filename";
 
-  Stream<String?> stream(
-          {Duration delayCheck = const Duration(milliseconds: 50)}) =>
-      _stream<String>(delayCheck, StreamMode.string);
+  Stream<String?> stream({
+    Duration delayCheck = const Duration(milliseconds: 50),
+  }) => _stream<String>(delayCheck, StreamMode.string);
 
-  Stream<T?> jsonStream<T>(
-          {Duration delayCheck = const Duration(milliseconds: 50)}) =>
-      _stream<T>(delayCheck, StreamMode.json);
+  Stream<T?> jsonStream<T>({
+    Duration delayCheck = const Duration(milliseconds: 50),
+  }) => _stream<T>(delayCheck, StreamMode.json);
 
-  Stream<Uint8List?> bytesStream(
-          {Duration delayCheck = const Duration(milliseconds: 50)}) =>
-      _stream<Uint8List>(delayCheck, StreamMode.bytes);
+  Stream<Uint8List?> bytesStream({
+    Duration delayCheck = const Duration(milliseconds: 50),
+  }) => _stream<Uint8List>(delayCheck, StreamMode.bytes);
 
   String get randomStreamId => String.fromCharCodes(
-        List.generate(8, (index) => Random().nextInt(33) + 89),
-      );
+    List.generate(8, (index) => Random().nextInt(33) + 89),
+  );
 
   Stream<T?> _stream<T>(Duration delayCheck, StreamMode streamMode) async* {
     String streamId = randomStreamId;

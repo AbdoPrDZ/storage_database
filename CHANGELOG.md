@@ -293,3 +293,7 @@
 - Export extensions.
 - Update `StorageModelRegister`.
 - Update `StorageDatabase`.
+
+## 2.0.3
+
+- Upgrade flutter sdk.

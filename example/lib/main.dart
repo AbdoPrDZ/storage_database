@@ -14,20 +14,28 @@ void main() => runApp(const MyApp());
 class UserModel extends StorageModel {
   final String name;
 
-  const UserModel({
-    super.id,
-    required this.name,
-  });
+  UserModel({super.id, required this.name});
 
-  factory UserModel.fromMap(Map map) => UserModel(
-        id: map['id'],
-        name: map['name'],
-      );
+  factory UserModel.fromMap(Map map) =>
+      UserModel(id: map['id'], name: map['name']);
 
   @override
-  Map toMap() => {
-        'name': name,
-      };
+  Map toMap() => {'name': name};
+}
+
+class MessageModel extends StorageModel {
+  final String content;
+  final UserModel user;
+
+  MessageModel({super.id, required this.content, required this.user});
+
+  factory MessageModel.fromJson(Map data) => MessageModel(
+    content: data['content'],
+    user: data['content'].toModel<MessageModel>(),
+  );
+
+  @override
+  Map toMap() => {'content': content, 'user': user.ref};
 }
 
 class MyApp extends StatelessWidget {
@@ -35,12 +43,10 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => MaterialApp(
-        title: 'Storage Database Example',
-        theme: ThemeData(
-          primarySwatch: Colors.blue,
-        ),
-        home: const MyHomePage(),
-      );
+    title: 'Storage Database Example',
+    theme: ThemeData(primarySwatch: Colors.blue),
+    home: const MyHomePage(),
+  );
 }
 
 class MyHomePage extends StatefulWidget {
@@ -51,48 +57,65 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  StorageDatabase? storageDatabase;
+  StorageDatabase get storageDatabase => StorageDatabase.instance;
 
   void snackbar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(message),
-      backgroundColor: Colors.black,
-      action: SnackBarAction(
-        label: 'Dismiss',
-        onPressed: () {},
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.black,
+        action: SnackBarAction(label: 'Dismiss', onPressed: () {}),
       ),
-    ));
+    );
   }
 
-  void initStorageDatabase() async {
-    if (storageDatabase != null) {
+  void initStorageDatabase({bool secure = false}) async {
+    if (StorageDatabase.hasInstance) {
       snackbar('StorageDatabase already initialized');
       return;
     }
 
-    await StorageDatabase.initInstance();
-    storageDatabase = StorageDatabase.instance;
-    await storageDatabase!.clear();
+    snackbar('Initializing StorageDatabase...');
+    if (secure) {
+      await StorageDatabase.initSecureInstance('AbdoPrDZ');
+    } else {
+      await StorageDatabase.initInstance();
+    }
 
     StorageModelRegister.register<UserModel>(
       (data) => UserModel.fromMap(data),
       'users',
     );
+    StorageModelRegister.register<MessageModel>(
+      (data) => MessageModel.fromJson(data),
+      'messages',
+    );
 
-    await storageDatabase!.collection('messages').set({});
-    storageDatabase!
+    await storageDatabase.collection('messages').set({});
+    storageDatabase
         .collection('messages')
         .stream()
         .listen((data) => setState(() => messages = data));
 
-    setState(() {});
-
     snackbar('StorageDatabase initializing successfully');
+
+    setState(() {});
+  }
+
+  void clearStorageDatabase() async {
+    if (!StorageDatabase.hasInstance) {
+      snackbar("You need to init StorageDatabase first");
+      return;
+    }
+
+    await StorageDatabase.instance.clear();
+
+    snackbar('StorageDatabase cleared successfully');
   }
 
   TextEditingController explorerPathController = TextEditingController();
   void initStorageExplorer() async {
-    if (storageDatabase == null) {
+    if (!StorageDatabase.hasInstance) {
       snackbar("You need to init StorageDatabase first");
       return;
     } else if (StorageExplorer.hasInstance) {
@@ -100,17 +123,20 @@ class _MyHomePageState extends State<MyHomePage> {
       return;
     }
 
-    await storageDatabase!.initExplorer(
-      path: explorerPathController.text.isNotEmpty
-          ? explorerPathController.text
-          : null,
+    await storageDatabase.initExplorer(
+      path:
+          explorerPathController.text.isNotEmpty
+              ? explorerPathController.text
+              : null,
     );
 
     snackbar('StorageExplorer initializing successfully');
+
+    setState(() {});
   }
 
   void initNetworkFiles() async {
-    if (storageDatabase == null) {
+    if (!StorageDatabase.hasInstance) {
       snackbar("You need to init StorageDatabase first");
       return;
     } else if (!StorageExplorer.hasInstance) {
@@ -121,17 +147,19 @@ class _MyHomePageState extends State<MyHomePage> {
       return;
     }
 
-    storageDatabase!.explorer.initNetWorkFiles();
-    await storageDatabase!.clear();
+    storageDatabase.explorer.initNetWorkFiles();
+    await storageDatabase.clear();
 
     snackbar('NetworkFiles initializing successfully');
+
+    setState(() {});
   }
 
   TextEditingController imageUrlController = TextEditingController();
   TextEditingController tokenController = TextEditingController();
   Widget? networkImage;
   void getNetworkImage() {
-    if (storageDatabase == null) {
+    if (!StorageDatabase.hasInstance) {
       snackbar("You need to init StorageDatabase first");
       return;
     } else if (!StorageExplorer.hasInstance) {
@@ -155,7 +183,7 @@ class _MyHomePageState extends State<MyHomePage> {
         height: 300,
         headers: {
           if (tokenController.text.isNotEmpty)
-            'Authorization': tokenController.text
+            'Authorization': tokenController.text,
         },
         refresh: true,
         log: true,
@@ -173,7 +201,7 @@ class _MyHomePageState extends State<MyHomePage> {
   );
 
   void initStorageAPI() async {
-    if (storageDatabase == null) {
+    if (!StorageDatabase.hasInstance) {
       snackbar("You need to init StorageDatabase first");
       return;
     } else if (apiUrlController.text.isEmpty) {
@@ -181,15 +209,17 @@ class _MyHomePageState extends State<MyHomePage> {
       return;
     }
 
-    storageDatabase!.initAPI(apiUrl: apiUrlController.text);
+    storageDatabase.initAPI(apiUrl: apiUrlController.text);
 
     snackbar('StorageExplorer initializing successfully');
+
+    setState(() {});
   }
 
   TextEditingController collectionController = TextEditingController();
   TextEditingController collectionDataController = TextEditingController();
   void createCollection() async {
-    if (storageDatabase == null) {
+    if (!StorageDatabase.hasInstance) {
       snackbar("You need to init StorageDatabase first");
       return;
     } else if (collectionController.text.isEmpty) {
@@ -208,54 +238,78 @@ class _MyHomePageState extends State<MyHomePage> {
       log('Error: $e');
     }
 
-    await storageDatabase!.collection(collectionController.text).set(data);
+    await storageDatabase.collection(collectionController.text).set(data);
 
     final collectionData =
-        await storageDatabase!.collection(collectionController.text).get();
+        await storageDatabase.collection(collectionController.text).get();
 
     log(collectionData.toString());
 
     snackbar('StorageCollection created successfully');
   }
 
-  void createUserCollection() async {
-    if (storageDatabase == null) {
+  TextEditingController userController = TextEditingController();
+  void createUserModel() async {
+    if (!StorageDatabase.hasInstance) {
       snackbar("You need to init StorageDatabase first");
       return;
+    } else if (userController.text.isEmpty) {
+      snackbar("Username required");
+      return;
     }
+    snackbar('Creating UserModel...');
 
-    // await storageDatabase!.collection("user").set(
-    //       UserModel(
-    //         id: '1',
-    //         name: 'John Doe',
-    //         // type: 'user',
-    //       ),
-    //     );
-
-    // UserModel user = await storageDatabase!.collection("user").getAsModel();
-
-    // log(user.toString());
-
-    final newUser = UserModel(
-      name: 'Abdo Pr',
-    );
-
+    final newUser = UserModel(name: userController.text);
     snackbar(newUser.toString());
 
     await newUser.save();
+    snackbar((await storageDatabase.collection('users').get()).toString());
 
-    snackbar((await storageDatabase!.collection('users').get()).toString());
-
-    final user = await StorageModel.find<UserModel>('1');
+    final user = await StorageModel.find<UserModel>(newUser.id!);
     snackbar(user.toString());
 
     snackbar((await StorageModel.all<UserModel>()).toString());
 
-    snackbar('User StorageCollection created successfully');
+    snackbar('UserModel created successfully');
+  }
+
+  TextEditingController messageController = TextEditingController();
+  void createMessageModel() async {
+    if (!StorageDatabase.hasInstance) {
+      snackbar("You need to init StorageDatabase first");
+      return;
+    } else if (messageController.text.isEmpty) {
+      snackbar("Message required");
+      return;
+    }
+
+    snackbar('Creating MessageModel...');
+
+    final user =
+        userController.text.isNotEmpty
+            ? await StorageModel.findBy<UserModel>(userController.text, 'name')
+            : await StorageModel.find<UserModel>('1');
+
+    if (user == null) {
+      snackbar('User not found');
+      return;
+    }
+
+    final newMessage = MessageModel(
+      content: messageController.text,
+      user: user,
+    );
+
+    snackbar(newMessage.toString());
+
+    await newMessage.save();
+    snackbar((await storageDatabase.collection('messages').get()).toString());
+
+    snackbar('MessageModel created successfully');
   }
 
   void getCollectionData() async {
-    if (storageDatabase == null) {
+    if (!StorageDatabase.hasInstance) {
       snackbar("You need to init StorageDatabase first");
       return;
     } else if (collectionController.text.isEmpty) {
@@ -264,7 +318,7 @@ class _MyHomePageState extends State<MyHomePage> {
     }
 
     snackbar(
-      'Collection Data: "${await storageDatabase!.collection(collectionController.text).get()}"',
+      'Collection Data: "${await storageDatabase.collection(collectionController.text).get()}"',
     );
   }
 
@@ -289,10 +343,10 @@ class _MyHomePageState extends State<MyHomePage> {
   int bytes = 0;
   int totalBytes = 1;
   void uploadImage() async {
-    if (storageDatabase == null) {
+    if (!StorageDatabase.hasInstance) {
       snackbar("You need to init StorageDatabase first");
       return;
-    } else if (!storageDatabase!.storageAPIIsInitialized) {
+    } else if (!StorageAPI.hasInstance) {
       snackbar('You need to init StorageAPI first');
       return;
     } else if (imagePath == null) {
@@ -306,15 +360,11 @@ class _MyHomePageState extends State<MyHomePage> {
     bytes = 0;
     totalBytes = 1;
 
-    await storageDatabase!.storageAPI.request(
+    await StorageAPI.instance.request(
       targetController.text,
       RequestType.post,
-      files: [
-        await http.MultipartFile.fromPath('image', imagePath!),
-      ],
-      data: {
-        'text': '121',
-      },
+      files: [await http.MultipartFile.fromPath('image', imagePath!)],
+      data: {'text': '121'},
       log: true,
       onFilesUpload: (bytes, totalBytes) {
         log("progress: ${bytes / totalBytes * 100}%");
@@ -331,7 +381,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   TextEditingController dirPathController = TextEditingController();
   void createDir() async {
-    if (storageDatabase == null) {
+    if (!StorageDatabase.hasInstance) {
       snackbar("You need to init StorageDatabase first");
       return;
     } else if (!StorageExplorer.hasInstance) {
@@ -341,7 +391,7 @@ class _MyHomePageState extends State<MyHomePage> {
       snackbar('Please enter directory Path');
       return;
     }
-    storageDatabase!.explorer.directory(dirPathController.text);
+    storageDatabase.explorer.directory(dirPathController.text);
     snackbar('Directory created successfully');
   }
 
@@ -350,15 +400,15 @@ class _MyHomePageState extends State<MyHomePage> {
   bool laravelEchoConnected = false;
   Map messages = {};
   void connectLaravelEcho() {
-    if (storageDatabase == null) {
+    if (!StorageDatabase.hasInstance) {
       snackbar("You need to init StorageDatabase first");
       return;
     }
 
     if (broadcaster == 'socket.io') {
-      storageDatabase!.initSocketLaravelEcho(
+      storageDatabase.initSocketLaravelEcho(
         'http://localhost:6001',
-        [MessageMigration(storageDatabase!, 'messages')],
+        [MessageMigration(storageDatabase, 'messages')],
         autoConnect: false,
         authHeaders: {'Authorization': 'Bearer ${echoTokenController.text}'},
         moreOptions: {
@@ -372,46 +422,42 @@ class _MyHomePageState extends State<MyHomePage> {
       const String hostAuthEndPoint = "http://$hostEndPoint/broadcasting/auth";
       const int port = 6001;
 
-      storageDatabase!.initPusherLaravelEcho(
+      storageDatabase.initPusherLaravelEcho(
         key,
-        [
-          MessageMigration(storageDatabase!, 'messages'),
-        ],
+        [MessageMigration(storageDatabase, 'messages')],
         host: hostEndPoint,
         wsPort: port,
         cluster: cluster,
         encrypted: true,
         authEndPoint: hostAuthEndPoint,
-        authHeaders: {
-          'Authorization': 'Bearer ${echoTokenController.text}',
-        },
+        authHeaders: {'Authorization': 'Bearer ${echoTokenController.text}'},
         autoConnect: false,
         enableLogging: true,
       );
     }
 
-    storageDatabase!.laravelEcho.connector.onConnect((data) {
+    storageDatabase.laravelEcho.connector.onConnect((data) {
       setState(() => laravelEchoConnected = true);
       log('socket connected');
     });
-    storageDatabase!.laravelEcho.connector.onDisconnect((data) {
+    storageDatabase.laravelEcho.connector.onDisconnect((data) {
       setState(() => laravelEchoConnected = false);
       log('socket disconnected');
     });
-    storageDatabase!.laravelEcho.connector.onConnectError((err) {
+    storageDatabase.laravelEcho.connector.onConnectError((err) {
       setState(() => laravelEchoConnected = false);
       log('socketConnectError: $err');
     });
-    storageDatabase!.laravelEcho.connector.onError((err) {
+    storageDatabase.laravelEcho.connector.onError((err) {
       log('socketError: $err');
     });
-    storageDatabase!.laravelEcho.connect();
+    storageDatabase.laravelEcho.connect();
 
     snackbar('Laravel echo connected successfully');
   }
 
   void getLaravelEchoChannels() {
-    storageDatabase!.laravelEcho.connector.channels.forEach((name, channel) {
+    storageDatabase.laravelEcho.connector.channels.forEach((name, channel) {
       channel = channel as SocketIoChannel;
       log(' -- channel: $name');
       for (var event in channel.events.keys) {
@@ -424,78 +470,107 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(
-          title: const Text('StorageDatabase Example'),
-        ),
-        body: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-            child: Form(
-              key: formKey,
-              child: Flex(
-                direction: Axis.vertical,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const Divider(),
-                  ElevatedButton(
-                    onPressed: initStorageDatabase,
-                    child: const Text('Init StorageDatabase'),
+    appBar: AppBar(title: const Text('StorageDatabase Example')),
+    body: SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        child: Form(
+          key: formKey,
+          child: Flex(
+            direction: Axis.vertical,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (!StorageDatabase.hasInstance) ...[
+                ElevatedButton(
+                  onPressed: initStorageDatabase,
+                  child: const Text('Init StorageDatabase'),
+                ),
+                ElevatedButton(
+                  onPressed: () => initStorageDatabase(secure: true),
+                  child: const Text('Init SecureStorageDatabase'),
+                ),
+                const Divider(),
+              ] else ...[
+                ElevatedButton(
+                  onPressed: clearStorageDatabase,
+                  child: const Text('Clear StorageDatabase'),
+                ),
+                const Divider(),
+                ElevatedButton(
+                  onPressed: initStorageExplorer,
+                  child: const Text('Init StorageExplorer'),
+                ),
+                const Divider(),
+                ElevatedButton(
+                  onPressed: initNetworkFiles,
+                  child: const Text('Init NetworkFiles'),
+                ),
+                const Divider(),
+                TextField(
+                  controller: apiUrlController,
+                  decoration: const InputDecoration(hintText: 'API URL'),
+                ),
+                ElevatedButton(
+                  onPressed: initStorageAPI,
+                  child: const Text('Init StorageAPI'),
+                ),
+                const Divider(),
+                TextField(
+                  controller: collectionController,
+                  decoration: const InputDecoration(hintText: 'Collection'),
+                ),
+                TextField(
+                  controller: collectionDataController,
+                  decoration: const InputDecoration(
+                    hintText: 'Collection Data',
                   ),
-                  const Divider(),
-                  ElevatedButton(
-                    onPressed: initStorageExplorer,
-                    child: const Text('Init StorageExplorer'),
-                  ),
-                  const Divider(),
-                  const Divider(),
-                  TextField(
-                    controller: apiUrlController,
-                    decoration: const InputDecoration(hintText: 'API URL'),
-                  ),
-                  ElevatedButton(
-                    onPressed: initStorageAPI,
-                    child: const Text('Init StorageAPI'),
-                  ),
-                  const Divider(),
-                  TextField(
-                    controller: collectionController,
-                    decoration: const InputDecoration(hintText: 'Collection'),
-                  ),
-                  TextField(
-                    controller: collectionDataController,
-                    decoration:
-                        const InputDecoration(hintText: 'Collection Data'),
-                  ),
-                  ElevatedButton(
-                    onPressed: createCollection,
-                    child: const Text('Create Collection'),
-                  ),
-                  ElevatedButton(
-                    onPressed: createUserCollection,
-                    child: const Text('Create User Collection'),
-                  ),
-                  const Divider(),
-                  ElevatedButton(
-                    onPressed: getCollectionData,
-                    child: const Text('Get Collection Data'),
-                  ),
+                ),
+                ElevatedButton(
+                  onPressed: createCollection,
+                  child: const Text('Create Collection'),
+                ),
+                const Divider(),
+                TextField(
+                  controller: userController,
+                  decoration: const InputDecoration(hintText: 'Username'),
+                ),
+                ElevatedButton(
+                  onPressed: createUserModel,
+                  child: const Text('Create User Model'),
+                ),
+                const Divider(),
+                TextField(
+                  controller: messageController,
+                  decoration: const InputDecoration(hintText: 'Message'),
+                ),
+                ElevatedButton(
+                  onPressed: createMessageModel,
+                  child: const Text('Create Message Model'),
+                ),
+                const Divider(),
+                ElevatedButton(
+                  onPressed: getCollectionData,
+                  child: const Text('Get Collection Data'),
+                ),
+                const Divider(),
+                if (StorageAPI.hasInstance) ...[
+                  Text("Chose Image:"),
                   InkWell(
                     onTap: choseImage,
                     child: Container(
                       height: 200,
                       decoration: BoxDecoration(
                         color: const Color.fromARGB(255, 217, 217, 217),
-                        image: imagePath != null
-                            ? DecorationImage(
-                                image: FileImage(io.File(imagePath!)),
-                              )
-                            : null,
+                        image:
+                            imagePath != null
+                                ? DecorationImage(
+                                  image: FileImage(io.File(imagePath!)),
+                                )
+                                : null,
                       ),
                     ),
                   ),
-                  LinearProgressIndicator(
-                    value: bytes / totalBytes,
-                  ),
+                  LinearProgressIndicator(value: bytes / totalBytes),
                   TextField(
                     controller: targetController,
                     decoration: const InputDecoration(hintText: 'Target'),
@@ -505,11 +580,8 @@ class _MyHomePageState extends State<MyHomePage> {
                     child: const Text('Upload Image'),
                   ),
                   const Divider(),
-                  ElevatedButton(
-                    onPressed: initNetworkFiles,
-                    child: const Text('Init NetworkFiles'),
-                  ),
-                  const Divider(),
+                ],
+                if (StorageExplorer.hasInstance) ...[
                   TextField(
                     controller: imageUrlController,
                     decoration: const InputDecoration(hintText: 'Image Url'),
@@ -523,82 +595,79 @@ class _MyHomePageState extends State<MyHomePage> {
                     child: const Text('Get NetworkImage'),
                   ),
                   if (networkImage != null) networkImage!,
-                  TextField(
-                    controller: dirPathController,
-                    decoration: const InputDecoration(hintText: 'Dir Path'),
-                  ),
-                  ElevatedButton(
-                    onPressed: createDir,
-                    child: const Text('Create Directory'),
-                  ),
-                  const Divider(),
-                  TextField(
-                    controller: echoTokenController,
-                    decoration:
-                        const InputDecoration(hintText: 'Laravel Echo Token'),
-                  ),
-                  Row(
-                    children: [
-                      const Text('Broadcaster:'),
-                      const SizedBox(width: 10),
-                      DropdownButton<String>(
-                        value: broadcaster,
-                        items: const [
-                          DropdownMenuItem(
-                            value: 'socket.io',
-                            child: Text('Socket.io'),
-                          ),
-                          DropdownMenuItem(
-                            value: 'pusher',
-                            child: Text('Pusher'),
-                          ),
-                        ],
-                        onChanged: (value) => setState(
-                          () => broadcaster = value ?? broadcaster,
-                        ),
-                      ),
-                    ],
-                  ),
-                  ElevatedButton(
-                    onPressed: laravelEchoConnected
-                        ? storageDatabase!.laravelEcho.disconnect
-                        : connectLaravelEcho,
-                    style: ButtonStyle(
-                      backgroundColor: WidgetStateProperty.all(
-                        laravelEchoConnected ? Colors.green : Colors.red,
-                      ),
-                    ),
-                    child: Text(
-                      '${laravelEchoConnected ? 'Disconnect' : 'Connect'} Laravel Echo',
-                    ),
-                  ),
-                  if (laravelEchoConnected)
-                    ElevatedButton(
-                      onPressed: getLaravelEchoChannels,
-                      child: const Text('Get Laravel Echo Channels'),
-                    ),
-                  if (storageDatabase != null)
-                    // StreamBuilder(
-                    //   stream: storageDatabase!.collection('messages').stream(),
-                    //   builder: (context, snapshot) =>
-                    Container(
-                      height: 200,
-                      color: const Color(0xFFE4E4E4),
-                      padding: const EdgeInsets.all(5),
-                      child: SingleChildScrollView(
-                        // child: Text(snapshot.data?.toString() ?? 'None'),
-                        child: Text(const JsonEncoder.withIndent('  ')
-                            .convert(messages)),
-                      ),
-                    ),
-                  // ),
-                  const Divider(),
                 ],
-              ),
-            ),
+                TextField(
+                  controller: dirPathController,
+                  decoration: const InputDecoration(hintText: 'Dir Path'),
+                ),
+                ElevatedButton(
+                  onPressed: createDir,
+                  child: const Text('Create Directory'),
+                ),
+                const Divider(),
+                TextField(
+                  controller: echoTokenController,
+                  decoration: const InputDecoration(
+                    hintText: 'Laravel Echo Token',
+                  ),
+                ),
+                Row(
+                  children: [
+                    const Text('Broadcaster:'),
+                    const SizedBox(width: 10),
+                    DropdownButton<String>(
+                      value: broadcaster,
+                      items: const [
+                        DropdownMenuItem(
+                          value: 'socket.io',
+                          child: Text('Socket.io'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'pusher',
+                          child: Text('Pusher'),
+                        ),
+                      ],
+                      onChanged:
+                          (value) => setState(
+                            () => broadcaster = value ?? broadcaster,
+                          ),
+                    ),
+                  ],
+                ),
+                ElevatedButton(
+                  onPressed:
+                      laravelEchoConnected
+                          ? storageDatabase.laravelEcho.disconnect
+                          : connectLaravelEcho,
+                  style: ButtonStyle(
+                    backgroundColor: WidgetStateProperty.all(
+                      laravelEchoConnected ? Colors.green : Colors.red,
+                    ),
+                  ),
+                  child: Text(
+                    '${laravelEchoConnected ? 'Disconnect' : 'Connect'} Laravel Echo',
+                  ),
+                ),
+                if (laravelEchoConnected)
+                  ElevatedButton(
+                    onPressed: getLaravelEchoChannels,
+                    child: const Text('Get Laravel Echo Channels'),
+                  ),
+                if (StorageDatabase.hasInstance)
+                  Container(
+                    height: 200,
+                    color: const Color(0xFFE4E4E4),
+                    padding: const EdgeInsets.all(5),
+                    child: SingleChildScrollView(child: Text("$messages")),
+                  ),
+                const Divider(),
+              ],
+            ],
           ),
         ),
-      );
+      ),
+    ),
+  );
 }
 
 class MessageMigration extends LaravelEchoMigration {
@@ -615,10 +684,10 @@ class MessageMigration extends LaravelEchoMigration {
 
   @override
   Map<EventsType, String> get eventsNames => {
-        EventsType.create: 'MessageCreatedEvent',
-        EventsType.update: 'MessageUpdatedEvent',
-        EventsType.delete: 'MessageDeletedEvent',
-      };
+    EventsType.create: 'MessageCreatedEvent',
+    EventsType.update: 'MessageUpdatedEvent',
+    EventsType.delete: 'MessageDeletedEvent',
+  };
 
   @override
   setup() {
