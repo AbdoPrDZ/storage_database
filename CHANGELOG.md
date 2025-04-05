@@ -297,3 +297,10 @@
 ## 2.0.3
 
 - Upgrade flutter sdk.
+- Refactor storage database structure and enhance secure storage functionality
+- Removed deprecated enums from storage_database_values.dart and replaced with storage_database_types.dart.
+- Updated StorageListeners to use private \_listenersData map for better encapsulation.
+- Modified StorageCollection to include caching mechanisms for improved performance.
+- Introduced SecureStorageSource for encrypted data storage with AES encryption.
+- Updated stream handling in Explorer classes to use more consistent naming and logic.
+- Enhanced error handling and data validation across various storage operations.
