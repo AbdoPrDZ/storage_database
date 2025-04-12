@@ -1,6 +1,8 @@
 import 'dart:typed_data';
 
 import 'package:path_provider/path_provider.dart';
+import 'package:pusher_client_socket/pusher_client_socket.dart';
+import 'package:socket_io_client/socket_io_client.dart';
 
 import 'src/default_storage_source.dart';
 import 'src/secure_storage_source.dart';
@@ -50,9 +52,9 @@ class StorageDatabase {
   }
 
   static Future<void> initInstance({bool overide = false}) async {
-    if (_instance != null && !overide) {
+    if (hasInstance && !overide) {
       throw const StorageDatabaseException(
-        'StorageDatabase instance has not initialized yet',
+        'StorageDatabase instance has already initialized',
       );
     }
 
@@ -65,9 +67,9 @@ class StorageDatabase {
     String? appIV,
     bool overide = false,
   }) async {
-    if (_instance != null && !overide) {
+    if (hasInstance && !overide) {
       throw const StorageDatabaseException(
-        'StorageDatabase instance has not initialized yet',
+        'StorageDatabase instance has already initialized',
       );
     }
 
@@ -101,22 +103,18 @@ class StorageDatabase {
 
   StorageAPI get storageAPI => StorageAPI.instance;
 
-  LaravelEcho? _laravelEcho;
   void initLaravelEcho(
     Connector connector, {
     List<LaravelEchoMigration> migrations = const [],
-  }) => _laravelEcho = LaravelEcho(this, connector, migrations: migrations);
+  }) => LaravelEcho(this, connector, migrations: migrations);
 
-  bool get laravelEchoIsInitialized => _laravelEcho != null;
+  LaravelEcho get laravelEcho => LaravelEcho.instance;
 
-  LaravelEcho get laravelEcho {
-    if (!laravelEchoIsInitialized) {
-      throw const StorageDatabaseException(
-        'LaravelEcho service has not initialized yet',
-      );
-    }
-    return _laravelEcho!;
-  }
+  LaravelEcho<Socket, SocketIoChannel> get socketLaravelEcho =>
+      LaravelEcho.socketInstance;
+
+  LaravelEcho<PusherClient, PusherChannel> get pusherLaravelEcho =>
+      LaravelEcho.pusherInstance;
 
   void initSocketLaravelEcho(
     String host,
@@ -127,8 +125,9 @@ class StorageDatabase {
     bool autoConnect = true,
     Map<dynamic, dynamic> moreOptions = const {},
   }) {
-    _laravelEcho?.disconnect();
-    _laravelEcho = LaravelEcho.socket(
+    if (LaravelEcho.hasSocketInstance) laravelEcho.disconnect();
+
+    LaravelEcho.socket(
       this,
       host,
       migrations,
@@ -161,8 +160,9 @@ class StorageDatabase {
     channelDecryption,
     String? nameSpace,
   }) {
-    _laravelEcho?.disconnect();
-    _laravelEcho = LaravelEcho.pusher(
+    if (LaravelEcho.hasPusherInstance) laravelEcho.disconnect();
+
+    LaravelEcho.pusher(
       this,
       appKey,
       migrations,

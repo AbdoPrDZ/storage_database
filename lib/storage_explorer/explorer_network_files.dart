@@ -21,8 +21,10 @@ class ExplorerNetworkFiles {
 
   static ExplorerNetworkFiles? _instance;
 
+  static bool get hasInstance => _instance != null;
+
   static ExplorerNetworkFiles get instance {
-    if (_instance == null) {
+    if (!hasInstance) {
       throw const StorageDatabaseException(
         'ExplorerNetworkFiles instance has not initialized yet',
       );
@@ -30,8 +32,6 @@ class ExplorerNetworkFiles {
 
     return _instance!;
   }
-
-  static bool get hasInstance => _instance != null;
 
   String encodeUrl(String url) => utf8.fuse(base64).encode(url);
 
@@ -107,23 +107,22 @@ class ExplorerNetworkFiles {
     bool refresh = false,
     bool getOldOnError = false,
     bool log = false,
-  }) =>
-      ExplorerNetworkImage(
-        explorerNetworkFiles: this,
-        url: url,
-        width: width,
-        height: height,
-        borderRadius: borderRadius,
-        fit: fit,
-        backgroundColor: backgroundColor,
-        baseColor: baseColor,
-        errorIconColor: errorIconColor,
-        headers: headers,
-        highlightColor: highlightColor,
-        refresh: refresh,
-        getOldOnError: getOldOnError,
-        log: log,
-      );
+  }) => ExplorerNetworkImage(
+    explorerNetworkFiles: this,
+    url: url,
+    width: width,
+    height: height,
+    borderRadius: borderRadius,
+    fit: fit,
+    backgroundColor: backgroundColor,
+    baseColor: baseColor,
+    errorIconColor: errorIconColor,
+    headers: headers,
+    highlightColor: highlightColor,
+    refresh: refresh,
+    getOldOnError: getOldOnError,
+    log: log,
+  );
 
   Future clear() => networkDirFiles.clear();
 }
@@ -167,56 +166,63 @@ class ExplorerNetworkImage extends StatefulWidget {
 }
 
 class _ExplorerNetworkImageState extends State<ExplorerNetworkImage> {
-  Future<File?> getImage() async => (await widget.explorerNetworkFiles
-          .file(widget.url, headers: widget.headers))
-      ?.ioFile;
+  Future<File?> getImage() async =>
+      (await widget.explorerNetworkFiles.file(
+        widget.url,
+        headers: widget.headers,
+      ))?.ioFile;
 
   @override
   Widget build(BuildContext context) => FutureBuilder<File?>(
-        future: getImage(),
-        builder: (context, snapshot) => Container(
+    future: getImage(),
+    builder:
+        (context, snapshot) => Container(
           width: widget.width,
           height: widget.height,
           margin: widget.margin,
           padding: widget.padding,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(
-              widget.borderRadius ?? 0,
-            ),
+            borderRadius: BorderRadius.circular(widget.borderRadius ?? 0),
             color: widget.backgroundColor,
-            border: widget.borderColor != null
-                ? Border.all(color: widget.borderColor!)
-                : null,
-            image: widget.setItInDecoration && snapshot.hasData
-                ? DecorationImage(
-                    image: FileImage(snapshot.data!), fit: widget.fit)
-                : null,
+            border:
+                widget.borderColor != null
+                    ? Border.all(color: widget.borderColor!)
+                    : null,
+            image:
+                widget.setItInDecoration && snapshot.hasData
+                    ? DecorationImage(
+                      image: FileImage(snapshot.data!),
+                      fit: widget.fit,
+                    )
+                    : null,
           ),
-          child: snapshot.connectionState == ConnectionState.waiting
-              ? Shimmer.fromColors(
-                  baseColor: widget.baseColor,
-                  highlightColor: widget.highlightColor,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(
-                        widget.borderRadius ?? 0,
+          child:
+              snapshot.connectionState == ConnectionState.waiting
+                  ? Shimmer.fromColors(
+                    baseColor: widget.baseColor,
+                    highlightColor: widget.highlightColor,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(
+                          widget.borderRadius ?? 0,
+                        ),
+                        color: Colors.grey,
                       ),
-                      color: Colors.grey,
                     ),
-                  ),
-                )
-              : !widget.setItInDecoration && snapshot.hasData
+                  )
+                  : !widget.setItInDecoration && snapshot.hasData
                   ? Image.file(snapshot.data!)
                   : widget.setItInDecoration && !snapshot.hasData
-                      ? Icon(
-                          Icons.broken_image,
-                          color: widget.errorIconColor,
-                          size: widget.width != null || widget.height != null
-                              ? min(widget.width ?? 9e9, widget.height ?? 9e9) *
-                                  0.6
-                              : 50,
-                        )
-                      : null,
+                  ? Icon(
+                    Icons.broken_image,
+                    color: widget.errorIconColor,
+                    size:
+                        widget.width != null || widget.height != null
+                            ? min(widget.width ?? 9e9, widget.height ?? 9e9) *
+                                0.6
+                            : 50,
+                  )
+                  : null,
         ),
-      );
+  );
 }

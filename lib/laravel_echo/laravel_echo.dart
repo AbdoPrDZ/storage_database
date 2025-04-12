@@ -65,6 +65,20 @@ class LaravelEcho<ClientType, ChannelType>
     return _pusherInstance!;
   }
 
+  static bool get hasInstance => hasSocketInstance || hasPusherInstance;
+
+  static LaravelEcho get instance {
+    if (hasSocketInstance) {
+      return socketInstance;
+    } else if (hasPusherInstance) {
+      return pusherInstance;
+    } else {
+      throw const StorageDatabaseException(
+        'LaravelEcho instance has not initialized yet',
+      );
+    }
+  }
+
   void removeMigration(LaravelEchoMigration migration) {
     migration.channel.unsubscribe();
     migrations.remove(migration);

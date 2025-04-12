@@ -35,9 +35,9 @@ class StorageAPI {
     bool log = false,
     bool overide = false,
   }) {
-    if (_instance != null && !overide) {
+    if (hasInstance && !overide) {
       throw const StorageDatabaseException(
-        'StorageAPI instance has not initialized yet',
+        'StorageAPI instance has already initialized',
       );
     }
 

@@ -5,10 +5,7 @@ class StorageModelRegister {
   final StorageModel Function(dynamic data) encoder;
   final String? collectionId;
 
-  const StorageModelRegister({
-    required this.encoder,
-    this.collectionId,
-  });
+  const StorageModelRegister({required this.encoder, this.collectionId});
 
   static final Map<String, StorageModelRegister> _encoders = {};
 
@@ -34,9 +31,7 @@ class StorageModelRegister {
 
   static MT encode<MT extends StorageModel>(dynamic data) {
     if (!_encoders.containsKey("$MT")) {
-      throw StorageDatabaseException(
-        'No encoder found for type: $MT',
-      );
+      throw StorageDatabaseException('No encoder found for type: $MT');
     }
 
     return _encoders["$MT"]!.encoder(data) as MT;

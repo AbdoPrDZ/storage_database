@@ -22,17 +22,35 @@ abstract class StorageModel {
 
   Map get map => {'id': id, ...toMap()};
 
-  Stream<MT> stream<MT extends StorageModel>([
-    delayCheck = const Duration(milliseconds: 50),
-  ]) =>
-      StorageDatabase.instance.collection(path!).streamAsModel<MT>(delayCheck);
-
-  Future save() async {
+  Future<bool> exists([StorageDatabase? database]) async {
     if (collectionId == null) {
       throw StorageDatabaseException('Collection ID is not set');
     }
 
-    await StorageDatabase.instance.collection(collectionId!).set({});
+    if (id == null) {
+      throw StorageDatabaseException('ID is not set');
+    }
+
+    return await (database ?? StorageDatabase.instance)
+        .collection(path!)
+        .exists;
+  }
+
+  Stream<MT> stream<MT extends StorageModel>([
+    delayCheck = const Duration(milliseconds: 50),
+    StorageDatabase? database,
+  ]) => (database ?? StorageDatabase.instance)
+      .collection(path!)
+      .streamAsModel<MT>(delayCheck);
+
+  Future save([StorageDatabase? database]) async {
+    if (collectionId == null) {
+      throw StorageDatabaseException('Collection ID is not set');
+    }
+
+    database ??= StorageDatabase.instance;
+
+    await database.collection(collectionId!).set({});
 
     final map = this.map;
 
@@ -48,7 +66,7 @@ abstract class StorageModel {
       map['updated_at'] = DateTime.now().toIso8601String();
     }
 
-    await StorageDatabase.instance
+    await database
         .collection(collectionId!)
         .collection(map['id'].toString())
         .set(map);
@@ -56,7 +74,7 @@ abstract class StorageModel {
     id = map['id'];
   }
 
-  Future<bool> delete({bool log = true}) async {
+  Future<bool> delete({bool log = true, StorageDatabase? database}) async {
     if (collectionId == null) {
       throw StorageDatabaseException('Collection ID is not set');
     }
@@ -65,7 +83,9 @@ abstract class StorageModel {
       throw StorageDatabaseException('ID is not set');
     }
 
-    return await StorageDatabase.instance.collection(path!).delete(stream: log);
+    return await (database ?? StorageDatabase.instance)
+        .collection(path!)
+        .delete(stream: log);
   }
 
   operator [](String key) => map[key];
@@ -81,14 +101,20 @@ abstract class StorageModel {
   String toString() =>
       '#${collectionId ?? '?'}/${id ?? '?'} $runtimeType{\n${map.entries.map((entry) => '  ${entry.key}: ${entry.value ?? '?'},\n').join()}}';
 
-  static Future<String> nextId<MT extends StorageModel>([Type? type]) async {
+  static Future<String> nextId<MT extends StorageModel>([
+    Type? type,
+    StorageDatabase? database,
+  ]) async {
     final collectionId = StorageModelRegister.getCollectionId<MT>(type);
 
     if (collectionId == null) {
       throw StorageDatabaseException('Collection ID is not set');
     }
 
-    final data = await StorageDatabase.instance.collection(collectionId).get();
+    final data =
+        await (database ?? StorageDatabase.instance)
+            .collection(collectionId)
+            .get();
 
     if (data == null) return '1';
 
@@ -114,6 +140,7 @@ abstract class StorageModel {
 
   static Future<List<MT>> allWhere<MT extends StorageModel>([
     bool Function(dynamic)? where,
+    StorageDatabase? database,
   ]) async {
     final collectionId = StorageModelRegister.getCollectionId<MT>();
 
@@ -121,7 +148,10 @@ abstract class StorageModel {
       throw StorageDatabaseException('Collection ID is not set');
     }
 
-    final data = await StorageDatabase.instance.collection(collectionId).get();
+    final data =
+        await (database ?? StorageDatabase.instance)
+            .collection(collectionId)
+            .get();
 
     if (data == null) {
       return [];
@@ -149,6 +179,7 @@ abstract class StorageModel {
 
   static Stream<List<MT>> streamAll<MT extends StorageModel>([
     delayCheck = const Duration(milliseconds: 50),
+    StorageDatabase? database,
   ]) {
     final collectionId = StorageModelRegister.getCollectionId<MT>();
 
@@ -156,7 +187,7 @@ abstract class StorageModel {
       throw StorageDatabaseException('Collection ID is not set');
     }
 
-    return StorageDatabase.instance
+    return (database ?? StorageDatabase.instance)
         .collection(collectionId)
         .streamAsModels<MT>(delayCheck);
   }

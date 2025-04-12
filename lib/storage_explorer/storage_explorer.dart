@@ -36,8 +36,10 @@ class StorageExplorer {
 
   static StorageExplorer? _instance;
 
+  static bool get hasInstance => _instance != null;
+
   static StorageExplorer get instance {
-    if (_instance == null) {
+    if (!hasInstance) {
       throw const StorageDatabaseException(
         'StorageExplorer instance has not initialized yet',
       );
@@ -45,8 +47,6 @@ class StorageExplorer {
 
     return _instance!;
   }
-
-  static bool get hasInstance => _instance != null;
 
   static Future<ExplorerDirectory> _initLocalDirectory(
     StorageListeners storageListeners,

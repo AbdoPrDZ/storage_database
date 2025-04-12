@@ -309,3 +309,8 @@
 
 - Refactor StorageAPI initialization.
 - Enhance SecureStorageSource error handling.
+
+## 2.0.5
+
+- Enhance instance management and error handling in StorageAPI, LaravelEcho, and StorageDatabase.
+- Refactor StorageModel for improved database interaction.
