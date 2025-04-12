@@ -13,9 +13,7 @@ class StorageAPI {
   final Map<String, String> Function(String url)? getHeaders;
   final bool log;
 
-  StorageAPI({required this.apiUrl, this.getHeaders, this.log = false}) {
-    _instance = this;
-  }
+  StorageAPI({required this.apiUrl, this.getHeaders, this.log = false});
 
   static StorageAPI? _instance;
 
@@ -29,6 +27,21 @@ class StorageAPI {
     }
 
     return _instance!;
+  }
+
+  static initInstance({
+    required String apiUrl,
+    Map<String, String> Function(String url)? getHeaders,
+    bool log = false,
+    bool overide = false,
+  }) {
+    if (_instance != null && !overide) {
+      throw const StorageDatabaseException(
+        'StorageAPI instance has not initialized yet',
+      );
+    }
+
+    _instance = StorageAPI(apiUrl: apiUrl, getHeaders: getHeaders, log: log);
   }
 
   Future<APIResponse<T>> request<T>(

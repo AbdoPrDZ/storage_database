@@ -1,4 +1,3 @@
-// CLients
 import 'dart:typed_data';
 
 import 'package:pusher_client_socket/pusher_client_socket.dart';
@@ -7,8 +6,8 @@ import 'package:socket_io_client/socket_io_client.dart';
 import '../src/storage_database_exception.dart';
 import '../storage_database.dart';
 
-export './laravel_echo_migration.dart';
 export 'package:laravel_echo_null/laravel_echo_null.dart';
+export './laravel_echo_migration.dart';
 
 class LaravelEcho<ClientType, ChannelType>
     extends Echo<ClientType, ChannelType> {

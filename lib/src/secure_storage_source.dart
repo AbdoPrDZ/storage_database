@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:encrypt/encrypt.dart';
+import 'storage_database_exception.dart';
 import 'storage_database_source.dart';
 
 class SecureStorageSource extends StorageDatabaseSource {
@@ -12,18 +13,32 @@ class SecureStorageSource extends StorageDatabaseSource {
   SecureStorageSource(this._source, this._sourcePassword);
 
   // 16 bytes for AES-128
-  static String _appIV = 'AbdoPrDZ@2132025';
+  static String _IV = 'AbdoPrDZ@2132025';
 
   static Future<SecureStorageSource> instance(
     String sourcePath,
     String sourcePassword, {
-    String? appIV,
+    String? iv,
   }) async {
-    if (appIV != null && appIV.length != 16) {
-      throw Exception('IV must be 16 bytes long');
+    if (iv != null && iv.length != 16) {
+      throw StorageDatabaseException('IV must be 16 bytes long');
     }
 
-    if (appIV != null) _appIV = appIV;
+    if (iv != null) _IV = iv;
+
+    if (sourcePassword.length != 32) {
+      throw StorageDatabaseException('Password must be 32 bytes long');
+    }
+
+    if (sourcePath.isEmpty) {
+      throw StorageDatabaseException('Source path must not be empty');
+    }
+
+    if (!sourcePath.contains('/')) {
+      throw StorageDatabaseException('Source path must be a valid path');
+    }
+
+    sourcePath = sourcePath.replaceAll('\\', '/');
 
     final sourceDirParts = sourcePath.split('/');
     String sourceDirPath = sourceDirParts
@@ -41,7 +56,7 @@ class SecureStorageSource extends StorageDatabaseSource {
       try {
         decryptData(fileContent, sourcePassword);
       } catch (e) {
-        throw Exception('Invalid Password');
+        throw StorageDatabaseException('Invalid Password');
       }
     } else {
       sourceFile = await sourceFile.writeAsString(
@@ -52,7 +67,7 @@ class SecureStorageSource extends StorageDatabaseSource {
     return SecureStorageSource(sourceFile, sourcePassword);
   }
 
-  static IV iv = IV.fromUtf8(_appIV);
+  static IV iv = IV.fromUtf8(_IV);
 
   static Encrypter encrypter(String password) =>
       Encrypter(AES(Key.fromUtf8(password.padLeft(32)), mode: AESMode.cbc));

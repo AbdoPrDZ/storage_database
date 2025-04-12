@@ -32,8 +32,6 @@ class StorageExplorer {
         path: localDirectory.ioDirectory.path,
       ),
     );
-
-    _instance = this;
   }
 
   static StorageExplorer? _instance;

@@ -17,6 +17,8 @@ export 'storage_collection.dart';
 export 'src/storage_database_model.dart';
 
 export 'src/storage_database_source.dart';
+export 'src/default_storage_source.dart';
+export 'src/secure_storage_source.dart';
 export 'src/storage_database_types.dart';
 
 export 'storage_explorer/storage_explorer.dart';
@@ -28,9 +30,7 @@ export 'laravel_echo/laravel_echo.dart';
 class StorageDatabase {
   final StorageDatabaseSource source;
 
-  StorageDatabase(this.source) {
-    _instance = this;
-  }
+  StorageDatabase(this.source);
 
   final List<Function> _onClear = [];
   final StorageListeners storageListeners = StorageListeners();
@@ -75,11 +75,7 @@ class StorageDatabase {
         "${(await getApplicationDocumentsDirectory()).path}/storage_database.sdb";
 
     _instance = StorageDatabase(
-      await SecureStorageSource.instance(
-        sourcePath,
-        sourcePassword,
-        appIV: appIV,
-      ),
+      await SecureStorageSource.instance(sourcePath, sourcePassword, iv: appIV),
     );
   }
 
@@ -92,7 +88,7 @@ class StorageDatabase {
     required String apiUrl,
     Map<String, String> Function(String url)? getHeaders,
     bool log = false,
-  }) => StorageAPI(
+  }) => StorageAPI.initInstance(
     apiUrl: apiUrl,
     getHeaders:
         getHeaders ??
