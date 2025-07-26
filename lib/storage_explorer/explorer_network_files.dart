@@ -166,63 +166,51 @@ class ExplorerNetworkImage extends StatefulWidget {
 }
 
 class _ExplorerNetworkImageState extends State<ExplorerNetworkImage> {
-  Future<File?> getImage() async =>
-      (await widget.explorerNetworkFiles.file(
-        widget.url,
-        headers: widget.headers,
-      ))?.ioFile;
+  Future<File?> getImage() async => (await widget.explorerNetworkFiles.file(
+    widget.url,
+    headers: widget.headers,
+  ))?.ioFile;
 
   @override
   Widget build(BuildContext context) => FutureBuilder<File?>(
     future: getImage(),
-    builder:
-        (context, snapshot) => Container(
-          width: widget.width,
-          height: widget.height,
-          margin: widget.margin,
-          padding: widget.padding,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(widget.borderRadius ?? 0),
-            color: widget.backgroundColor,
-            border:
-                widget.borderColor != null
-                    ? Border.all(color: widget.borderColor!)
-                    : null,
-            image:
-                widget.setItInDecoration && snapshot.hasData
-                    ? DecorationImage(
-                      image: FileImage(snapshot.data!),
-                      fit: widget.fit,
-                    )
-                    : null,
-          ),
-          child:
-              snapshot.connectionState == ConnectionState.waiting
-                  ? Shimmer.fromColors(
-                    baseColor: widget.baseColor,
-                    highlightColor: widget.highlightColor,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(
-                          widget.borderRadius ?? 0,
-                        ),
-                        color: Colors.grey,
-                      ),
-                    ),
-                  )
-                  : !widget.setItInDecoration && snapshot.hasData
-                  ? Image.file(snapshot.data!)
-                  : widget.setItInDecoration && !snapshot.hasData
-                  ? Icon(
-                    Icons.broken_image,
-                    color: widget.errorIconColor,
-                    size:
-                        widget.width != null || widget.height != null
-                            ? min(widget.width ?? 9e9, widget.height ?? 9e9) *
-                                0.6
-                            : 50,
-                  )
-                  : null,
-        ),
+    builder: (context, snapshot) => Container(
+      width: widget.width,
+      height: widget.height,
+      margin: widget.margin,
+      padding: widget.padding,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(widget.borderRadius ?? 0),
+        color: widget.backgroundColor,
+        border: widget.borderColor != null
+            ? Border.all(color: widget.borderColor!)
+            : null,
+        image: widget.setItInDecoration && snapshot.hasData
+            ? DecorationImage(image: FileImage(snapshot.data!), fit: widget.fit)
+            : null,
+      ),
+      child: snapshot.connectionState == ConnectionState.waiting
+          ? Shimmer.fromColors(
+              baseColor: widget.baseColor,
+              highlightColor: widget.highlightColor,
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(widget.borderRadius ?? 0),
+                  color: Colors.grey,
+                ),
+              ),
+            )
+          : !widget.setItInDecoration && snapshot.hasData
+          ? Image.file(snapshot.data!)
+          : widget.setItInDecoration && !snapshot.hasData
+          ? Icon(
+              Icons.broken_image,
+              color: widget.errorIconColor,
+              size: widget.width != null || widget.height != null
+                  ? min(widget.width ?? 9e9, widget.height ?? 9e9) * 0.6
+                  : 50,
+            )
+          : null,
+    ),
   );
 }

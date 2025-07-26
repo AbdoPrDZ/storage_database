@@ -62,8 +62,9 @@ class ExplorerDirectory {
   );
 
   ExplorerDirectory directory(String dirName, {String? streamId}) {
-    List<String> dirNames =
-        dirName.contains("/") ? dirName.split("/") : [dirName];
+    List<String> dirNames = dirName.contains("/")
+        ? dirName.split("/")
+        : [dirName];
     dirNames = [for (String name in dirNames) name.replaceAll('\\', '/')];
 
     Directory nioDirectory = explorerSource.dirSync(
@@ -106,7 +107,7 @@ class ExplorerDirectory {
   );
 
   Stream<List<ExplorerDirectoryItem>> stream({
-    delayCheck = const Duration(milliseconds: 50),
+    Duration delayCheck = const Duration(milliseconds: 50),
   }) async* {
     String streamId = _randomStreamId;
     storageListeners.initStream(shortPath, streamId);

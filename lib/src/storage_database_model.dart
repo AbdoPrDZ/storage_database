@@ -37,7 +37,7 @@ abstract class StorageModel {
   }
 
   Stream<MT> stream<MT extends StorageModel>([
-    delayCheck = const Duration(milliseconds: 50),
+    Duration delayCheck = const Duration(milliseconds: 50),
     StorageDatabase? database,
   ]) => (database ?? StorageDatabase.instance)
       .collection(path!)
@@ -111,10 +111,9 @@ abstract class StorageModel {
       throw StorageDatabaseException('Collection ID is not set');
     }
 
-    final data =
-        await (database ?? StorageDatabase.instance)
-            .collection(collectionId)
-            .get();
+    final data = await (database ?? StorageDatabase.instance)
+        .collection(collectionId)
+        .get();
 
     if (data == null) return '1';
 
@@ -148,10 +147,9 @@ abstract class StorageModel {
       throw StorageDatabaseException('Collection ID is not set');
     }
 
-    final data =
-        await (database ?? StorageDatabase.instance)
-            .collection(collectionId)
-            .get();
+    final data = await (database ?? StorageDatabase.instance)
+        .collection(collectionId)
+        .get();
 
     if (data == null) {
       return [];
@@ -160,10 +158,9 @@ abstract class StorageModel {
     List<dynamic> founds;
 
     if (data is Map) {
-      founds =
-          where != null
-              ? data.values.where(where).toList()
-              : data.values.toList();
+      founds = where != null
+          ? data.values.where(where).toList()
+          : data.values.toList();
     } else if (data is List) {
       founds = where != null ? data.where(where).toList() : data;
     } else {
@@ -175,10 +172,29 @@ abstract class StorageModel {
         .toList();
   }
 
+  static Future<List<String>> allIds<MT extends StorageModel>() async {
+    final collectionId = StorageModelRegister.getCollectionId<MT>();
+
+    if (collectionId == null) {
+      throw StorageDatabaseException('Collection ID is not set');
+    }
+
+    final data = await StorageDatabase.instance.collection(collectionId).get();
+
+    if (data == null) return [];
+
+    if (data is Map) {
+      return List<String>.from(data.keys.toList());
+    } else {
+      throw StorageDatabaseException('Data is not a Map or List');
+    }
+  }
+
   static Future<List<MT>> all<MT extends StorageModel>() => allWhere<MT>();
 
   static Stream<List<MT>> streamAll<MT extends StorageModel>([
-    delayCheck = const Duration(milliseconds: 50),
+    bool Function(MT)? where,
+    Duration delayCheck = const Duration(milliseconds: 50),
     StorageDatabase? database,
   ]) {
     final collectionId = StorageModelRegister.getCollectionId<MT>();
@@ -189,7 +205,7 @@ abstract class StorageModel {
 
     return (database ?? StorageDatabase.instance)
         .collection(collectionId)
-        .streamAsModels<MT>(delayCheck);
+        .streamAsModels<MT>(where, delayCheck);
   }
 
   static Future<MT?> findWhere<MT extends StorageModel>(
@@ -204,9 +220,9 @@ abstract class StorageModel {
   static Future<MT?> find<MT extends StorageModel>(String id) =>
       findWhere<MT>((element) => element['id'] == id);
 
-  static Future<int> deleteWhere<MT extends StorageModel>(
-    bool Function(dynamic) where,
-  ) async {
+  static Future<int> deleteWhere<MT extends StorageModel>([
+    bool Function(dynamic)? where,
+  ]) async {
     int count = 0;
 
     for (final item in await allWhere<MT>(where)) {

@@ -35,19 +35,17 @@ class StorageCollection {
 
   Future<dynamic> _checkType(var data) async {
     if (!await exists) {
-      var initialData =
-          data is Map
-              ? {}
-              : data is List
-              ? []
-              : null;
+      var initialData = data is Map
+          ? {}
+          : data is List
+          ? []
+          : null;
 
       return initialData;
     } else {
-      dynamic collectionData =
-          (parent != null
-              ? (await parent!.get())[collectionId]
-              : await storageDatabase.source.getData(collectionId));
+      dynamic collectionData = (parent != null
+          ? (await parent!.get())[collectionId]
+          : await storageDatabase.source.getData(collectionId));
 
       bool currentType = false;
       try {
@@ -89,17 +87,9 @@ class StorageCollection {
         data[i] = _decodeRefs(data[i]);
       }
     } else if (data is StorageCollection) {
-      data = "ref:${data.path}";
+      data = data.ref;
     } else if (data is StorageModel) {
-      if (data.collectionId == null ||
-          data.collectionId?.isEmpty == true ||
-          data.collectionId == collectionId ||
-          data.id == null ||
-          data.id?.isEmpty == true) {
-        data = data.map;
-      } else {
-        data = "ref:${data.path}";
-      }
+      data = data.ref ?? data.map;
     }
 
     return data;
@@ -188,12 +178,13 @@ class StorageCollection {
       throw StorageDatabaseException(
         "This collection ($collectionId) has not yet been created",
       );
+      // await set({}, stream: false, keepData: false);
+      // _cache = {};
     }
 
-    dynamic collectionData =
-        (parent != null
-            ? (await parent!.get())[collectionId]
-            : await storageDatabase.source.getData(collectionId));
+    dynamic collectionData = (parent != null
+        ? (await parent!.get())[collectionId]
+        : await storageDatabase.source.getData(collectionId));
 
     if (streamId != null && storageListeners.hasStreamId(path, streamId)) {
       storageListeners.getDate(path, streamId);
@@ -380,6 +371,8 @@ class StorageCollection {
   String get path =>
       parent != null ? "${parent!.path}/$collectionId" : collectionId;
 
+  String get ref => "ref:$path";
+
   Future<bool> hasCollectionId(dynamic collectionId) async {
     final data = await get();
 
@@ -405,7 +398,9 @@ class StorageCollection {
     List.generate(8, (index) => Random().nextInt(33) + 89),
   );
 
-  Stream stream({delayCheck = const Duration(milliseconds: 50)}) async* {
+  Stream stream({
+    Duration delayCheck = const Duration(milliseconds: 50),
+  }) async* {
     String streamId = randomStreamId;
 
     storageListeners.initStream(path, streamId);
@@ -422,28 +417,36 @@ class StorageCollection {
   }
 
   Stream<MT> streamAsModel<MT extends StorageModel>([
-    delayCheck = const Duration(milliseconds: 50),
+    Duration delayCheck = const Duration(milliseconds: 50),
   ]) => stream(delayCheck: delayCheck).asyncExpand<MT>((data) async* {
     if (data != null) yield data.toModel<MT>();
   });
 
   Stream<List<MT>> streamAsModels<MT extends StorageModel>([
-    delayCheck = const Duration(milliseconds: 50),
+    bool Function(MT)? where,
+    Duration delayCheck = const Duration(milliseconds: 50),
   ]) => stream(delayCheck: delayCheck).asyncExpand<List<MT>>((data) async* {
     if (data != null) {
       if (data is Map) {
-        yield [for (Object item in data.values) item.toModel<MT>()];
+        List<MT> items = data.toListModel<MT>();
+        if (where != null) {
+          items = items.where(where).toList();
+        }
+        yield items;
       } else if (data is List) {
-        yield [for (Object item in data) item.toModel<MT>()];
+        List<MT> items = data.toModels<MT>();
+        if (where != null) {
+          items = items.where(where).toList();
+        }
+        yield items;
       }
     }
   });
 
   Future<bool> delete({bool stream = true}) async {
-    bool res =
-        parent != null
-            ? await parent!.deleteItem(collectionId)
-            : await storageDatabase.source.remove(collectionId);
+    bool res = parent != null
+        ? await parent!.deleteItem(collectionId)
+        : await storageDatabase.source.remove(collectionId);
 
     if (stream) {
       for (String streamId in storageListeners.getPathStreamIds(path)) {
