@@ -8,6 +8,7 @@ class APIResponse<T> {
   final Map<String, String>? errors;
   final T? value;
   final dynamic body;
+  final Map<String, String> headers;
 
   const APIResponse(
     this.success,
@@ -16,6 +17,7 @@ class APIResponse<T> {
     this.errors,
     this.body,
     this.value,
+    this.headers = const {},
   });
 
   static APIResponse<T> fromResponse<T>(
@@ -24,6 +26,7 @@ class APIResponse<T> {
     bool log = true,
     String errorsField = 'errors',
     Map<String, String> Function(Map errors)? decodeErrors,
+    Map<String, String> headers = const {},
   }) {
     try {
       Map responseData = jsonDecode(response);
@@ -49,19 +52,19 @@ class APIResponse<T> {
       Map values = {
         for (var key in responseData.keys)
           if (!["success", "message", errorsField].contains(key))
-            key: responseData[key]
+            key: responseData[key],
       };
 
       Map<String, String> errors = responseData.containsKey(errorsField)
           ? decodeErrors?.call(responseData[errorsField]) ??
-              Map<String, String>.from(responseData[errorsField]!)
+                Map<String, String>.from(responseData[errorsField]!)
           : {};
 
       final value = values.length == 1
           ? values[values.keys.first]
           : values.isNotEmpty
-              ? values
-              : null;
+          ? values
+          : null;
 
       if (log) {
         dev.log(
@@ -79,6 +82,7 @@ class APIResponse<T> {
         errors: errors,
         body: responseData,
         value: value as T,
+        headers: headers,
       );
     } catch (e) {
       String strBody = response.toString();
@@ -92,12 +96,7 @@ class APIResponse<T> {
         dev.log("[StorageDatabase.StorageAPI.Response] - resBody: $body");
       }
 
-      return APIResponse(
-        false,
-        "body: $body...",
-        statusCode,
-        body: strBody,
-      );
+      return APIResponse(false, "body: $body...", statusCode, body: strBody);
     }
   }
 }

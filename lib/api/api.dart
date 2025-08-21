@@ -66,10 +66,9 @@ class StorageAPI {
       files: files,
       onFilesUpload: onFilesUpload,
       log: log ?? this.log,
-      headers:
-          appendHeader
-              ? {...(getHeaders?.call(url) ?? {}), ...headers}
-              : headers,
+      headers: appendHeader
+          ? {...(getHeaders?.call(url) ?? {}), ...headers}
+          : headers,
       errorsField: errorsField,
       decodeErrors: decodeErrors,
       encoding: encoding,

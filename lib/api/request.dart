@@ -41,6 +41,7 @@ class APIRequest<T> {
     }
 
     String responseBody = '';
+    Map<String, String> responseHeaders = {};
 
     int statusCode = 400;
 
@@ -62,6 +63,7 @@ class APIRequest<T> {
         http.StreamedResponse res = await request.send();
         statusCode = res.statusCode;
         responseBody = await res.stream.bytesToString();
+        responseHeaders = res.headers;
       } else {
         http.Response response;
 
@@ -96,6 +98,7 @@ class APIRequest<T> {
 
         responseBody = response.body;
         statusCode = response.statusCode;
+        responseHeaders = response.headers;
       }
 
       return APIResponse.fromResponse<T>(
@@ -103,6 +106,8 @@ class APIRequest<T> {
         statusCode,
         log: log,
         errorsField: errorsField,
+        decodeErrors: decodeErrors,
+        headers: responseHeaders,
       );
     } on SocketException {
       if (log) {
@@ -125,17 +130,16 @@ class APIRequest<T> {
     bool log = false,
     Map<String, String> headers = const {},
     String errorsField = 'errors',
-  }) =>
-      APIRequest(
-        url,
-        type: RequestType.get,
-        data: data,
-        files: files,
-        onFilesUpload: onFilesUpload,
-        log: log,
-        headers: headers,
-        errorsField: errorsField,
-      );
+  }) => APIRequest(
+    url,
+    type: RequestType.get,
+    data: data,
+    files: files,
+    onFilesUpload: onFilesUpload,
+    log: log,
+    headers: headers,
+    errorsField: errorsField,
+  );
 
   factory APIRequest.post(
     String url, {
@@ -145,17 +149,16 @@ class APIRequest<T> {
     bool log = false,
     Map<String, String> headers = const {},
     String errorsField = 'errors',
-  }) =>
-      APIRequest(
-        url,
-        type: RequestType.post,
-        data: data,
-        files: files,
-        onFilesUpload: onFilesUpload,
-        log: log,
-        headers: headers,
-        errorsField: errorsField,
-      );
+  }) => APIRequest(
+    url,
+    type: RequestType.post,
+    data: data,
+    files: files,
+    onFilesUpload: onFilesUpload,
+    log: log,
+    headers: headers,
+    errorsField: errorsField,
+  );
 
   factory APIRequest.put(
     String url, {
@@ -165,17 +168,16 @@ class APIRequest<T> {
     bool log = false,
     Map<String, String> headers = const {},
     String errorsField = 'errors',
-  }) =>
-      APIRequest(
-        url,
-        type: RequestType.put,
-        data: data,
-        files: files,
-        onFilesUpload: onFilesUpload,
-        log: log,
-        headers: headers,
-        errorsField: errorsField,
-      );
+  }) => APIRequest(
+    url,
+    type: RequestType.put,
+    data: data,
+    files: files,
+    onFilesUpload: onFilesUpload,
+    log: log,
+    headers: headers,
+    errorsField: errorsField,
+  );
 
   factory APIRequest.patch(
     String url, {
@@ -185,17 +187,16 @@ class APIRequest<T> {
     bool log = false,
     Map<String, String> headers = const {},
     String errorsField = 'errors',
-  }) =>
-      APIRequest(
-        url,
-        type: RequestType.patch,
-        data: data,
-        files: files,
-        onFilesUpload: onFilesUpload,
-        log: log,
-        headers: headers,
-        errorsField: errorsField,
-      );
+  }) => APIRequest(
+    url,
+    type: RequestType.patch,
+    data: data,
+    files: files,
+    onFilesUpload: onFilesUpload,
+    log: log,
+    headers: headers,
+    errorsField: errorsField,
+  );
 
   factory APIRequest.delete(
     String url, {
@@ -205,17 +206,16 @@ class APIRequest<T> {
     bool log = false,
     Map<String, String> headers = const {},
     String errorsField = 'errors',
-  }) =>
-      APIRequest(
-        url,
-        type: RequestType.delete,
-        data: data,
-        files: files,
-        onFilesUpload: onFilesUpload,
-        log: log,
-        headers: headers,
-        errorsField: errorsField,
-      );
+  }) => APIRequest(
+    url,
+    type: RequestType.delete,
+    data: data,
+    files: files,
+    onFilesUpload: onFilesUpload,
+    log: log,
+    headers: headers,
+    errorsField: errorsField,
+  );
 }
 
 enum RequestType {

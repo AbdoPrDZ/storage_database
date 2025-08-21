@@ -1,3 +1,7 @@
+## 2.0.7
+
+- Add response headers to APIResponse.
+
 ## 2.0.6
 
 - Upgrade flutter sdk.
