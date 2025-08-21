@@ -1,3 +1,8 @@
+## 2.0.8
+
+- Upgrade flutter sdk.
+- Upgrade packages versions to latest.
+
 ## 2.0.7
 
 - Add response headers to APIResponse.
@@ -27,7 +32,6 @@
 - Introduced SecureStorageSource for encrypted data storage with AES encryption.
 - Updated stream handling in Explorer classes to use more consistent naming and logic.
 - Enhanced error handling and data validation across various storage operations.
-
 
 ## 2.0.2
 
