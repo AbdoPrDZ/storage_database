@@ -1,3 +1,8 @@
+## 2.0.9
+
+- Upgrade flutter sdk.
+- Upgrade packages versions to latest.
+
 ## 2.0.8
 
 - Upgrade flutter sdk.

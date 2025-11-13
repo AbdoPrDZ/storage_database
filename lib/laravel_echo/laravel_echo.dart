@@ -94,7 +94,7 @@ class LaravelEcho<ClientType, ChannelType>
     StorageDatabase storageDatabase,
     String host,
     List<LaravelEchoMigration> migrations, {
-    Map<String, String>? authHeaders,
+    Future<Map<String, String>> Function()? authHeaders,
     String? nameSpace,
     bool autoConnect = true,
     Map moreOptions = const {},
@@ -118,9 +118,7 @@ class LaravelEcho<ClientType, ChannelType>
     String appKey,
     List<LaravelEchoMigration> migrations, {
     required String authEndPoint,
-    Map<String, String> authHeaders = const {
-      'Content-Type': 'application/json',
-    },
+    Future<Map<String, String>> Function()? authHeaders,
     String? cluster,
     String? host,
     Map<String, dynamic> Function(Uint8List, Map<String, dynamic>)?

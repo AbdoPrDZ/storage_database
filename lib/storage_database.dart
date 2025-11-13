@@ -64,17 +64,18 @@ class StorageDatabase {
   static Future<void> initSecureInstance(
     String sourcePassword, {
     String? sourcePath,
+    String? sourceName,
     String? appIV,
-    bool overide = false,
+    bool override = false,
   }) async {
-    if (hasInstance && !overide) {
+    if (hasInstance && !override) {
       throw const StorageDatabaseException(
         'StorageDatabase instance has already initialized',
       );
     }
 
-    sourcePath ??=
-        "${(await getApplicationDocumentsDirectory()).path}/storage_database.sdb";
+    sourcePath ??= (await getApplicationDocumentsDirectory()).path;
+    sourcePath += "/$sourceName.sdb";
 
     _instance = StorageDatabase(
       await SecureStorageSource.instance(sourcePath, sourcePassword, iv: appIV),
@@ -119,7 +120,7 @@ class StorageDatabase {
   void initSocketLaravelEcho(
     String host,
     List<LaravelEchoMigration> migrations, {
-    Map<String, String>? authHeaders,
+    Future<Map<String, String>> Function()? authHeaders,
     String? authEndpoint,
     String? nameSpace,
     bool autoConnect = true,
@@ -142,9 +143,7 @@ class StorageDatabase {
     String appKey,
     List<LaravelEchoMigration> migrations, {
     required String authEndPoint,
-    Map<String, String> authHeaders = const {
-      'Content-Type': 'application/json',
-    },
+    Future<Map<String, String>> Function()? authHeaders,
     String? cluster,
     String? host,
     int wsPort = 80,

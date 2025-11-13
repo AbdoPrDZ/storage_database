@@ -13,7 +13,7 @@ class StorageAPI {
   final Map<String, String> Function(String url)? getHeaders;
   final bool log;
 
-  StorageAPI({required this.apiUrl, this.getHeaders, this.log = false});
+  const StorageAPI({required this.apiUrl, this.getHeaders, this.log = false});
 
   static StorageAPI? _instance;
 

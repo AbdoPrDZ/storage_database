@@ -1,10 +1,12 @@
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io' as io;
+import 'dart:math' show min;
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:shimmer/shimmer.dart';
 
 import 'package:storage_database/storage_database.dart';
 import 'package:storage_database/storage_explorer/explorer_network_files.dart';
@@ -77,7 +79,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
     snackbar('Initializing StorageDatabase...');
     if (secure) {
-      await StorageDatabase.initSecureInstance('AbdoPrDZ');
+      await StorageDatabase.initSecureInstance('AbdoPrDZ'.padLeft(32, 'x'));
     } else {
       await StorageDatabase.initInstance();
     }
@@ -124,10 +126,9 @@ class _MyHomePageState extends State<MyHomePage> {
     }
 
     await storageDatabase.initExplorer(
-      path:
-          explorerPathController.text.isNotEmpty
-              ? explorerPathController.text
-              : null,
+      path: explorerPathController.text.isNotEmpty
+          ? explorerPathController.text
+          : null,
     );
 
     snackbar('StorageExplorer initializing successfully');
@@ -178,8 +179,9 @@ class _MyHomePageState extends State<MyHomePage> {
     });
 
     setState(() {
-      networkImage = ExplorerNetworkFiles.instance.networkImage(
-        imageUrlController.text,
+      networkImage = ExplorerNetworkImage(
+        url: imageUrlController.text,
+        explorerNetworkFiles: ExplorerNetworkFiles.instance,
         height: 300,
         headers: {
           if (tokenController.text.isNotEmpty)
@@ -240,8 +242,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
     await storageDatabase.collection(collectionController.text).set(data);
 
-    final collectionData =
-        await storageDatabase.collection(collectionController.text).get();
+    final collectionData = await storageDatabase
+        .collection(collectionController.text)
+        .get();
 
     log(collectionData.toString());
 
@@ -285,10 +288,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
     snackbar('Creating MessageModel...');
 
-    final user =
-        userController.text.isNotEmpty
-            ? await StorageModel.findBy<UserModel>(userController.text, 'name')
-            : await StorageModel.find<UserModel>('1');
+    final user = userController.text.isNotEmpty
+        ? await StorageModel.findBy<UserModel>(userController.text, 'name')
+        : await StorageModel.find<UserModel>('1');
 
     if (user == null) {
       snackbar('User not found');
@@ -410,7 +412,9 @@ class _MyHomePageState extends State<MyHomePage> {
         'http://localhost:6001',
         [MessageMigration(storageDatabase, 'messages')],
         autoConnect: false,
-        authHeaders: {'Authorization': 'Bearer ${echoTokenController.text}'},
+        authHeaders: () async => {
+          'Authorization': 'Bearer ${echoTokenController.text}',
+        },
         moreOptions: {
           'transports': ['websocket'],
         },
@@ -430,7 +434,9 @@ class _MyHomePageState extends State<MyHomePage> {
         cluster: cluster,
         encrypted: true,
         authEndPoint: hostAuthEndPoint,
-        authHeaders: {'Authorization': 'Bearer ${echoTokenController.text}'},
+        authHeaders: () async => {
+          'Authorization': 'Bearer ${echoTokenController.text}',
+        },
         autoConnect: false,
         enableLogging: true,
       );
@@ -561,12 +567,11 @@ class _MyHomePageState extends State<MyHomePage> {
                       height: 200,
                       decoration: BoxDecoration(
                         color: const Color.fromARGB(255, 217, 217, 217),
-                        image:
-                            imagePath != null
-                                ? DecorationImage(
-                                  image: FileImage(io.File(imagePath!)),
-                                )
-                                : null,
+                        image: imagePath != null
+                            ? DecorationImage(
+                                image: FileImage(io.File(imagePath!)),
+                              )
+                            : null,
                       ),
                     ),
                   ),
@@ -627,18 +632,15 @@ class _MyHomePageState extends State<MyHomePage> {
                           child: Text('Pusher'),
                         ),
                       ],
-                      onChanged:
-                          (value) => setState(
-                            () => broadcaster = value ?? broadcaster,
-                          ),
+                      onChanged: (value) =>
+                          setState(() => broadcaster = value ?? broadcaster),
                     ),
                   ],
                 ),
                 ElevatedButton(
-                  onPressed:
-                      laravelEchoConnected
-                          ? storageDatabase.laravelEcho.disconnect
-                          : connectLaravelEcho,
+                  onPressed: laravelEchoConnected
+                      ? storageDatabase.laravelEcho.disconnect
+                      : connectLaravelEcho,
                   style: ButtonStyle(
                     backgroundColor: WidgetStateProperty.all(
                       laravelEchoConnected ? Colors.green : Colors.red,
@@ -715,4 +717,92 @@ class MessageMigration extends LaravelEchoMigration {
     log('Message Deleted $data');
     return super.onDelete(data);
   }
+}
+
+class ExplorerNetworkImage extends StatefulWidget {
+  final String url;
+  final ExplorerNetworkFiles explorerNetworkFiles;
+  final double? width, height, borderRadius;
+  final EdgeInsets? margin, padding;
+  final BoxFit fit;
+  final Map<String, String> headers;
+  final bool refresh, getOldOnError, log;
+  final Color baseColor, highlightColor, errorIconColor, backgroundColor;
+  final Color? borderColor;
+  final bool setItInDecoration;
+
+  const ExplorerNetworkImage({
+    super.key,
+    required this.url,
+    required this.explorerNetworkFiles,
+    this.headers = const {},
+    this.refresh = false,
+    this.getOldOnError = false,
+    this.log = false,
+    this.width,
+    this.height,
+    this.borderRadius,
+    this.fit = BoxFit.cover,
+    this.baseColor = const Color(0xFFA8A8A8),
+    this.highlightColor = const Color(0xFFECECEC),
+    this.errorIconColor = const Color(0xFFECECEC),
+    this.backgroundColor = Colors.transparent,
+    this.borderColor,
+    this.margin,
+    this.padding,
+    this.setItInDecoration = true,
+  });
+
+  @override
+  createState() => _ExplorerNetworkImageState();
+}
+
+class _ExplorerNetworkImageState extends State<ExplorerNetworkImage> {
+  Future<io.File?> getImage() async => (await widget.explorerNetworkFiles.file(
+    widget.url,
+    headers: widget.headers,
+  ))?.ioFile;
+
+  @override
+  Widget build(BuildContext context) => FutureBuilder<io.File?>(
+    future: getImage(),
+    builder: (context, snapshot) => Container(
+      width: widget.width,
+      height: widget.height,
+      margin: widget.margin,
+      padding: widget.padding,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(widget.borderRadius ?? 0),
+        color: widget.backgroundColor,
+        border: widget.borderColor != null
+            ? Border.all(color: widget.borderColor!)
+            : null,
+        image: widget.setItInDecoration && snapshot.hasData
+            ? DecorationImage(image: FileImage(snapshot.data!), fit: widget.fit)
+            : null,
+      ),
+      child: snapshot.connectionState == ConnectionState.waiting
+          ? Shimmer.fromColors(
+              baseColor: widget.baseColor,
+              highlightColor: widget.highlightColor,
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(widget.borderRadius ?? 0),
+                  color: Colors.grey,
+                ),
+              ),
+            )
+          : !widget.setItInDecoration && snapshot.hasData
+          ? Image.file(snapshot.data!)
+          : widget.setItInDecoration && !snapshot.hasData
+          ? Icon(
+              Icons.broken_image,
+              color: widget.errorIconColor,
+              size: widget.width != null || widget.height != null
+                  ? min(widget.width ?? 9e9, widget.height ?? 9e9) * 0.6
+                  : 50,
+            )
+          : null,
+    ),
+  );
 }
