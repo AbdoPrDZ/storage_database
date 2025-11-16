@@ -1,3 +1,9 @@
+## 2.1.0
+
+- Implement StorageAPI add `parseResponse`.
+- Fix `nextId` function in StorageModel.
+- Fix Spell words.
+
 ## 2.0.9
 
 - Upgrade flutter sdk.

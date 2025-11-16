@@ -51,8 +51,8 @@ class StorageDatabase {
     return _instance!;
   }
 
-  static Future<void> initInstance({bool overide = false}) async {
-    if (hasInstance && !overide) {
+  static Future<void> initInstance({bool override = false}) async {
+    if (hasInstance && !override) {
       throw const StorageDatabaseException(
         'StorageDatabase instance has already initialized',
       );
@@ -64,7 +64,7 @@ class StorageDatabase {
   static Future<void> initSecureInstance(
     String sourcePassword, {
     String? sourcePath,
-    String? sourceName,
+    String sourceName = "storage_database",
     String? appIV,
     bool override = false,
   }) async {

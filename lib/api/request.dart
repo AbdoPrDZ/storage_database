@@ -5,7 +5,7 @@ import 'dart:io';
 
 import 'package:http/http.dart' as http;
 
-import '../storage_database.dart';
+import './response.dart';
 
 class APIRequest<T> {
   final String url;
@@ -18,6 +18,7 @@ class APIRequest<T> {
   final String errorsField;
   final Map<String, String> Function(Map errors)? decodeErrors;
   final Encoding? encoding;
+  final T Function(dynamic value)? parseResponse;
 
   const APIRequest(
     this.url, {
@@ -30,6 +31,7 @@ class APIRequest<T> {
     this.errorsField = 'errors',
     this.decodeErrors,
     this.encoding,
+    this.parseResponse,
   });
 
   Future<APIResponse<T>> send() async {
@@ -108,6 +110,7 @@ class APIRequest<T> {
         errorsField: errorsField,
         decodeErrors: decodeErrors,
         headers: responseHeaders,
+        parseResponse: parseResponse,
       );
     } on SocketException {
       if (log) {

@@ -33,9 +33,9 @@ class StorageAPI {
     required String apiUrl,
     Map<String, String> Function(String url)? getHeaders,
     bool log = false,
-    bool overide = false,
+    bool override = false,
   }) {
-    if (hasInstance && !overide) {
+    if (hasInstance && !override) {
       throw const StorageDatabaseException(
         'StorageAPI instance has already initialized',
       );
@@ -56,6 +56,7 @@ class StorageAPI {
     String errorsField = 'errors',
     Map<String, String> Function(Map errors)? decodeErrors,
     Encoding? encoding,
+    T Function(dynamic value)? parseResponse,
   }) {
     final url = '$apiUrl/$target';
 
@@ -72,6 +73,7 @@ class StorageAPI {
       errorsField: errorsField,
       decodeErrors: decodeErrors,
       encoding: encoding,
+      parseResponse: parseResponse,
     ).send();
   }
 
@@ -86,6 +88,8 @@ class StorageAPI {
     String errorsField = 'errors',
     Map<String, String> Function(Map errors)? decodeErrors,
     Encoding? encoding,
+
+    T Function(dynamic value)? parseResponse,
   }) => request<T>(
     target,
     RequestType.get,
@@ -97,6 +101,7 @@ class StorageAPI {
     errorsField: errorsField,
     decodeErrors: decodeErrors,
     encoding: encoding,
+    parseResponse: parseResponse,
   );
 
   Future<APIResponse<T>> post<T>(
@@ -110,6 +115,7 @@ class StorageAPI {
     String errorsField = 'errors',
     Map<String, String> Function(Map errors)? decodeErrors,
     Encoding? encoding,
+    T Function(dynamic value)? parseResponse,
   }) => request<T>(
     target,
     RequestType.post,
@@ -121,6 +127,7 @@ class StorageAPI {
     errorsField: errorsField,
     decodeErrors: decodeErrors,
     encoding: encoding,
+    parseResponse: parseResponse,
   );
 
   Future<APIResponse<T>> put<T>(
@@ -134,6 +141,7 @@ class StorageAPI {
     String errorsField = 'errors',
     Map<String, String> Function(Map errors)? decodeErrors,
     Encoding? encoding,
+    T Function(dynamic value)? parseResponse,
   }) => request<T>(
     target,
     RequestType.put,
@@ -145,6 +153,7 @@ class StorageAPI {
     errorsField: errorsField,
     decodeErrors: decodeErrors,
     encoding: encoding,
+    parseResponse: parseResponse,
   );
 
   Future<APIResponse<T>> patch<T>(
@@ -158,6 +167,7 @@ class StorageAPI {
     String errorsField = 'errors',
     Map<String, String> Function(Map errors)? decodeErrors,
     Encoding? encoding,
+    T Function(dynamic value)? parseResponse,
   }) => request<T>(
     target,
     RequestType.patch,
@@ -169,6 +179,7 @@ class StorageAPI {
     errorsField: errorsField,
     decodeErrors: decodeErrors,
     encoding: encoding,
+    parseResponse: parseResponse,
   );
 
   Future<APIResponse<T>> delete<T>(
@@ -182,6 +193,7 @@ class StorageAPI {
     String errorsField = 'errors',
     Map<String, String> Function(Map errors)? decodeErrors,
     Encoding? encoding,
+    T Function(dynamic value)? parseResponse,
   }) => request<T>(
     target,
     RequestType.delete,
@@ -193,5 +205,6 @@ class StorageAPI {
     errorsField: errorsField,
     decodeErrors: decodeErrors,
     encoding: encoding,
+    parseResponse: parseResponse,
   );
 }

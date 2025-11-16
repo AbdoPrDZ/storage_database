@@ -7,7 +7,7 @@ export 'extensions/map.extension.dart';
 export 'extensions/object.extension.dart';
 
 abstract class StorageModel {
-  String? id;
+  dynamic id;
 
   StorageModel({this.id});
 
@@ -58,14 +58,6 @@ abstract class StorageModel {
       map['id'] = await nextId(runtimeType);
     }
 
-    if (map.containsKey('created_at') && map['created_at'] == null) {
-      map['created_at'] = DateTime.now().toIso8601String();
-    }
-
-    if (map.containsKey('updated_at')) {
-      map['updated_at'] = DateTime.now().toIso8601String();
-    }
-
     await database
         .collection(collectionId!)
         .collection(map['id'].toString())
@@ -104,8 +96,9 @@ abstract class StorageModel {
   static Future<String> nextId<MT extends StorageModel>([
     Type? type,
     StorageDatabase? database,
+    String? collectionId,
   ]) async {
-    final collectionId = StorageModelRegister.getCollectionId<MT>(type);
+    collectionId ??= StorageModelRegister.getCollectionId<MT>(type);
 
     if (collectionId == null) {
       throw StorageDatabaseException('Collection ID is not set');

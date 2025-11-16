@@ -27,6 +27,7 @@ class APIResponse<T> {
     String errorsField = 'errors',
     Map<String, String> Function(Map errors)? decodeErrors,
     Map<String, String> headers = const {},
+    T Function(dynamic value)? parseResponse,
   }) {
     try {
       Map responseData = jsonDecode(response);
@@ -60,11 +61,19 @@ class APIResponse<T> {
                 Map<String, String>.from(responseData[errorsField]!)
           : {};
 
-      final value = values.length == 1
+      dynamic rawValue = values.length == 1
           ? values[values.keys.first]
           : values.isNotEmpty
           ? values
           : null;
+
+      T? value;
+
+      if (parseResponse != null && rawValue != null) {
+        value = parseResponse(rawValue);
+      } else {
+        value = rawValue as T?;
+      }
 
       if (log) {
         dev.log(
