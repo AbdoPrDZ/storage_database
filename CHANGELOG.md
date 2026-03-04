@@ -1,3 +1,8 @@
+## 2.2.0
+
+- Upgrade flutter sdk.
+- Upgrade packages versions to latest.
+
 ## 2.1.0
 
 - Implement StorageAPI add `parseResponse`.
