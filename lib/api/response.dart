@@ -10,10 +10,10 @@ class APIResponse<T> {
   final dynamic body;
   final Map<String, String> headers;
 
-  const APIResponse(
-    this.success,
-    this.message,
-    this.statusCode, {
+  const APIResponse({
+    required this.success,
+    required this.message,
+    required this.statusCode,
     this.errors,
     this.body,
     this.value,
@@ -85,9 +85,9 @@ class APIResponse<T> {
       }
 
       return APIResponse<T>(
-        responseData["success"] ?? statusCode == 200,
-        responseData["message"] ?? 'No response message',
-        statusCode,
+        success: responseData["success"] ?? statusCode == 200,
+        message: responseData["message"] ?? 'No response message',
+        statusCode: statusCode,
         errors: errors,
         body: responseData,
         value: value as T,
@@ -105,7 +105,30 @@ class APIResponse<T> {
         dev.log("[StorageDatabase.StorageAPI.Response] - resBody: $body");
       }
 
-      return APIResponse(false, "body: $body...", statusCode, body: strBody);
+      return APIResponse(
+        success: false,
+        message: "body: $body...",
+        statusCode: statusCode,
+        body: strBody,
+      );
     }
   }
+
+  APIResponse<T> copyWith<T>({
+    bool? success,
+    String? message,
+    int? statusCode,
+    Map<String, String>? errors,
+    T? value,
+    dynamic body,
+    Map<String, String>? headers,
+  }) => APIResponse<T>(
+    success: success ?? this.success,
+    message: message ?? this.message,
+    statusCode: statusCode ?? this.statusCode,
+    errors: errors ?? this.errors,
+    value: value ?? this.value as T?,
+    body: body ?? this.body,
+    headers: headers ?? this.headers,
+  );
 }

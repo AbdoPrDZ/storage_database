@@ -78,21 +78,18 @@ class StorageCollection {
   }
 
   dynamic _decodeRefs(dynamic data) {
+    var encodedData = data;
     if (data is Map) {
-      for (var key in data.keys) {
-        data[key] = _decodeRefs(data[key]);
-      }
+      encodedData = {for (var key in data.keys) key: _decodeRefs(data[key])};
     } else if (data is List) {
-      for (int i = 0; i < data.length; i++) {
-        data[i] = _decodeRefs(data[i]);
-      }
+      encodedData = data.map((e) => _decodeRefs(e)).toList();
     } else if (data is StorageCollection) {
-      data = data.ref;
+      encodedData = data.ref;
     } else if (data is StorageModel) {
-      data = data.ref ?? data.map;
+      encodedData = data.ref ?? data.map;
     }
 
-    return data;
+    return encodedData;
   }
 
   Future set(dynamic data, {bool stream = true, bool keepData = true}) async {

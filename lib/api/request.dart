@@ -119,9 +119,17 @@ class APIRequest<T> {
         );
       }
 
-      return APIResponse<T>(false, "No Internet Connection", 503);
+      return APIResponse<T>(
+        success: false,
+        message: "No Internet Connection",
+        statusCode: 503,
+      );
     } catch (e) {
-      return APIResponse<T>(false, 'ExceptionError: $e', statusCode);
+      return APIResponse<T>(
+        success: false,
+        message: 'ExceptionError: $e',
+        statusCode: statusCode,
+      );
     }
   }
 

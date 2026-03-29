@@ -1,4 +1,4 @@
-import '../../storage_collection.dart';
+import '../../storage_database.dart';
 
 extension ListExtension<E> on List<E> {
   /// Converts the list to a list of [MT]s.
@@ -67,9 +67,9 @@ extension ListStorageModelExtension on List<StorageModel> {
   ///
   /// await models.save();
   /// ```
-  Future save() async {
+  Future save([StorageDatabase? database]) async {
     for (final item in this) {
-      await item.save();
+      await item.save(database);
     }
   }
 

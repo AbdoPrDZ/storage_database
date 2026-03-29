@@ -8,10 +8,9 @@ import '../src/storage_database_exception.dart';
 import 'storage_explorer.dart';
 
 class ExplorerNetworkFiles {
-  final StorageExplorer storageExplorer;
   final ExplorerDirectory networkDirFiles;
 
-  ExplorerNetworkFiles(this.storageExplorer, this.networkDirFiles) {
+  ExplorerNetworkFiles(this.networkDirFiles) {
     _instance = this;
   }
 

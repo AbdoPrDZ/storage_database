@@ -1,3 +1,13 @@
+## 2.3.0
+
+- Upgrade flutter sdk.
+- Upgrade packages versions to latest.
+- Fix SecureCollection: fix decoding refs.
+- Refactor StorageAPI.
+- Refactor ListStorageModelExtension: add possibility to send StorageDatabase instance to save on it.
+- Refactor SecureStorageSource: add option to force reread from the source not the cache.
+- Refactor StorageExplorer: add possibility to specify the explorer dir name.
+
 ## 2.2.0
 
 - Upgrade flutter sdk.

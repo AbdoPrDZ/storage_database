@@ -79,7 +79,7 @@ class SecureStorageSource extends StorageDatabaseSource {
       encrypter(password).decrypt(Encrypted.fromBase64(crypto), iv: iv);
 
   Timer? _cacheTimer;
-  void setupCacheTimer() {
+  void _setupCacheTimer() {
     _cacheTimer?.cancel();
     _cacheTimer = Timer(const Duration(seconds: 5), () {
       _cacheData = null;
@@ -88,19 +88,20 @@ class SecureStorageSource extends StorageDatabaseSource {
   }
 
   Map? _cacheData;
-  Future<Map> get getFileData async {
-    if (_cacheData == null) {
+  Future<Map> _getFileData([bool noCache = false]) async {
+    if (_cacheData == null || noCache) {
       String content = await _source.readAsString();
       try {
-        _cacheData = Map.from(
-          jsonDecode(decryptData(content, _sourcePassword)),
-        );
+        final json = jsonDecode(decryptData(content, _sourcePassword));
+        _cacheData = Map.from(json);
       } catch (e) {
         await setFileData({});
         _cacheData = {};
       }
     }
-    setupCacheTimer();
+
+    _setupCacheTimer();
+
     return _cacheData!;
   }
 
@@ -109,26 +110,26 @@ class SecureStorageSource extends StorageDatabaseSource {
 
   @override
   Future setData(String id, data) async {
-    Map sourceData = await getFileData;
+    Map sourceData = await _getFileData(true);
     sourceData[id] = data;
     await setFileData(sourceData);
   }
 
   @override
   Future getData(String id) async {
-    Map sourceData = await getFileData;
+    Map sourceData = await _getFileData();
     return sourceData[id];
   }
 
   @override
   Future<bool> containsKey(String id) async {
-    Map sourceData = await getFileData;
+    Map sourceData = await _getFileData();
     return sourceData.containsKey(id);
   }
 
   @override
   Future remove(String id) async {
-    Map sourceData = await getFileData;
+    Map sourceData = await _getFileData();
     sourceData.remove(id);
     await setFileData(sourceData);
   }

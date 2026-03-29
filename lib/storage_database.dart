@@ -82,8 +82,10 @@ class StorageDatabase {
     );
   }
 
-  Future initExplorer({String? path}) =>
-      StorageExplorer.initInstance(this, path: path);
+  Future initExplorer({
+    String? path,
+    String dirName = 'storage_database_explorer',
+  }) => StorageExplorer.initInstance(this, path: path, dirName: dirName);
 
   StorageExplorer get explorer => StorageExplorer.instance;
 
@@ -101,6 +103,11 @@ class StorageDatabase {
         },
     log: log,
   );
+
+  ExplorerNetworkFiles get networkFiles => ExplorerNetworkFiles.instance;
+
+  ExplorerNetworkFiles initNetWorkFiles(ExplorerDirectory cacheDirectory) =>
+      ExplorerNetworkFiles(cacheDirectory);
 
   StorageAPI get storageAPI => StorageAPI.instance;
 

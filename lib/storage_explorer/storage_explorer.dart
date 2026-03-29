@@ -52,10 +52,10 @@ class StorageExplorer {
     StorageListeners storageListeners,
     ExplorerSource source, {
     String? path,
+    String dirName = 'storage_database_explorer',
   }) async {
     Directory localIODirectory = Directory(
-      path ??
-          "${(await getApplicationDocumentsDirectory()).path}/storage_database_explorer",
+      path ?? "${(await getApplicationDocumentsDirectory()).path}/$dirName",
     );
     String localDirName = basename(localIODirectory.path);
     if (!localIODirectory.existsSync()) localIODirectory.createSync();
@@ -72,6 +72,7 @@ class StorageExplorer {
     StorageDatabase storageDatabase, {
     ExplorerSource source = const DefaultExplorerSource(),
     String? path,
+    String dirName = 'storage_database_explorer',
   }) async {
     StorageListeners storageListeners = StorageListeners();
 
@@ -79,6 +80,7 @@ class StorageExplorer {
       storageListeners,
       source,
       path: path,
+      dirName: dirName,
     );
 
     _instance = StorageExplorer(
@@ -91,12 +93,13 @@ class StorageExplorer {
 
   ExplorerNetworkFiles get networkFiles => ExplorerNetworkFiles.instance;
 
-  ExplorerNetworkFiles initNetWorkFiles({ExplorerDirectory? cacheDirectory}) =>
-      ExplorerNetworkFiles(this, cacheDirectory ?? directory('network-files'));
+  ExplorerNetworkFiles initNetWorkFiles() =>
+      ExplorerNetworkFiles(directory('network-files'));
 
   ExplorerDirectory directory(String dirName, {bool stream = true}) {
-    List<String> dirNames =
-        dirName.contains("/") ? dirName.split("/") : [dirName];
+    List<String> dirNames = dirName.contains("/")
+        ? dirName.split("/")
+        : [dirName];
     dirNames = [for (String name in dirNames) name.replaceAll('\\', '/')];
 
     Directory nIODirectory = explorerSource.dirSync(
